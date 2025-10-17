@@ -10,7 +10,7 @@ import { useColorScheme } from '@/components/useColorScheme';
 
 export {
   // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
+  ErrorBoundary
 } from 'expo-router';
 
 export const unstable_settings = {
@@ -42,7 +42,7 @@ export default function RootLayout() {
     return null;
   }
 
-  return <RootLayoutNav />;
+  return <RootLayoutNav />; 
 }
 
 function RootLayoutNav() {
@@ -56,4 +56,4 @@ function RootLayoutNav() {
       </Stack>
     </ThemeProvider>
   );
-}
+} 
