@@ -1,20 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { Link, Tabs } from "expo-router";
+import { Tabs } from "expo-router";
 import React from "react";
-import { Pressable } from "react-native";
+import { Platform } from "react-native";
 
 import { useClientOnlyValue } from "@/components/useClientOnlyValue";
 import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
 
-// You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
-function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome>["name"];
-  color: string;
-}) {
-  return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
-}
 
 const ICONS: Record<string, { on: keyof typeof Ionicons.glyphMap; off: keyof typeof Ionicons.glyphMap; title: string }> = {
   index: { on: "home", off: "home-outline", title: "Home" },
@@ -30,7 +22,7 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={({route}) => {
-        const cfg = ICONS[route.name] ?? {on: "eclipse", off: "eclipse-outline", title: route.name}
+        const cfg = ICONS[route.name] ?? {on: "ellipse", off: "ellipse-outline", title: route.name}
         return {
           tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
           // Disable the static render of the header on web
@@ -39,30 +31,35 @@ export default function TabLayout() {
           tabBarIcon: ({color, size, focused}) => {
             return <Ionicons name={(focused ? cfg.on : cfg.off) as any} size={size} color={color} />
           },
-          tabBarLabel: cfg.title
+          tabBarLabel: cfg.title,
+          tabBarStyle: {
+            height: Platform.select({ios: 64, android: 60}),
+            paddingBottom: Platform.select({ios: 12, android: 8}),
+            paddingTop: Platform.select({ios: 6, android: 6})
+          },
+          tabBarHideOnKeyboard: true,
         }
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="index"   
         options={{
-          title: "Home",
+          title: ICONS.index.title,
           headerShown: false,
-          tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
-          headerRight: () => (
-            <Link href="/modal" asChild>
-              <Pressable>
-                {({ pressed }) => (
-                  <Ionicons
-                    name="information-circle-outline"
-                    size={25}
-                    color={Colors[colorScheme ?? "light"].text}
-                    style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
-                  />
-                )}
-              </Pressable>
-            </Link>
-          ),
+          // headerRight: () => (
+          //   <Link href="/modal" asChild>
+          //     <Pressable>
+          //       {({ pressed }) => (
+          //         <Ionicons
+          //           name="information-circle-outline"
+          //           size={25}
+          //           color={Colors[colorScheme ?? "light"].text}
+          //           style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
+          //         />
+          //       )}
+          //     </Pressable>
+          //   </Link>
+          // ),
         }}
       />
 
