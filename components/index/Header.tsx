@@ -1,19 +1,64 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Text, TextInput, View } from "react-native";
+import { Pressable, Text, TextInput, View } from "react-native";
 
 type HeaderProps = {
-    location: string;
+  location: string;
+  placeholder?: string;
+  value?: string;
+  onSearchChange?: (text: string) => void;
+  onPressLocation?: () => void;
+  mode?: "full" | "searchOnly";
+};
 
-}
+export default function Header({
+  location,
+  placeholder = "Search foods, restaurents...",
+  value,
+  onSearchChange,
+  onPressLocation,
+  mode = "full",
+}: HeaderProps) {
+  const containerClasses =
+    mode === "full"
+      ? "bg-primary-400 p-2 pt-12 pb-3"
+      : "bg-primary-400 px-2 pb-2";
 
-export default function Header() {
-    return (
-        <View className="flex-1 bg-primary-300 h-6 p-4">
-            <View>
-                <Ionicons name="location-outline" size={24} />
-                <Text></Text>
-            </View>
-            <TextInput placeholder="Search" className="rounded-lg bg-white p-2" />
-        </View>
-    )
+  return (
+    <View className={containerClasses}>
+      {mode === "full" && (
+        <>
+          <Text className="text-white mb-1">Giao den:</Text>
+
+          {/* Address  */}
+          <Pressable
+            onPress={onPressLocation}
+            className="flex-row items-center gap-2 mb-3"
+            hitSlop={10}
+          >
+            <Ionicons name="location" size={18} color={"white"} />
+            <Text
+              className="text-base font-medium text-white flex-1"
+              numberOfLines={1}
+            >
+              {location}
+            </Text>
+            <Ionicons name="chevron-forward" size={16} color={"white"} />
+          </Pressable>
+
+          <View className="flex-row items-center bg-white rounded-md px-2 h-11">
+            <Ionicons name="search" size={24} color={"#26C6DA"} />
+            <TextInput
+              placeholder={placeholder}
+              value={value}
+              onChangeText={onSearchChange}
+              returnKeyType="search"
+              className="flex-1 font-medium rounded-lg p-2 text-primary-400 border-transparent focus:border-transparent focus:ring-0"
+              placeholderTextColor={"#26C6DA"}
+              underlineColorAndroid={"transparent"}
+            />
+          </View>
+        </>
+      )}
+    </View>
+  );
 }

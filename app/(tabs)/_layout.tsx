@@ -5,7 +5,8 @@ import { Platform } from "react-native";
 
 import { useClientOnlyValue } from "@/components/useClientOnlyValue";
 import { useColorScheme } from "@/components/useColorScheme";
-import Colors from "@/constants/Colors";
+import Colors from '@/constants/Colors';
+import { useTheme } from '@react-navigation/native';
 
 
 const ICONS: Record<string, { on: keyof typeof Ionicons.glyphMap; off: keyof typeof Ionicons.glyphMap; title: string }> = {
@@ -18,6 +19,7 @@ const ICONS: Record<string, { on: keyof typeof Ionicons.glyphMap; off: keyof typ
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const theme = useTheme();
 
   return (
     <Tabs
@@ -25,6 +27,8 @@ export default function TabLayout() {
         const cfg = ICONS[route.name] ?? {on: "ellipse", off: "ellipse-outline", title: route.name}
         return {
           tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+          // tabBarInactiveTintColor: Colors[colorScheme ?? "light"].tint,
+          // tabBarBackground: Colors.light.background,
           // Disable the static render of the header on web
           // to prevent a hydration error in React Navigation v6.
           headerShown: useClientOnlyValue(false, true),
@@ -33,9 +37,13 @@ export default function TabLayout() {
           },
           tabBarLabel: cfg.title,
           tabBarStyle: {
-            height: Platform.select({ios: 64, android: 60}),
-            paddingBottom: Platform.select({ios: 12, android: 8}),
-            paddingTop: Platform.select({ios: 6, android: 6})
+            height: Platform.select({ ios: 68, android: 64, default: 64 }),
+            // paddingBottom: Platform.select({ ios: 18, android: 10, default: 12 }),
+            // paddingTop: Platform.select({ ios: 8, android: 6, default: 6 }),
+            marginBottom: Platform.select({ ios: 18, android: 10, default: 12 }),
+            backgroundColor: Colors.light.background ?? "#FFFFFF",
+            borderWidth: 0,
+            borderColor: "transparent"
           },
           tabBarHideOnKeyboard: true,
         }
