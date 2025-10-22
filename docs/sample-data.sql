@@ -638,6 +638,82 @@ SET restaurant_ids = ARRAY['550e8400-e29b-41d4-a716-446655440014'::UUID]
 WHERE code = 'PIZZA20';
 
 -- ==============================================
+-- 4. BANNERS (4 promotional banners)
+-- ==============================================
+
+INSERT INTO banners (
+  id, title, subtitle, image,
+  action_type, action_value, restaurant_id,
+  background_color, text_color,
+  display_order, is_active,
+  start_date, end_date
+) VALUES
+-- Banner 1: Flash Sale Pizza 4P's
+(
+  '550e8400-e29b-41d4-a716-446655440051',
+  '🍕 Pizza 4P''s - Giảm 20%',
+  'Áp dụng tất cả món Pizza. Giảm tối đa 100k',
+  'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&h=400&fit=crop',
+  'restaurant',
+  '550e8400-e29b-41d4-a716-446655440014',
+  '550e8400-e29b-41d4-a716-446655440014'::UUID,
+  '#FF6B6B',
+  '#FFFFFF',
+  1,
+  true,
+  NOW() - INTERVAL '1 day',
+  NOW() + INTERVAL '14 days'
+),
+-- Banner 2: Free Ship
+(
+  '550e8400-e29b-41d4-a716-446655440052',
+  '🚚 Miễn Phí Giao Hàng',
+  'Đơn từ 100k - Tiết kiệm 30k phí ship',
+  'https://images.unsplash.com/photo-1526367790999-0150786686a2?w=800&h=400&fit=crop',
+  'coupon',
+  'FREESHIP',
+  NULL,
+  '#4ECDC4',
+  '#FFFFFF',
+  2,
+  true,
+  NOW() - INTERVAL '3 days',
+  NOW() + INTERVAL '60 days'
+),
+-- Banner 3: Welcome Discount
+(
+  '550e8400-e29b-41d4-a716-446655440053',
+  '🎉 Chào Mừng Khách Mới',
+  'Giảm ngay 15% đơn hàng đầu tiên',
+  'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&h=400&fit=crop',
+  'coupon',
+  'WELCOME15',
+  NULL,
+  '#FFD93D',
+  '#2D3436',
+  3,
+  true,
+  NOW() - INTERVAL '7 days',
+  NOW() + INTERVAL '30 days'
+),
+-- Banner 4: BBQ House Promotion
+(
+  '550e8400-e29b-41d4-a716-446655440054',
+  '🔥 BBQ House - Ưu Đãi Hot',
+  'Tặng kimchi cho đơn trên 200k',
+  'https://images.unsplash.com/photo-1585032226651-759b368d7246?w=800&h=400&fit=crop',
+  'restaurant',
+  '550e8400-e29b-41d4-a716-446655440015',
+  '550e8400-e29b-41d4-a716-446655440015'::UUID,
+  '#F97316',
+  '#FFFFFF',
+  4,
+  true,
+  NOW() - INTERVAL '2 days',
+  NOW() + INTERVAL '10 days'
+);
+
+-- ==============================================
 -- VERIFICATION QUERIES
 -- ==============================================
 -- Run these to verify data was inserted correctly:
@@ -654,11 +730,15 @@ WHERE code = 'PIZZA20';
 -- Check coupons
 -- SELECT code, description, discount_type, discount_value, valid_until FROM coupons WHERE is_active = true;
 
+-- Check banners
+-- SELECT title, subtitle, action_type, display_order, is_active FROM banners ORDER BY display_order;
+
 -- Count items
 -- SELECT 
 --   (SELECT COUNT(*) FROM restaurants) as total_restaurants,
 --   (SELECT COUNT(*) FROM dishes) as total_dishes,
---   (SELECT COUNT(*) FROM coupons) as total_coupons;
+--   (SELECT COUNT(*) FROM coupons) as total_coupons,
+--   (SELECT COUNT(*) FROM banners) as total_banners;
 
 -- ==============================================
 -- NOTES FOR USAGE

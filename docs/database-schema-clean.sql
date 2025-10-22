@@ -370,7 +370,32 @@ CREATE TABLE IF NOT EXISTS coupon_usage (
 CREATE INDEX idx_coupon_usage_coupon ON coupon_usage(coupon_id);
 CREATE INDEX idx_coupon_usage_user ON coupon_usage(user_id);
 
-ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+CREATE TABLE IF NOT EXISTS banners (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  title TEXT NOT NULL,
+  subtitle TEXT,
+  image TEXT NOT NULL,
+  action_type TEXT CHECK (action_type IN ('restaurant', 'dish', 'category', 'url', 'coupon', 'none')),
+  action_value TEXT,
+  restaurant_id UUID REFERENCES restaurants(id) ON DELETE SET NULL,
+  background_color TEXT,
+  text_color TEXT DEFAULT '#FFFFFF',
+  display_order INTEGER DEFAULT 0,
+  is_active BOOLEAN DEFAULT true,
+  start_date TIMESTAMPTZ,
+  end_date TIMESTAMPTZ,
+  click_count INTEGER DEFAULT 0,
+  impression_count INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  deleted_at TIMESTAMPTZ
+);
+
+CREATE INDEX idx_banners_active ON banners(is_active, display_order) WHERE deleted_at IS NULL;
+CREATE INDEX idx_banners_dates ON banners(start_date, end_date) WHERE is_active = true AND deleted_at IS NULL;
+CREATE INDEX idx_banners_restaurant ON banners(restaurant_id) WHERE restaurant_id IS NOT NULL;
+
+ALTER TABLE banners ENABLE ROW LEVEL SECURITY;
 ALTER TABLE addresses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE restaurants ENABLE ROW LEVEL SECURITY;
 ALTER TABLE dishes ENABLE ROW LEVEL SECURITY;
@@ -416,6 +441,13 @@ CREATE POLICY "Users can update own notifications" ON notifications FOR UPDATE U
 CREATE POLICY "Anyone can view active coupons" ON coupons FOR SELECT USING (is_active = true AND valid_from <= NOW() AND valid_until >= NOW() AND (usage_limit IS NULL OR current_usage < usage_limit));
 CREATE POLICY "Users can view own coupon usage" ON coupon_usage FOR SELECT USING (auth.uid() = user_id);
 
+CREATE POLICY "Anyone can view active banners" ON banners FOR SELECT USING (
+  is_active = true 
+  AND deleted_at IS NULL 
+  AND (start_date IS NULL OR start_date <= NOW()) 
+  AND (end_date IS NULL OR end_date >= NOW())
+);
+
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -431,6 +463,7 @@ CREATE TRIGGER update_dishes_updated_at BEFORE UPDATE ON dishes FOR EACH ROW EXE
 CREATE TRIGGER update_orders_updated_at BEFORE UPDATE ON orders FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_reviews_updated_at BEFORE UPDATE ON reviews FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_coupons_updated_at BEFORE UPDATE ON coupons FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_banners_updated_at BEFORE UPDATE ON banners FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
@@ -464,6 +497,25 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER set_order_number BEFORE INSERT ON orders FOR EACH ROW WHEN (NEW.order_number IS NULL) EXECUTE FUNCTION generate_order_number();
+
+-- =============================================
+-- Banner Analytics Functions
+-- =============================================
+
+CREATE OR REPLACE FUNCTION increment_banner_clicks(banner_id UUID)
+RETURNS VOID AS $$
+BEGIN
+  UPDATE banners SET click_count = click_count + 1 WHERE id = banner_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE OR REPLACE FUNCTION increment_banner_impressions(banner_id UUID)
+RETURNS VOID AS $$
+BEGIN
+  UPDATE banners SET impression_count = impression_count + 1 WHERE id = banner_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 
 CREATE OR REPLACE FUNCTION update_restaurant_rating()
 RETURNS TRIGGER AS $$
