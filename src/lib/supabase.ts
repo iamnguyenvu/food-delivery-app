@@ -1,12 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
-import Constants from 'expo-constants';
 
-const SUPABASE_URL = Constants.expoConfig?.extra?.SUPABASE_URL ?? process.env.PUBLIC_SUPABASE_URL;
-const SUPABASE_ANON_KEY = Constants.expoConfig?.extra?.SUPABASE_ANON_KEY ?? process.env.PUBLIC_SUPABASE_ANON_KEY;
-
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  throw new Error('Missing Supabase credentials. Please check your .env file and app.config.js');
-}
+const SUPABASE_URL = process.env.PUBLIC_SUPABASE_URL || 'https://rltjwjafntmimoinohne.supabase.co';
+const SUPABASE_ANON_KEY = process.env.PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsdGp3amFmbnRtaW1vaW5vaG5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjc1MjcsImV4cCI6MjA3NjUwMzUyN30.o7eTQJf_jePxsUtg5nykl21QwSERez1RFnioMW09RAA';
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {

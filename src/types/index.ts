@@ -90,3 +90,24 @@ export enum NotificationType {
   PROMOTION = "promotion",
   SYSTEM = "system",
 }
+
+export interface Banner {
+  id: string;
+  title: string;
+  subtitle?: string;
+  image: string;
+  actionType: "restaurant" | "dish" | "category" | "url" | "coupon" | "none";
+  actionValue?: string;
+  restaurantId?: string;
+  backgroundColor?: string;
+  textColor?: string;
+  displayOrder: number;
+  isActive: boolean;
+  startDate?: string;
+  endDate?: string;
+  clickCount: number;
+  impressionCount: number;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string;
+}

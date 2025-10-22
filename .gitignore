@@ -1,7 +1,13 @@
 # Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
+# Environment variables (CRITICAL - Never commit!)
 .env
+.env.local
+.env.*.local
+*.env
 
+# Supabase local development
+.supabase/
 
 # dependencies
 node_modules/
@@ -42,3 +48,19 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# IDE backup files (Visual Paradigm)
+*.vpp.bak*
+*.vpp~
+
+# Database backups and exports
+*.sql.backup
+*.dump
+backup_*.sql
+
+# Temporary files
+*.tmp
+*.log
+*.swp
+*.swo
+*~

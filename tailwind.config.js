@@ -202,7 +202,6 @@ module.exports = {
         border: {
           DEFAULT: '#E0E0E0',
           light: '#EEEEEE',
-          dark: '#BDBDBD',
           focus: '#00BCD4',
         },
         
@@ -212,6 +211,13 @@ module.exports = {
           DEFAULT: 'rgba(0, 0, 0, 0.1)',
           medium: 'rgba(0, 0, 0, 0.15)',
           dark: 'rgba(0, 0, 0, 0.25)',
+        },
+
+        // Banner colors
+        banner: {
+          'dot-active': '#FFFFFF',
+          'dot-inactive': 'rgba(255,255,255,0.5)',
+          'overlay': 'rgba(0,0,0,0.30)',
         },
       },
       
@@ -258,6 +264,10 @@ module.exports = {
         'xl': '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
         'card': '0 2px 8px rgba(0, 0, 0, 0.08)',
         'hover': '0 4px 12px rgba(0, 0, 0, 0.12)',
+      },
+
+      spacing: {
+        gutter: '16px',
       },
     },
   },
