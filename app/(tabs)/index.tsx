@@ -2,7 +2,8 @@
 import Header from '@/components/index/Header';
 import { trackBannerClick, useBanners } from '@/src/hooks';
 import { Banner } from '@/src/types';
-import { ScrollView } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { ScrollView, View } from 'react-native';
 
 export default function HomeScreen() {
   const { banners, isLoading } = useBanners();
@@ -30,18 +31,26 @@ export default function HomeScreen() {
 
   return (
     <ScrollView 
-      className="flex-1 bg-slate-50"
+      className="flex-1 bg-white"
       stickyHeaderIndices={[1]}
       keyboardShouldPersistTaps="handled"
     >
       <Header location="1 Quang Trung" mode="full" />
       <Header location="1 Quang Trung" mode="searchOnly" />
 
-      <BannerCarousel 
-        banners={banners}
-        isLoading={isLoading}
-        onBannerPress={handleBannerPress}
-      />
+      <LinearGradient
+        colors={["#26C6DA", "#4DD0E1", "#80DEEA", "#B2EBF2", "#FFFFFF"]}
+        locations={[0, 0.15, 0.3, 0.5, 0.8]}
+        className="flex-1"
+      >
+        <View className="pb-2">
+          <BannerCarousel 
+            banners={banners}
+            isLoading={isLoading}
+            onBannerPress={handleBannerPress}
+          />
+        </View>
+      </LinearGradient>
     </ScrollView>
   );
 }

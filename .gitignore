@@ -53,6 +53,10 @@ yarn-error.*
 *.vpp.bak*
 *.vpp~
 
+# Documentation (local only)
+docs/*.md
+!docs/README.md
+
 # Database backups and exports
 *.sql.backup
 *.dump

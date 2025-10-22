@@ -3,11 +3,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Image,
+  Platform,
   Pressable,
   ScrollView,
-  Text,
   useWindowDimensions,
   View,
+  type ImageProps,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from "react-native";
@@ -17,30 +18,15 @@ type BannerCarouselProps = {
   isLoading?: boolean;
   autoPlayInterval?: number;
   onBannerPress?: (banner: Banner) => void;
-
-  containerClassName?: string;
-  slidePaddingXClassName?: string;
-  imageWrapperClassName?: string;
-  overlayClassName?: string;
-  dotActiveClassName?: string;
-  dotInactiveClassName?: string;
-
   aspectRatio?: number;
 };
 
 export default function BannerCarousel({
   banners = [],
   isLoading = false,
-  autoPlayInterval = 3000,
+  autoPlayInterval = 5000,
   onBannerPress,
-  aspectRatio = 20 / 9,
-
-  containerClassName = "mb-4",
-  slidePaddingXClassName = "px-gutter",
-  imageWrapperClassName = "rounded-card overflow-hidden bg-gray-200",
-  overlayClassName = "bg-banner-overlay rounded-xl px-2 py-1",
-  dotActiveClassName = "w-6 h-2 rounded-full bg-banner-dot-active",
-  dotInactiveClassName = "w-2 h-2 rounded-full bg-banner-dot-inactive",
+  aspectRatio = 10 / 3,
 }: BannerCarouselProps) {
   const { width } = useWindowDimensions();
   const [activeIndex, setActiveIndex] = useState(0);
@@ -59,8 +45,10 @@ export default function BannerCarousel({
     indexRef.current = activeIndex;
   }, [activeIndex]);
 
+  // auto-play stable, pause while user dragging
   useEffect(() => {
-    if (!hasData || !banners || banners.length <= 1 || autoPlayInterval <= 0) return;
+    if (!hasData || !banners || banners.length <= 1 || autoPlayInterval <= 0)
+      return;
     const id = setInterval(() => {
       if (isDraggindRef.current) return;
       const next = (indexRef.current + 1) % banners.length;
@@ -86,9 +74,12 @@ export default function BannerCarousel({
 
   if (isLoading) {
     return (
-      <View className={containerClassName} style={{ height: itemHeight }}>
-        <View className={`${imageWrapperClassName} ${slidePaddingXClassName} items-center justify-center`}>
-          <ActivityIndicator size="large" color="#EF4444" />
+      <View className="px-2" style={{ height: itemHeight }}>
+        <View
+          className="rounded-md overflow-hidden bg-gray-200 items-center justify-center"
+          style={{ height: itemHeight }}
+        >
+          <ActivityIndicator size="large" color="#26C6DA" />
         </View>
       </View>
     );
@@ -97,7 +88,7 @@ export default function BannerCarousel({
   if (!hasData) return null;
 
   return (
-    <View className={containerClassName} style={{ height: itemHeight }}>
+    <View style={{ height: itemHeight + 24 }}>
       <ScrollView
         ref={scrollRef}
         horizontal
@@ -113,42 +104,34 @@ export default function BannerCarousel({
             key={banner.id}
             onPress={() => onBannerPress?.(banner)}
             accessibilityRole="imagebutton"
-            accessibilityLabel={banner.title}
-            style={{width: itemWidth, height: itemHeight}}
-            className={slidePaddingXClassName}
+            accessibilityLabel={banner.title || "Banner"}
+            style={{ width: itemWidth, height: itemHeight }}
+            className="px-2"
           >
-            <View className={imageWrapperClassName}>
+            <View className="rounded-md overflow-hidden bg-gray-200 shadow-sm">
               <Image
-                source={{uri: banner.image}}
-                style={{width: "100%", height: "100%"}}
+                source={{ uri: banner.image }}
+                style={{ width: "100%", height: "100%" }}
                 resizeMode="cover"
+                {...(Platform.OS === "web" &&
+                  ({ crossOrigin: "anonymous" } as Partial<ImageProps>))}
               />
-
-              {(banner.title || banner.subtitle) && (
-                <View className={`absolute left-3 right-3 bottom-3 ${overlayClassName}`}>
-                  {!!banner.title && (
-                    <Text className="text-white font-semibold text-base" numberOfLines={1}>
-                      {banner.title
-                      }
-                    </Text>
-                  )}
-
-                  {!!banner.subtitle && (
-                    <Text className="text-white text-xs mt-0.5" numberOfLines={1}>
-                      {banner.subtitle}
-                    </Text>
-                  )}
-                </View>
-              )}
             </View>
           </Pressable>
         ))}
       </ScrollView>
 
       {banners.length > 1 && (
-        <View className="absolute bottom-2 left-0 right-0 flex-row justify-center gap-2">
+        <View className="absolute bottom-8 left-0 right-0 flex-row justify-center gap-2 z-10">
           {banners.map((_, i) => (
-            <View key={i} className={i === activeIndex ? dotActiveClassName : dotInactiveClassName} />
+            <View
+              key={i}
+              className={
+                i === activeIndex
+                  ? "w-2 h-2 rounded-full bg-primary-400"
+                  : "w-2 h-2 rounded-full bg-gray-800"
+              }
+            />
           ))}
         </View>
       )}

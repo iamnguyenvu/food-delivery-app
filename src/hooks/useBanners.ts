@@ -30,6 +30,7 @@ export function useBanners(): UseBannersResult {
         throw fetchError;
       }
 
+      // Filter by date range (client-side)
       const filteredData = (data || []).filter((banner) => {
         const startDate = banner.start_date ? new Date(banner.start_date) : null;
         const endDate = banner.end_date ? new Date(banner.end_date) : null;
