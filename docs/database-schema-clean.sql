@@ -456,6 +456,15 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS update_profiles_updated_at ON profiles;
+DROP TRIGGER IF EXISTS update_addresses_updated_at ON addresses;
+DROP TRIGGER IF EXISTS update_restaurants_updated_at ON restaurants;
+DROP TRIGGER IF EXISTS update_dishes_updated_at ON dishes;
+DROP TRIGGER IF EXISTS update_orders_updated_at ON orders;
+DROP TRIGGER IF EXISTS update_reviews_updated_at ON reviews;
+DROP TRIGGER IF EXISTS update_coupons_updated_at ON coupons;
+DROP TRIGGER IF EXISTS update_banners_updated_at ON banners;
+
 CREATE TRIGGER update_profiles_updated_at BEFORE UPDATE ON profiles FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_addresses_updated_at BEFORE UPDATE ON addresses FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_restaurants_updated_at BEFORE UPDATE ON restaurants FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
@@ -479,6 +488,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+
 CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 CREATE OR REPLACE FUNCTION generate_order_number()
@@ -495,6 +506,8 @@ BEGIN
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS set_order_number ON orders;
 
 CREATE TRIGGER set_order_number BEFORE INSERT ON orders FOR EACH ROW WHEN (NEW.order_number IS NULL) EXECUTE FUNCTION generate_order_number();
 
@@ -531,6 +544,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS update_restaurant_rating_on_review_change ON reviews;
+
 CREATE TRIGGER update_restaurant_rating_on_review_change AFTER INSERT OR UPDATE OR DELETE ON reviews FOR EACH ROW EXECUTE FUNCTION update_restaurant_rating();
 
 CREATE OR REPLACE FUNCTION update_dish_rating()
@@ -549,6 +564,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS update_dish_rating_on_review_change ON reviews;
+
 CREATE TRIGGER update_dish_rating_on_review_change AFTER INSERT OR UPDATE OR DELETE ON reviews FOR EACH ROW EXECUTE FUNCTION update_dish_rating();
 
 CREATE OR REPLACE FUNCTION update_profile_stats()
@@ -564,6 +581,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS update_profile_stats_on_order_delivered ON orders;
+
 CREATE TRIGGER update_profile_stats_on_order_delivered AFTER UPDATE ON orders FOR EACH ROW WHEN (NEW.status = 'delivered' AND OLD.status IS DISTINCT FROM 'delivered') EXECUTE FUNCTION update_profile_stats();
 
 CREATE OR REPLACE FUNCTION update_restaurant_order_count()
@@ -576,6 +595,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS update_restaurant_order_count_on_delivered ON orders;
+
 CREATE TRIGGER update_restaurant_order_count_on_delivered AFTER UPDATE ON orders FOR EACH ROW WHEN (NEW.status = 'delivered' AND OLD.status IS DISTINCT FROM 'delivered') EXECUTE FUNCTION update_restaurant_order_count();
 
 CREATE OR REPLACE FUNCTION update_dish_sold_count()
@@ -587,6 +608,8 @@ BEGIN
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS update_dish_sold_count_on_delivered ON orders;
 
 CREATE TRIGGER update_dish_sold_count_on_delivered AFTER UPDATE ON orders FOR EACH ROW WHEN (NEW.status = 'delivered' AND OLD.status IS DISTINCT FROM 'delivered') EXECUTE FUNCTION update_dish_sold_count();
 
@@ -742,6 +765,8 @@ CREATE INDEX IF NOT EXISTS idx_banners_display_order
 
 ALTER TABLE banners ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Anyone can view active banners" ON banners;
+
 CREATE POLICY "Anyone can view active banners"
   ON banners
   FOR SELECT
@@ -769,17 +794,4 @@ BEGIN
   WHERE id = banner_id;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-
-CREATE OR REPLACE FUNCTION update_banner_updated_at()
-RETURNS TRIGGER AS $$
-BEGIN
-  NEW.updated_at = NOW();
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trigger_update_banner_updated_at
-  BEFORE UPDATE ON banners
-  FOR EACH ROW
-  EXECUTE FUNCTION update_banner_updated_at();
 
