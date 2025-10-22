@@ -129,7 +129,7 @@ export default function BannerCarousel({
               className={
                 i === activeIndex
                   ? "w-2 h-2 rounded-full bg-primary-400"
-                  : "w-2 h-2 rounded-full bg-white/10"
+                  : "w-2 h-2 rounded-full bg-gray-800"
               }
             />
           ))}

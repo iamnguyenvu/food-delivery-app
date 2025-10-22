@@ -20,7 +20,7 @@ export default function Header({
 }: HeaderProps) {
   const containerClasses =
     mode === "full"
-      ? "bg-primary-400 px-2 pt-12"
+      ? "bg-primary-400 px-2 pt-12 pb-1"
       : "bg-primary-400 px-2 pb-1";
 
   return (
