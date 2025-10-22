@@ -693,3 +693,93 @@ FROM auth.users u
 LEFT JOIN profiles p ON u.id = p.id
 LEFT JOIN orders o ON u.id = o.user_id
 GROUP BY u.id, p.name, p.email;
+
+-- =============================================
+-- BANNERS TABLE (Added 2024-12-22)
+-- =============================================
+
+CREATE TABLE IF NOT EXISTS banners (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title TEXT NOT NULL,
+  subtitle TEXT,
+  image TEXT NOT NULL,
+  
+  action_type TEXT CHECK (action_type IN ('restaurant', 'dish', 'category', 'url', 'coupon', 'none')),
+  action_value TEXT,
+  restaurant_id UUID REFERENCES restaurants(id) ON DELETE SET NULL,
+  
+  background_color TEXT,
+  text_color TEXT DEFAULT '#FFFFFF',
+  
+  display_order INTEGER DEFAULT 0,
+  is_active BOOLEAN DEFAULT true,
+  
+  start_date TIMESTAMPTZ,
+  end_date TIMESTAMPTZ,
+  
+  click_count INTEGER DEFAULT 0,
+  impression_count INTEGER DEFAULT 0,
+  
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  deleted_at TIMESTAMPTZ
+);
+
+CREATE INDEX IF NOT EXISTS idx_banners_active 
+  ON banners(is_active) 
+  WHERE is_active = true AND deleted_at IS NULL;
+
+CREATE INDEX IF NOT EXISTS idx_banners_dates 
+  ON banners(start_date, end_date) 
+  WHERE is_active = true AND deleted_at IS NULL;
+
+CREATE INDEX IF NOT EXISTS idx_banners_restaurant 
+  ON banners(restaurant_id) 
+  WHERE restaurant_id IS NOT NULL;
+
+CREATE INDEX IF NOT EXISTS idx_banners_display_order 
+  ON banners(display_order, created_at);
+
+ALTER TABLE banners ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone can view active banners"
+  ON banners
+  FOR SELECT
+  USING (
+    is_active = true 
+    AND deleted_at IS NULL 
+    AND (start_date IS NULL OR start_date <= NOW()) 
+    AND (end_date IS NULL OR end_date >= NOW())
+  );
+
+CREATE OR REPLACE FUNCTION increment_banner_clicks(banner_id UUID)
+RETURNS VOID AS $$
+BEGIN
+  UPDATE banners 
+  SET click_count = click_count + 1, updated_at = NOW() 
+  WHERE id = banner_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE OR REPLACE FUNCTION increment_banner_impressions(banner_id UUID)
+RETURNS VOID AS $$
+BEGIN
+  UPDATE banners 
+  SET impression_count = impression_count + 1, updated_at = NOW() 
+  WHERE id = banner_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE OR REPLACE FUNCTION update_banner_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_update_banner_updated_at
+  BEFORE UPDATE ON banners
+  FOR EACH ROW
+  EXECUTE FUNCTION update_banner_updated_at();
+

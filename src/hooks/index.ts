@@ -1,3 +1,4 @@
 export { useAuth } from './useAuth';
-export { useBanners, trackBannerClick, trackBannerImpression } from './useBanners';
+export { trackBannerClick, trackBannerImpression, useBanners } from './useBanners';
 export type { UseBannersResult } from './useBanners';
+

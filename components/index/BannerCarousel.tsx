@@ -1,3 +1,4 @@
+import type { Banner } from "@/src/types";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -10,7 +11,6 @@ import {
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from "react-native";
-import type { Banner } from "@/src/types";
 
 type BannerCarouselProps = {
   banners?: Banner[];
@@ -59,19 +59,17 @@ export default function BannerCarousel({
     indexRef.current = activeIndex;
   }, [activeIndex]);
 
-  // auto-play stable + pause while dragging
   useEffect(() => {
     if (!hasData || !banners || banners.length <= 1 || autoPlayInterval <= 0) return;
     const id = setInterval(() => {
-      if (isDraggindRef.current) return; // pause while user dragging
-      const next = (indexRef.current + 1) % banners.length; // Fix: use modulo instead of division
+      if (isDraggindRef.current) return;
+      const next = (indexRef.current + 1) % banners.length;
       scrollRef.current?.scrollTo({ x: next * itemWidth, animated: true });
       setActiveIndex(next);
     }, autoPlayInterval);
     return () => clearInterval(id);
   }, [hasData, banners, autoPlayInterval, itemWidth]);
 
-  // handle scroll
   const onScrollEnd = useCallback(
     (e: NativeSyntheticEvent<NativeScrollEvent>) => {
       const x = e.nativeEvent.contentOffset.x;
@@ -86,7 +84,6 @@ export default function BannerCarousel({
     isDraggindRef.current = true;
   }, []);
 
-  // Loading state
   if (isLoading) {
     return (
       <View className={containerClassName} style={{ height: itemHeight }}>
@@ -148,7 +145,6 @@ export default function BannerCarousel({
         ))}
       </ScrollView>
 
-      {/* Dot  */}
       {banners.length > 1 && (
         <View className="absolute bottom-2 left-0 right-0 flex-row justify-center gap-2">
           {banners.map((_, i) => (

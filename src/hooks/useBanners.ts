@@ -9,15 +9,6 @@ export interface UseBannersResult {
   refresh: () => Promise<void>;
 }
 
-/**
- * Custom hook to fetch active banners from Supabase
- * Automatically filters by:
- * - is_active = true
- * - deleted_at IS NULL
- * - Current date is within start_date and end_date range
- * 
- * Returns banners ordered by display_order ascending
- */
 export function useBanners(): UseBannersResult {
   const [banners, setBanners] = useState<Banner[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -28,23 +19,29 @@ export function useBanners(): UseBannersResult {
       setIsLoading(true);
       setError(null);
 
-      const now = new Date().toISOString();
-
       const { data, error: fetchError } = await supabase
         .from("banners")
         .select("*")
         .eq("is_active", true)
         .is("deleted_at", null)
-        .or(`start_date.is.null,start_date.lte.${now}`)
-        .or(`end_date.is.null,end_date.gte.${now}`)
         .order("display_order", { ascending: true });
 
       if (fetchError) {
         throw fetchError;
       }
 
-      // Map database columns to camelCase
-      const mappedBanners: Banner[] = (data || []).map((banner) => ({
+      const filteredData = (data || []).filter((banner) => {
+        const startDate = banner.start_date ? new Date(banner.start_date) : null;
+        const endDate = banner.end_date ? new Date(banner.end_date) : null;
+        const currentDate = new Date();
+
+        const isAfterStart = !startDate || currentDate >= startDate;
+        const isBeforeEnd = !endDate || currentDate <= endDate;
+
+        return isAfterStart && isBeforeEnd;
+      });
+
+      const mappedBanners: Banner[] = filteredData.map((banner) => ({
         id: banner.id,
         title: banner.title,
         subtitle: banner.subtitle,
@@ -86,10 +83,6 @@ export function useBanners(): UseBannersResult {
   };
 }
 
-/**
- * Increment the click count for a banner
- * Call this when user taps/clicks on a banner
- */
 export async function trackBannerClick(bannerId: string): Promise<void> {
   try {
     await supabase.rpc("increment_banner_clicks", { banner_id: bannerId });
@@ -98,10 +91,6 @@ export async function trackBannerClick(bannerId: string): Promise<void> {
   }
 }
 
-/**
- * Increment the impression count for a banner
- * Call this when a banner is displayed to the user
- */
 export async function trackBannerImpression(bannerId: string): Promise<void> {
   try {
     await supabase.rpc("increment_banner_impressions", { banner_id: bannerId });
