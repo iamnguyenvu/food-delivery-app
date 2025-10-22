@@ -20,8 +20,8 @@ export default function Header({
 }: HeaderProps) {
   const containerClasses =
     mode === "full"
-      ? "bg-primary-400 p-2 pt-12 pb-3"
-      : "bg-primary-400 px-2 pb-2";
+      ? "bg-primary-400 px-2 pt-12"
+      : "bg-primary-400 px-2 pb-1";
 
   return (
     <View className={containerClasses}>
@@ -29,7 +29,6 @@ export default function Header({
         <>
           <Text className="text-white mb-1">Giao den:</Text>
 
-          {/* Address  */}
           <Pressable
             onPress={onPressLocation}
             className="flex-row items-center gap-2 mb-3"

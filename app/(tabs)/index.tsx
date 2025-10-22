@@ -2,7 +2,7 @@
 import Header from '@/components/index/Header';
 import { trackBannerClick, useBanners } from '@/src/hooks';
 import { Banner } from '@/src/types';
-import { ScrollView } from 'react-native';
+import { ScrollView, View } from 'react-native';
 
 export default function HomeScreen() {
   const { banners, isLoading } = useBanners();
@@ -37,11 +37,13 @@ export default function HomeScreen() {
       <Header location="1 Quang Trung" mode="full" />
       <Header location="1 Quang Trung" mode="searchOnly" />
 
-      <BannerCarousel 
-        banners={banners}
-        isLoading={isLoading}
-        onBannerPress={handleBannerPress}
-      />
+      <View className="flex-1 py-2">
+        <BannerCarousel 
+          banners={banners}
+          isLoading={isLoading}
+          onBannerPress={handleBannerPress}
+        />
+      </View>
     </ScrollView>
   );
 }
