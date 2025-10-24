@@ -1,11 +1,17 @@
 ﻿import BannerCarousel from '@/components/index/BannerCarousel';
 import Header from '@/components/index/Header';
 import { trackBannerClick, useBanners } from '@/src/hooks';
+import { useLocationStore } from '@/src/store/locationStore';
 import { Banner } from '@/src/types';
 import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
+import { useMemo } from 'react';
 import { ScrollView, View } from 'react-native';
 
 export default function HomeScreen() {
+  const {address} = useLocationStore()
+  const label = useMemo(() => address?.formatted || "Chon vi tri giao hang", [address])
+  const openPicker = () => router.push("/location-picker")
   const { banners, isLoading } = useBanners();
 
   const handleBannerPress = (banner: Banner) => {
@@ -35,8 +41,8 @@ export default function HomeScreen() {
       stickyHeaderIndices={[1]}
       keyboardShouldPersistTaps="handled"
     >
-      <Header location="1 Quang Trung" mode="full" />
-      <Header location="1 Quang Trung" mode="searchOnly" />
+      <Header location={label} mode="full" onPressLocation={openPicker} />
+      <Header location={label} mode="searchOnly" onPressLocation={openPicker} />
 
       <LinearGradient
         colors={["#26C6DA", "#4DD0E1", "#80DEEA", "#B2EBF2", "#FFFFFF"]}

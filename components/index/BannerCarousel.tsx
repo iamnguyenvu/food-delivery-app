@@ -1,14 +1,12 @@
 import type { Banner } from "@/src/types";
+import { Image } from "expo-image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Image,
-  Platform,
   Pressable,
   ScrollView,
   useWindowDimensions,
   View,
-  type ImageProps,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from "react-native";
@@ -31,7 +29,7 @@ export default function BannerCarousel({
   const { width } = useWindowDimensions();
   const [activeIndex, setActiveIndex] = useState(0);
   const scrollRef = useRef<ScrollView>(null);
-  const isDraggindRef = useRef(false);
+  const isDraggingRef = useRef(false);
   const indexRef = useRef(0);
 
   const hasData = banners && banners.length > 0;
@@ -50,7 +48,7 @@ export default function BannerCarousel({
     if (!hasData || !banners || banners.length <= 1 || autoPlayInterval <= 0)
       return;
     const id = setInterval(() => {
-      if (isDraggindRef.current) return;
+      if (isDraggingRef.current) return;
       const next = (indexRef.current + 1) % banners.length;
       scrollRef.current?.scrollTo({ x: next * itemWidth, animated: true });
       setActiveIndex(next);
@@ -63,13 +61,13 @@ export default function BannerCarousel({
       const x = e.nativeEvent.contentOffset.x;
       const i = Math.round(x / itemWidth);
       setActiveIndex(i);
-      isDraggindRef.current = false;
+      isDraggingRef.current = false;
     },
     [itemWidth]
   );
 
   const onScrollBegin = useCallback(() => {
-    isDraggindRef.current = true;
+    isDraggingRef.current = true;
   }, []);
 
   if (isLoading) {
@@ -112,9 +110,11 @@ export default function BannerCarousel({
               <Image
                 source={{ uri: banner.image }}
                 style={{ width: "100%", height: "100%" }}
-                resizeMode="cover"
-                {...(Platform.OS === "web" &&
-                  ({ crossOrigin: "anonymous" } as Partial<ImageProps>))}
+                contentFit="cover"
+                transition={200}
+                cachePolicy="memory-disk"
+                placeholder={{ blurhash: 'L6PZfSi_.AyE_3t7t7R**0o#DgR4' }}
+                recyclingKey={banner.id}
               />
             </View>
           </Pressable>
