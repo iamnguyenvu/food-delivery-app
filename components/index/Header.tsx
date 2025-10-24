@@ -12,7 +12,7 @@ type HeaderProps = {
 
 export default function Header({
   location,
-  placeholder = "Search foods, restaurents...",
+  placeholder = "Tìm kiếm món ăn, quán...",
   value,
   onSearchChange,
   onPressLocation,
@@ -27,7 +27,7 @@ export default function Header({
     <View className={containerClasses}>
       {mode === "full" && (
         <>
-          <Text className="text-white mb-1">Giao den:</Text>
+          <Text className="text-white mb-1">Giao đến:</Text>
 
           <Pressable
             onPress={onPressLocation}
@@ -51,7 +51,11 @@ export default function Header({
               value={value}
               onChangeText={onSearchChange}
               returnKeyType="search"
-              className="flex-1 font-medium rounded-lg p-2 text-primary-400 border-transparent focus:border-transparent focus:ring-0"
+              multiline={false}
+              scrollEnabled={false}
+              textAlignVertical="center"
+              numberOfLines={1}
+              className="flex-1 font-medium rounded-lg p-2 text-primary-400"
               placeholderTextColor={"#26C6DA"}
               underlineColorAndroid={"transparent"}
             />

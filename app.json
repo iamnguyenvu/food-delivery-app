@@ -15,7 +15,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.fooddelivery.app"
+      "bundleIdentifier": "com.fooddelivery.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "We use your location to delivery food to your address."
+      }
     },
     "android": {
       "adaptiveIcon": {
