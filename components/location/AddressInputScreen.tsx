@@ -1,4 +1,6 @@
+import { useAuth } from "@/src/contexts/AuthContext";
 import { useAddresses } from "@/src/hooks/useAddresses";
+import { LocationStorage } from "@/src/lib/locationStorage";
 import { useLocationStore } from "@/src/store/locationStore";
 import type { Location, SavedLocation } from "@/src/types/location";
 import { Ionicons } from "@expo/vector-icons";
@@ -6,13 +8,13 @@ import * as ExpoLocation from "expo-location";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    FlatList,
-    Pressable,
-    Text,
-    TextInput,
-    View,
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Pressable,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -23,25 +25,45 @@ type SearchResult = {
   fullAddress: string;
 };
 
+// Helper to format timestamp as relative time
+function getRelativeTime(timestamp: string): string {
+  const now = new Date();
+  const then = new Date(timestamp);
+  const diffMs = now.getTime() - then.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return "Vừa xong";
+  if (diffMins < 60) return `${diffMins} phút trước`;
+  if (diffHours < 24) return `${diffHours} giờ trước`;
+  if (diffDays < 7) return `${diffDays} ngày trước`;
+  return then.toLocaleDateString("vi-VN");
+}
+
 export default function AddressInputScreen() {
   const { setAll, savedAddresses: localAddresses } = useLocationStore();
-  
-  // Inplement later
-  const userId = undefined; 
-  
+
+  // Get current user
+  const { user } = useAuth();
+  const userId = user?.id;
+
   // Always call hook, but it won't fetch if userId is undefined
-  const { addresses: dbAddresses = [], loading: dbLoading = false } = useAddresses(userId);
-  
+  const { addresses: dbAddresses = [], loading: dbLoading = false, saveAddress: saveToDatabase } =
+    useAddresses(userId);
+
   // Convert SavedAddress to SavedLocation format for compatibility
-  const dbAddressesConverted: SavedLocation[] = dbAddresses.map(addr => ({
+  const dbAddressesConverted: SavedLocation[] = dbAddresses.map((addr) => ({
     location: addr.location,
     address: addr.address,
     timestamp: new Date().toISOString(), // Not stored in DB, use current time
   }));
-  
+
   // Use database addresses if user logged in, otherwise use local storage
-  const displayAddresses: SavedLocation[] = userId ? dbAddressesConverted : localAddresses;
-  
+  const displayAddresses: SavedLocation[] = userId
+    ? dbAddressesConverted
+    : localAddresses;
+
   const [searchText, setSearchText] = useState("");
   const [searching, setSearching] = useState(false);
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -127,21 +149,58 @@ export default function AddressInputScreen() {
       setResults(formatted);
     } catch (e: any) {
       console.error("Search error:", e);
-      Alert.alert("Lỗi tìm kiếm", "Không thể tìm kiếm địa chỉ. Vui lòng thử lại.");
+      Alert.alert(
+        "Lỗi tìm kiếm",
+        "Không thể tìm kiếm địa chỉ. Vui lòng thử lại."
+      );
       setResults([]);
     } finally {
       setSearching(false);
     }
   };
 
-  const handleSelectAddress = (item: SearchResult) => {
-    setAll({
+  const handleSelectAddress = async (item: SearchResult) => {
+    const locationData = {
       location: item.location,
       address: {
         formatted: `${item.streetAddress}, ${item.fullAddress}`,
         street: item.streetAddress,
       },
-    });
+    }
+
+    // Update current location
+    setAll(locationData);
+
+    // Save to appropriate storage
+    if(userId) {
+      // Logged in: Save to database
+      try {
+        await saveToDatabase(
+          item.location,
+          locationData.address,
+          "other",
+          false
+        )
+      }
+      catch (error) {
+        console.error("Failed to save to database", error);
+        Alert.alert("Lỗi", "Không thể lưu địa chỉ vào tài khoản")
+      }
+    }
+    else {
+      // Guest: Save to Local Storage
+      try {
+        await LocationStorage.saveAddress({
+          location: item.location,
+          address: locationData.address,
+          timestamp: new Date().toISOString()
+        })
+      }
+      catch (error) {
+        console.error("Failed to save locally:", error);
+      }
+    }
+
     router.back();
   };
 
@@ -177,7 +236,7 @@ export default function AddressInputScreen() {
         {/* Search Bar */}
         <View className="flex-row items-center bg-white rounded-md px-2 h-11 mb-1">
           <Ionicons name="search" size={24} color={"#26C6DA"} />
-          <TextInput
+          <TextInput 
             placeholder="Tìm kiếm địa chỉ..."
             placeholderTextColor={"#26C6DA"}
             value={searchText}
@@ -256,11 +315,33 @@ export default function AddressInputScreen() {
                 <Text className="mt-2 text-gray-500">
                   Chưa có địa chỉ đã lưu
                 </Text>
+                {!userId && (
+                  <Text className="mt-1 text-xs text-gray-400 px-8 text-center">
+                    Đăng nhập để lưu không giới hạn địa chỉ
+                  </Text>
+                )}
               </View>
             ) : (
               <FlatList
                 data={displayAddresses}
                 keyExtractor={(item, index) => `saved-${index}`}
+                ListHeaderComponent={
+                  !userId && displayAddresses.length > 0 ? (
+                    <View className="px-4 py-2 bg-amber-50 border-b border-amber-100">
+                      <View className="flex-row items-center">
+                        <Ionicons
+                          name="information-circle"
+                          size={16}
+                          color="#F59E0B"
+                        />
+                        <Text className="text-xs text-amber-700 ml-2 flex-1">
+                          Chế độ khách: Tối đa 5 địa chỉ. Đăng nhập để lưu không
+                          giới hạn.
+                        </Text>
+                      </View>
+                    </View>
+                  ) : null
+                }
                 renderItem={({ item }) => (
                   <Pressable
                     onPress={() => {
@@ -270,20 +351,49 @@ export default function AddressInputScreen() {
                       });
                       router.back();
                     }}
-                    className="flex-row items-center px-2 py-4 border-b border-gray-100 active:bg-gray-50"
+                    className="bg-white mx-3 my-2 rounded-xl border border-gray-200 shadow-sm active:bg-gray-50"
                   >
-                    <View className="w-10 h-10 bg-primary-50 rounded-full items-center justify-center mr-3">
-                      <Ionicons name="bookmark" size={20} color="#26C6DA" />
+                    <View className="flex-row items-start p-4">
+                      <View className="w-12 h-12 bg-primary-50 rounded-full items-center justify-center">
+                        <Ionicons
+                          name={userId ? "cloud" : "phone-portrait"}
+                          size={24}
+                          color="#26C6DA"
+                        />
+                      </View>
+                      <View className="flex-1 ml-3">
+                        <View className="flex-row items-center mb-1">
+                          <Ionicons
+                            name="bookmark"
+                            size={14}
+                            color="#10B981"
+                            style={{ marginRight: 4 }}
+                          />
+                          <Text className="text-sm font-semibold text-primary-500">
+                            {userId ? "Đã lưu trên cloud" : "Lưu trên thiết bị"}
+                          </Text>
+                        </View>
+                        <Text className="text-base font-bold text-gray-900 mb-1">
+                          {item.address.street || "Địa chỉ"}
+                        </Text>
+                        <Text
+                          className="text-sm text-gray-600"
+                          numberOfLines={2}
+                        >
+                          {item.address.formatted}
+                        </Text>
+                        {item.timestamp && (
+                          <Text className="text-xs text-gray-400 mt-2">
+                            {getRelativeTime(item.timestamp)}
+                          </Text>
+                        )}
+                      </View>
+                      <Ionicons
+                        name="chevron-forward"
+                        size={20}
+                        color="#9CA3AF"
+                      />
                     </View>
-                    <View className="flex-1">
-                      <Text className="text-base font-semibold text-gray-800 mb-1">
-                        {item.address.street || "Địa chỉ"}
-                      </Text>
-                      <Text className="text-sm text-gray-500" numberOfLines={1}>
-                        {item.address.formatted}
-                      </Text>
-                    </View>
-                    <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
                   </Pressable>
                 )}
               />

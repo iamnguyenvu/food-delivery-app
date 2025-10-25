@@ -1,40 +1,37 @@
+import { useAuth } from "@/src/contexts/AuthContext";
+import { useAddresses } from "@/src/hooks";
 import { useReverseGeocode } from "@/src/hooks/useReverseGeocode";
+import { LocationStorage } from "@/src/lib/locationStorage";
 import { useLocationStore } from "@/src/store/locationStore";
 import type { Location } from "@/src/types/location";
 import { Ionicons } from "@expo/vector-icons";
 import * as ExpoLocation from "expo-location";
 import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  Pressable,
-  Text,
-  View
-} from "react-native";
+import { ActivityIndicator, Alert, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import MapPicker from "./MapPicker";
 
 export default function LocationPickerScreen() {
   // Get saved location and address from global store
   const { location, address, setAll } = useLocationStore();
-  
+
   // Local state for current selected location
   const [loc, setLoc] = useState<Location | null>(location);
-  
+
   // Auto reverse-geocode whenever location changes
   const { address: revAddr, loading: addrLoading } = useReverseGeocode(
     loc?.latitude,
     loc?.longitude
   );
-  
+
   const [searchText, setSearchText] = useState("");
   const [locating, setLocating] = useState(false);
 
   // Initialize with saved location or default to HCM center
   useEffect(() => {
     if (loc) return;
-    
+
     setLoc({
       latitude: 10.8231,
       longitude: 106.6297,
@@ -48,31 +45,48 @@ export default function LocationPickerScreen() {
     debRef.current = setTimeout(() => setLoc(l), 350);
   };
 
-  const onConfirm = () => {
+  const onConfirm = async () => {
     if (!loc) return;
-    
+
     // Wait for address loading to finish
     if (addrLoading) {
       Alert.alert("Đang tải", "Vui lòng đợi địa chỉ được xác định.");
       return;
     }
-    
+
     // Use reverse-geocoded address if available and valid
-    const finalAddr = revAddr.formatted && revAddr.formatted.trim()
-      ? revAddr
-      : { formatted: `${loc.latitude.toFixed(6)}, ${loc.longitude.toFixed(6)}` };
-    
+    const finalAddr =
+      revAddr.formatted && revAddr.formatted.trim()
+        ? revAddr
+        : {
+            formatted: `${loc.latitude.toFixed(6)}, ${loc.longitude.toFixed(6)}`,
+          };
+
     setAll({ location: loc, address: finalAddr });
+
+    const { user } = useAuth();
+
+    if (user?.id) {
+      const { saveAddress: saveToDatabase } = useAddresses(user?.id);
+      await saveToDatabase(loc, finalAddr, "other", false);
+    } else {
+      await LocationStorage.saveAddress({
+        location: loc,
+        address: finalAddr,
+        timestamp: new Date().toISOString(),
+      });
+    }
+
     router.push("/");
   };
 
   const onSearch = async () => {
     if (!searchText.trim()) return;
-    
+
     try {
       // Forward geocode: convert text address to coordinates
       const results = await ExpoLocation.geocodeAsync(searchText.trim());
-      
+
       if (results?.length) {
         const { latitude, longitude } = results[0];
         setLoc({ latitude, longitude });
@@ -87,32 +101,32 @@ export default function LocationPickerScreen() {
   const onUseMyLocation = async () => {
     try {
       setLocating(true);
-      
+
       // Check if location services are enabled
       const enabled = await ExpoLocation.hasServicesEnabledAsync();
       if (!enabled) {
         Alert.alert(
-          "Dịch vụ vị trí", 
+          "Dịch vụ vị trí",
           "Vui lòng bật dịch vụ định vị trong cài đặt thiết bị."
         );
         return;
       }
-      
+
       // Request permission if not granted
       const { status } = await ExpoLocation.requestForegroundPermissionsAsync();
       if (status !== "granted") {
         Alert.alert(
-          "Quyền truy cập bị từ chối", 
+          "Quyền truy cập bị từ chối",
           "Cần cấp quyền truy cập vị trí để sử dụng tính năng này."
         );
         return;
       }
-      
+
       // Get current position
       const cur = await ExpoLocation.getCurrentPositionAsync({
         accuracy: ExpoLocation.Accuracy.Balanced,
       });
-      
+
       setLoc({
         latitude: cur.coords.latitude,
         longitude: cur.coords.longitude,
@@ -127,7 +141,7 @@ export default function LocationPickerScreen() {
   return (
     <SafeAreaView className="flex-1 bg-primary-400 pb-2" edges={["top"]}>
       {/* Header with back button */}
-      <View className="bg-primary-400 px-4 py-3 flex-row items-center">
+      <View className="bg-primary-400 px-2 py-3 flex-row items-center">
         <Pressable onPress={() => router.back()} className="mr-3">
           <Ionicons name="arrow-back" size={24} color="white" />
         </Pressable>
@@ -213,7 +227,9 @@ export default function LocationPickerScreen() {
           onPress={onConfirm}
           disabled={!loc || addrLoading}
           className={`py-4 rounded-md items-center ${
-            !loc || addrLoading ? "bg-gray-300" : "bg-primary-400 active:bg-primary-500"
+            !loc || addrLoading
+              ? "bg-gray-300"
+              : "bg-primary-400 active:bg-primary-500"
           }`}
         >
           <Text className="text-white font-semibold text-base">
