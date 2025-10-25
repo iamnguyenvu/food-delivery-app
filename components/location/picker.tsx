@@ -6,12 +6,11 @@ import * as ExpoLocation from "expo-location";
 import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Pressable,
-    Text,
-    TextInput,
-    View,
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  Text,
+  View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import MapPicker from "./MapPicker";
@@ -52,13 +51,19 @@ export default function LocationPickerScreen() {
   const onConfirm = () => {
     if (!loc) return;
     
-    // Use reverse-geocoded address if available, otherwise show coordinates
-    const finalAddr = revAddr.formatted 
+    // Wait for address loading to finish
+    if (addrLoading) {
+      Alert.alert("Đang tải", "Vui lòng đợi địa chỉ được xác định.");
+      return;
+    }
+    
+    // Use reverse-geocoded address if available and valid
+    const finalAddr = revAddr.formatted && revAddr.formatted.trim()
       ? revAddr
       : { formatted: `${loc.latitude.toFixed(6)}, ${loc.longitude.toFixed(6)}` };
     
     setAll({ location: loc, address: finalAddr });
-    router.back();
+    router.push("/");
   };
 
   const onSearch = async () => {
@@ -120,7 +125,7 @@ export default function LocationPickerScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-primary-400" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-primary-400 pb-2" edges={["top"]}>
       {/* Header with back button */}
       <View className="bg-primary-400 px-4 py-3 flex-row items-center">
         <Pressable onPress={() => router.back()} className="mr-3">
@@ -154,7 +159,7 @@ export default function LocationPickerScreen() {
         <Pressable
           onPress={onUseMyLocation}
           disabled={locating}
-          className="flex-row items-center justify-center py-3 mb-3 bg-blue-50 rounded-lg active:bg-blue-100"
+          className="flex-row items-center justify-center py-3 mb-3 bg-blue-50 rounded-md active:bg-blue-100"
         >
           {locating ? (
             <ActivityIndicator size="small" color="#26C6DA" />
@@ -169,7 +174,7 @@ export default function LocationPickerScreen() {
         </Pressable>
 
         {/* Search bar */}
-        <View className="flex-row items-center mb-3 bg-gray-50 rounded-lg px-3 border border-gray-200">
+        {/* <View className="flex-row items-center mb-3 bg-gray-50 rounded-md px-3 border border-gray-200">
           <Ionicons name="search" size={20} color="#9CA3AF" />
           <TextInput
             placeholder="Tìm kiếm địa chỉ..."
@@ -185,10 +190,10 @@ export default function LocationPickerScreen() {
               <Ionicons name="close-circle" size={20} color="#9CA3AF" />
             </Pressable>
           )}
-        </View>
+        </View> */}
 
         {/* Current address display */}
-        <View className="flex-row items-start mb-3 p-3 bg-gray-50 rounded-lg">
+        <View className="flex-row items-start mb-3 p-3 bg-gray-50 rounded-md">
           <Ionicons name="location-sharp" size={22} color="#26C6DA" />
           <View className="flex-1 ml-3">
             <Text className="text-xs text-gray-500 mb-1">Địa chỉ đã chọn</Text>
@@ -207,7 +212,7 @@ export default function LocationPickerScreen() {
         <Pressable
           onPress={onConfirm}
           disabled={!loc || addrLoading}
-          className={`py-4 rounded-lg items-center ${
+          className={`py-4 rounded-md items-center ${
             !loc || addrLoading ? "bg-gray-300" : "bg-primary-400 active:bg-primary-500"
           }`}
         >
