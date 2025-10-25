@@ -27,7 +27,7 @@ export default function ProfileHeader({ onPressAvatar }: ProfileHeaderProps) {
             </Text> */}
             <Pressable
               onPress={() => router.push("/login" as any)}
-              className="bg-white rounded-md py-2 px-4 active:bg-white/90"
+              className="bg-white rounded-sm py-2 px-4 active:bg-white/90"
             >
               <Text className="text-primary-400 font-semibold text-center">
                 Đăng nhập / Đăng ký
