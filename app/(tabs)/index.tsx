@@ -1,42 +1,55 @@
-﻿import BannerCarousel from '@/components/index/BannerCarousel';
-import Header from '@/components/index/Header';
-import { trackBannerClick, useBanners } from '@/src/hooks';
-import { useLocationStore } from '@/src/store/locationStore';
-import { Banner } from '@/src/types';
-import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
-import { useMemo } from 'react';
-import { ScrollView, View } from 'react-native';
+﻿import BannerCarousel from "@/components/index/BannerCarousel";
+import CategoryList from "@/components/index/CategoryList";
+import Header from "@/components/index/Header";
+import { trackBannerClick, useBanners } from "@/src/hooks";
+import { useLocationStore } from "@/src/store/locationStore";
+import { Banner } from "@/src/types";
+import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
+import { useMemo, useState } from "react";
+import { ScrollView } from "react-native";
 
 export default function HomeScreen() {
-  const {address} = useLocationStore()
-  const label = useMemo(() => address?.formatted || "Chon vi tri giao hang", [address])
-  const openPicker = () => router.push("/location-picker")
+  const { address } = useLocationStore();
+  const label = useMemo(
+    () => address?.formatted || "Chon vi tri giao hang",
+    [address]
+  );
+  const openPicker = () => router.push("/location-picker");
   const { banners, isLoading } = useBanners();
+  const [selectedCategory, setSelectedCategory] = useState("1");
 
   const handleBannerPress = (banner: Banner) => {
     trackBannerClick(banner.id);
 
     switch (banner.actionType) {
-      case 'restaurant':
-        console.log('Navigate to restaurant:', banner.actionValue || banner.restaurantId);
+      case "restaurant":
+        console.log(
+          "Navigate to restaurant:",
+          banner.actionValue || banner.restaurantId
+        );
         break;
-      case 'dish':
-        console.log('Navigate to dish:', banner.actionValue);
+      case "dish":
+        console.log("Navigate to dish:", banner.actionValue);
         break;
-      case 'coupon':
-        console.log('Apply coupon:', banner.actionValue);
+      case "coupon":
+        console.log("Apply coupon:", banner.actionValue);
         break;
-      case 'url':
-        console.log('Open URL:', banner.actionValue);
+      case "url":
+        console.log("Open URL:", banner.actionValue);
         break;
       default:
-        console.log('Banner clicked:', banner.title);
+        console.log("Banner clicked:", banner.title);
     }
   };
 
+  const handleCategorySelect = (id: string) => {
+    setSelectedCategory(id);
+    console.log("Category selected:", id);
+  };
+
   return (
-    <ScrollView 
+    <ScrollView
       className="flex-1 bg-white"
       stickyHeaderIndices={[1]}
       keyboardShouldPersistTaps="handled"
@@ -49,15 +62,17 @@ export default function HomeScreen() {
         locations={[0, 0.15, 0.3, 0.5, 0.8]}
         className="flex-1"
       >
-        <View className="pb-2">
-          <BannerCarousel 
-            banners={banners}
-            isLoading={isLoading}
-            onBannerPress={handleBannerPress}
-          />
-        </View>
+        <BannerCarousel
+          banners={banners}
+          isLoading={isLoading}
+          onBannerPress={handleBannerPress}
+        />
+
+        <CategoryList
+          selectedId={selectedCategory}
+          onSelectCategory={handleCategorySelect}
+        />
       </LinearGradient>
     </ScrollView>
   );
 }
-
