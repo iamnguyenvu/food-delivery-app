@@ -13,7 +13,7 @@ const ICONS: Record<string, { on: keyof typeof Ionicons.glyphMap; off: keyof typ
   index: { on: "home", off: "home-outline", title: "Home" },
   orders: { on: "receipt", off: "receipt-outline", title: "My Order" },
   favorites: { on: "heart", off: "heart-outline", title: "Favorites" },
-  notifications: { on: "mail", off: "mail-outline", title: "Inbox", },
+  notifications: { on: "mail", off: "mail-outline", title: "Notifications", },
   profile: { on: "person", off: "person-outline", title: "Account" },
 };
 

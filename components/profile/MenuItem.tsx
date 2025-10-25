@@ -23,11 +23,11 @@ export default function MenuItem({
     >
       {/* Icon */}
       <View className="w-10 items-center">
-        <Ionicons name={icon} size={24} color={iconColor} />
+        <Ionicons name={icon} size={20} color={iconColor} />
       </View>
 
       {/* Label */}
-      <Text className="flex-1 text-gray-800 text-base font-medium ml-3">
+      <Text className="flex-1 text-gray-800 text-sm font-medium ml-3">
         {label}
       </Text>
 
