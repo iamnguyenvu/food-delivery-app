@@ -1,13 +1,18 @@
+import { useAuth } from "@/src/contexts/AuthContext";
+import { useAddresses } from "@/src/hooks";
+import { formatAddress } from "@/src/hooks/useReverseGeocode";
+import { LocationStorage } from "@/src/lib/locationStorage";
+import type { Location } from "@/src/types/location";
 import { Ionicons } from "@expo/vector-icons";
 import * as ExpoLocation from "expo-location";
 import React, { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Modal,
-    Pressable,
-    Text,
-    View,
+  ActivityIndicator,
+  Alert,
+  Modal,
+  Pressable,
+  Text,
+  View,
 } from "react-native";
 
 type Props = {
@@ -25,6 +30,10 @@ export default function LocationPermissionModal({
   onManualInput,
 }: Props) {
   const [loading, setLoading] = useState(false);
+  
+  // Hooks MUST be called at top level
+  const { user } = useAuth();
+  const { saveAddress: saveToDatabase } = useAddresses(user?.id || "");
 
   const handleAllowLocation = async () => {
     try {
@@ -53,52 +62,28 @@ export default function LocationPermissionModal({
       const location = await ExpoLocation.getCurrentPositionAsync({
         accuracy: ExpoLocation.Accuracy.Balanced,
       });
-
-      // Reverse geocode to get address text
-      const reverseResults = await ExpoLocation.reverseGeocodeAsync({
+      const coords: Location = {
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
-      });
+      };
 
-      const details = reverseResults[0];
-      let addressText = "";
+      // Reverse geocode to get address text
+      const results = await ExpoLocation.reverseGeocodeAsync(coords);
+      const addressData = formatAddress(results[0]);
 
-      if (details) {
-        const parts: string[] = [];
-        
-        // Street address
-        if (details.streetNumber && details.street) {
-          parts.push(`${details.streetNumber} ${details.street}`);
-        } else if (details.name || details.street) {
-          parts.push(details.name || details.street!);
-        }
-        
-        // Ward, District, City
-        if (details.subregion && details.subregion !== details.district) {
-          parts.push(details.subregion);
-        }
-        if (details.district) {
-          parts.push(details.district);
-        }
-        if (details.city || details.region) {
-          parts.push(details.city || details.region!);
-        }
-
-        addressText = parts.filter(Boolean).join(", ");
+      // Save address to storage
+      if (user?.id) {
+        await saveToDatabase(coords, addressData, "other", false);
+      } else {
+        await LocationStorage.saveAddress({
+          location: coords,
+          address: addressData,
+          timestamp: new Date().toISOString(),
+        });
       }
 
-      // Fallback to coordinates if geocoding failed
-      if (!addressText) {
-        addressText = `${location.coords.latitude.toFixed(6)}, ${location.coords.longitude.toFixed(6)}`;
-      }
-
-      onLocationGranted(
-        {
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-        },
-        addressText
-      );
+      // Call callback to update UI
+      onLocationGranted(coords, addressData.formatted);
     } catch (e: any) {
       Alert.alert("Lỗi", e?.message ?? "Không thể lấy vị trí hiện tại");
     } finally {

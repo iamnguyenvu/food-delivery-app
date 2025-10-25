@@ -87,7 +87,7 @@ export default function HomeScreen() {
       />
       <SafeAreaProvider>
         <ScrollView
-          className="flex-1 bg-white"
+          className="flex-1 bg-gray-100"
           stickyHeaderIndices={[1]}
           keyboardShouldPersistTaps="handled"
         >
