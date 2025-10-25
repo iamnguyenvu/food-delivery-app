@@ -86,7 +86,7 @@ export default function BannerCarousel({
   if (!hasData) return null;
 
   return (
-    <View style={{ height: itemHeight + 24, marginTop: 4 }}>
+    <View className="my-1 mb-2">
       <ScrollView
         ref={scrollRef}
         horizontal

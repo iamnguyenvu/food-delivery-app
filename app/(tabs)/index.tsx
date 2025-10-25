@@ -1,4 +1,5 @@
 ﻿import BannerCarousel from "@/components/index/BannerCarousel";
+import CategoryGrid from "@/components/index/CategoryGrid";
 import CategoryList from "@/components/index/CategoryList";
 import Header from "@/components/index/Header";
 import LocationPermissionModal from "@/components/location/LocationPermissionModal";
@@ -108,6 +109,8 @@ export default function HomeScreen() {
               isLoading={isLoading}
               onBannerPress={handleBannerPress}
             />
+
+            <CategoryGrid onSelectCategory={handleCategorySelect} />
 
             <CategoryList
               selectedId={selectedCategory}
