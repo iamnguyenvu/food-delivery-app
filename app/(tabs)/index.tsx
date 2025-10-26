@@ -24,7 +24,7 @@ export default function HomeScreen() {
     [address]
   );
 
-  const openPicker = () => router.push("/address-input" as any);
+  const openPicker = () => router.push("/(screens)/address-input" as any);
   const { banners, isLoading } = useBanners();
   const [selectedCategory, setSelectedCategory] = useState("1");
 
@@ -67,7 +67,7 @@ export default function HomeScreen() {
 
   const handleManualInput = () => {
     setShowPermissionModal(false);
-    router.push("/address-input" as any);
+    router.push("/(screens)/address-input" as any);
   };
 
   const handleBannerPress = (banner: Banner) => {

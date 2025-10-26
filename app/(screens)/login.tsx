@@ -66,7 +66,7 @@ export default function LoginScreen() {
         </View>
 
         <Pressable
-          onPress={() => router.push("/help-center" as any)}
+          onPress={() => router.push("/(screens)/help-center" as any)}
           className="p-2"
         >
           <Ionicons name="help-circle-outline" size={24} color="#26C6DA" />

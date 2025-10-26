@@ -55,7 +55,7 @@ export default function ProfileScreen() {
     {
       icon: "help-circle-outline",
       label: "Trung tâm trợ giúp",
-      onPress: () => router.push("/help-center" as any),
+      onPress: () => router.push("/(screens)/help-center" as any),
     },
     {
       icon: "settings-outline",

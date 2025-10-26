@@ -205,7 +205,7 @@ export default function AddressInputScreen() {
   };
 
   const openMapPicker = () => {
-    router.push("/location-map-picker" as any);
+    router.push("/(screens)/location-map-picker" as any);
   };
 
   useEffect(() => {
