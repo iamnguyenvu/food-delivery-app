@@ -1,142 +1,172 @@
 import Card from "@/components/common/Card";
+import type { Deal } from "@/src/hooks";
+import { useDeals } from "@/src/hooks";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { Image, Pressable, Text, View } from "react-native";
 
-type DealItem = {
-  id: string;
-  restaurantName: string;
-  dishName: string;
-  image: string;
-  discountPercent: number;
-  originalPrice: number;
-  discountedPrice: number;
-};
-
-const SAMPLE_DEALS: DealItem[] = [
+// Sample data for fallback when database is empty
+const SAMPLE_DEALS: Deal[] = [
   {
-    id: "1",
-    restaurantName: "Bún Bò Huế Nam Giao",
-    dishName: "Bún Bò Huế Nam Giaooooooooooo",
-    image: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=400",
-    discountPercent: 50,
-    originalPrice: 50000,
-    discountedPrice: 25000,
+    id: "sample-1",
+    restaurant_id: "sample-r1",
+    dish_id: "sample-d1",
+    title: "Deal Bún Bò Huế",
+    original_price: 50000,
+    discounted_price: 25000,
+    discount_percent: 50,
+    valid_from: new Date().toISOString(),
+    display_order: 1,
+    is_featured: true,
+    is_active: true,
+    restaurant: { name: "Bún Bò Huế Nam Giao" },
+    dish: { 
+      name: "Bún Bò Huế",
+      image: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=400"
+    }
   },
   {
-    id: "2",
-    restaurantName: "Phở Hà Nội",
-    dishName: "Phở Bò",
-    image: "https://images.unsplash.com/photo-1591814468924-caf88d1232e1?w=400",
-    discountPercent: 40,
-    originalPrice: 45000,
-    discountedPrice: 27000,
+    id: "sample-2",
+    restaurant_id: "sample-r2",
+    dish_id: "sample-d2",
+    title: "Deal Phở Bò",
+    original_price: 45000,
+    discounted_price: 27000,
+    discount_percent: 40,
+    valid_from: new Date().toISOString(),
+    display_order: 2,
+    is_featured: true,
+    is_active: true,
+    restaurant: { name: "Phở Hà Nội" },
+    dish: { 
+      name: "Phở Bò",
+      image: "https://images.unsplash.com/photo-1591814468924-caf88d1232e1?w=400"
+    }
   },
   {
-    id: "3",
-    restaurantName: "Cơm Tấm Sài Gòn",
-    dishName: "Cơm Tấm",
-    image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400",
-    discountPercent: 30,
-    originalPrice: 40000,
-    discountedPrice: 28000,
-  },
+    id: "sample-3",
+    restaurant_id: "sample-r3",
+    dish_id: "sample-d3",
+    title: "Deal Cơm Tấm",
+    original_price: 40000,
+    discounted_price: 28000,
+    discount_percent: 30,
+    valid_from: new Date().toISOString(),
+    display_order: 3,
+    is_featured: true,
+    is_active: true,
+    restaurant: { name: "Cơm Tấm Sài Gòn" },
+    dish: { 
+      name: "Cơm Tấm Sườn",
+      image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400"
+    }
+  }
 ];
 
 type TrumDealNgonProps = {
-  deals?: DealItem[];
   onViewMore?: () => void;
   onSelectDeal?: (id: string) => void;
 };
 
 export default function TrumDealNgon({
-  deals = SAMPLE_DEALS,
   onViewMore,
   onSelectDeal,
 }: TrumDealNgonProps) {
+  const { deals: dealsFromDB, isLoading, error } = useDeals({ limit: 3, featured: true });
+  
+  // Use database deals if available, otherwise use sample data
+  const deals = !isLoading && dealsFromDB.length === 0 ? SAMPLE_DEALS : dealsFromDB;
+
   const formatPrice = (price: number) => {
     return `${price.toLocaleString("vi-VN")}đ`;
   };
 
-  const renderLargeCard = (deal: DealItem) => (
-    <Pressable
-      key={deal.id}
-      onPress={() => onSelectDeal?.(deal.id)}
-      className="h-full active:opacity-80"
-    >
-      <View className="bg-white rounded-md overflow-hidden h-full">
-        {/* Image with Discount Badge */}
-        <View className="relative">
-          <Image
-            source={{ uri: deal.image }}
-            className="w-full h-32"
-            resizeMode="cover"
-          />
-          {/* Discount Badge */}
-          <View className="absolute top-1 right-1 bg-red-500 px-2 py-1 rounded-md">
-            <Text className="text-white text-xs font-bold">
-              -{deal.discountPercent}%
+  const renderLargeCard = (deal: typeof deals[0]) => {
+    if (!deal) return null;
+    
+    return (
+      <Pressable
+        key={deal.id}
+        onPress={() => onSelectDeal?.(deal.id)}
+        className="h-full active:opacity-80"
+      >
+        <View className="bg-white rounded-md overflow-hidden h-full">
+          {/* Image with Discount Badge */}
+          <View className="relative">
+            <Image
+              source={{ uri: deal.dish?.image || "https://via.placeholder.com/400" }}
+              className="w-full h-32"
+              resizeMode="cover"
+            />
+            {/* Discount Badge */}
+            <View className="absolute top-1 right-1 bg-red-500 px-2 py-1 rounded-md">
+              <Text className="text-white text-xs font-bold">
+                -{deal.discount_percent}%
+              </Text>
+            </View>
+          </View>
+
+          {/* Content */}
+          <View className="p-2 flex-1 justify-between pt-1">
+            {/* Restaurant Name */}
+            <Text className="text-gray-600 text-xs" numberOfLines={1}>
+              {deal.restaurant?.name || ""}
             </Text>
+
+            {/* Dish Name */}
+            <Text
+              className="text-gray-900 font-semibold text-lg"
+              numberOfLines={2}
+            >
+              {deal.dish?.name || deal.title}
+            </Text>
+
+            {/* Price Row */}
+            <View className="flex-row items-center">
+              <Text className="text-primary-400 font-semibold text-sm mr-2">
+                {formatPrice(deal.discounted_price)}
+              </Text>
+              <Text className="text-gray-400 text-xs line-through">
+                {formatPrice(deal.original_price)}
+              </Text>
+            </View>
           </View>
         </View>
+      </Pressable>
+    );
+  };
 
-        {/* Content */}
-        <View className="p-2 flex-1 justify-between pt-1">
-          {/* Restaurant Name */}
-          <Text className="text-gray-600 text-xs" numberOfLines={1}>
-            {deal.restaurantName}
-          </Text>
-
-          {/* Dish Name */}
-          <Text
-            className="text-gray-900 font-semibold text-lg"
-            numberOfLines={2}
-          >
-            {deal.dishName}
-          </Text>
-
-          {/* Price Row */}
-          <View className="flex-row items-center">
-            <Text className="text-primary-400 font-semibold text-sm mr-2">
-              {formatPrice(deal.discountedPrice)}
-            </Text>
-            <Text className="text-gray-400 text-xs line-through">
-              {formatPrice(deal.originalPrice)}
-            </Text>
+  const renderSmallCard = (deal: typeof deals[0]) => {
+    if (!deal) return null;
+    
+    return (
+      <Pressable
+        key={deal.id}
+        onPress={() => onSelectDeal?.(deal.id)}
+        className="active:opacity-80"
+      >
+        <View className="bg-white rounded-md overflow-hidden flex-row h-full">
+          {/* Image with Discount Badge - Left Side */}
+          <View className="relative w-28">
+            <Image
+              source={{ uri: deal.dish?.image || "https://via.placeholder.com/400" }}
+              className="w-full h-full"
+              resizeMode="cover"
+            />
+            {/* Discount Badge */}
+            <View className="absolute top-1 right-1 bg-red-500 px-1.5 py-0.5 rounded">
+              <Text className="text-white text-[10px] font-bold">
+                -{deal.discount_percent}%
+              </Text>
+            </View>
           </View>
-        </View>
-      </View>
-    </Pressable>
-  );
 
-  const renderSmallCard = (deal: DealItem) => (
-    <Pressable
-      key={deal.id}
-      onPress={() => onSelectDeal?.(deal.id)}
-      className="active:opacity-80"
-    >
-      <View className="bg-white rounded-md overflow-hidden flex-row h-full">
-        {/* Image with Discount Badge - Left Side */}
-        <View className="relative w-28">
-          <Image
-            source={{ uri: deal.image }}
-            className="w-full h-full"
-            resizeMode="cover"
-          />
-          {/* Discount Badge */}
-          <View className="absolute top-1 right-1 bg-red-500 px-1.5 py-0.5 rounded">
-            <Text className="text-white text-[10px] font-bold">
-              -{deal.discountPercent}%
-            </Text>
-          </View>
-        </View>
-
-        {/* Content - Right Side */}
-        <View className="flex-1 p-2 justify-between pt-0">
+          {/* Content - Right Side */}
+          <View className="flex-1 p-2 justify-between pt-0">
           <View className="flex-1 justify-center">
             {/* Restaurant Name */}
             <Text className="text-gray-600 text-[12px]" numberOfLines={1}>
-              {deal.restaurantName}
+              {deal.restaurant?.name || ""}
             </Text>
 
             {/* Dish Name */}
@@ -144,23 +174,39 @@ export default function TrumDealNgon({
               className="text-gray-900 font-semibold text-base mb-1"
               numberOfLines={2}
             >
-              {deal.dishName}
+              {deal.dish?.name || deal.title}
             </Text>
           </View>
 
           {/* Price Row */}
           <View className="flex-row items-center">
             <Text className="text-primary-400 font-bold text-sm mr-1.5">
-              {formatPrice(deal.discountedPrice)}
+              {formatPrice(deal.discounted_price)}
             </Text>
             <Text className="text-gray-400 text-[10px] line-through">
-              {formatPrice(deal.originalPrice)}
+              {formatPrice(deal.original_price)}
             </Text>
           </View>
         </View>
       </View>
     </Pressable>
   );
+};
+
+  if (isLoading) {
+    return (
+      <Card className="mx-2 mt-2">
+        <View className="p-8 items-center justify-center">
+          <Text className="text-gray-400">Đang tải deals...</Text>
+        </View>
+      </Card>
+    );
+  }
+
+  // Don't hide if no deals - show sample data instead
+  // if (deals.length === 0) {
+  //   return null;
+  // }
 
   return (
     <Card className="mx-2 mt-2">
