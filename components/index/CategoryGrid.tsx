@@ -1,74 +1,60 @@
 import Card from "@/components/common/Card";
+import { useCategories } from "@/src/hooks";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useRef, useState } from "react";
 import {
-    Animated,
-    Dimensions,
-    Image,
-    NativeScrollEvent,
-    NativeSyntheticEvent,
-    Pressable,
-    ScrollView,
-    Text,
-    View,
+  Animated,
+  Dimensions,
+  Image,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
 } from "react-native";
-
-type Category = {
-  id: string;
-  name: string;
-  icon?: keyof typeof Ionicons.glyphMap;
-  image?: string;
-  isSpecial?: boolean; // For metallic shine effect
-  bgColor?: string;
-};
-
-const CATEGORIES: Category[] = [
-  {
-    id: "1",
-    name: "Deal 0đ",
-    icon: "flash",
-    isSpecial: true,
-    bgColor: "#FFD700",
-  },
-  { id: "2", name: "Ăn khuya", icon: "moon", bgColor: "#8B5CF6" },
-  { id: "3", name: "Freeship", icon: "bicycle", bgColor: "#10B981" },
-  { id: "4", name: "Món mới", icon: "sparkles", bgColor: "#F59E0B" },
-  { id: "5", name: "Bán chạy", icon: "trending-up", bgColor: "#EF4444" },
-  { id: "6", name: "Đồ uống", icon: "cafe", bgColor: "#8B4513" },
-  { id: "7", name: "Ăn vặt", icon: "fast-food", bgColor: "#EC4899" },
-  { id: "8", name: "Món Việt", icon: "restaurant", bgColor: "#06B6D4" },
-  { id: "9", name: "Món Á", icon: "fish", bgColor: "#F97316" },
-  { id: "10", name: "Món Âu", icon: "pizza", bgColor: "#6366F1" },
-  { id: "11", name: "Tráng miệng", icon: "ice-cream", bgColor: "#EC4899" },
-  { id: "12", name: "Lẩu nướng", icon: "flame", bgColor: "#DC2626" },
-];
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const ITEM_WIDTH = 90;
-const ITEM_HEIGHT = 100;
-const ITEMS_PER_SCREEN = Math.floor((SCREEN_WIDTH - 32) / ITEM_WIDTH);
 
 type CategoryGridProps = {
   onSelectCategory?: (id: string) => void;
 };
 
 export default function CategoryGrid({ onSelectCategory }: CategoryGridProps) {
+  const { categories, isLoading } = useCategories();
   const scrollViewRef = useRef<ScrollView>(null);
-  const [scrollProgress, setScrollProgress] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(0);
 
-  const totalWidth = CATEGORIES.length * ITEM_WIDTH;
-  const scrollableWidth = totalWidth - (SCREEN_WIDTH - 32);
+  // Calculate how many items visible per screen
+  const itemsPerScreen = Math.floor((SCREEN_WIDTH - 32) / ITEM_WIDTH);
+  const totalPages = Math.ceil(categories.length / (itemsPerScreen * 2)); // 2 rows
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const offsetX = event.nativeEvent.contentOffset.x;
-    const progress = Math.min(offsetX / scrollableWidth, 1);
-    setScrollProgress(progress);
+    const pageWidth = itemsPerScreen * ITEM_WIDTH;
+    const currentPage = Math.round(offsetX / pageWidth);
+    setActiveIndex(currentPage);
   };
 
   // Split categories into 2 rows
-  const row1 = CATEGORIES.filter((_, index) => index % 2 === 0);
-  const row2 = CATEGORIES.filter((_, index) => index % 2 === 1);
+  const row1 = categories.filter((_, index) => index % 2 === 0);
+  const row2 = categories.filter((_, index) => index % 2 === 1);
+
+  if (isLoading) {
+    return (
+      <Card className="mx-2 p-1 py-3 mt-1">
+        <View className="items-center justify-center" style={{ height: 180 }}>
+          <Text className="text-gray-400">Đang tải...</Text>
+        </View>
+      </Card>
+    );
+  }
+
+  if (categories.length === 0) {
+    return null;
+  }
 
   return (
     <Card className="mx-2 p-1 py-3 mt-1">
@@ -118,15 +104,19 @@ export default function CategoryGrid({ onSelectCategory }: CategoryGridProps) {
         </View>
       </ScrollView>
 
-      {/* Progress Bar - Centered and shorter */}
-      {CATEGORIES.length > ITEMS_PER_SCREEN && (
-        <View className="mt-3 items-center">
-          <View className="h-1 bg-gray-200 rounded-full overflow-hidden w-32">
+      {/* Pagination Dots - Similar to BannerCarousel */}
+      {totalPages > 1 && (
+        <View className="mt-3 flex-row justify-center gap-2">
+          {Array.from({ length: totalPages }).map((_, i) => (
             <View
-              className="h-full bg-primary-400 rounded-full"
-              style={{ width: `${Math.max(scrollProgress * 100, 15)}%` }}
+              key={i}
+              className={
+                i === activeIndex
+                  ? "w-2 h-2 rounded-full bg-primary-400"
+                  : "w-2 h-2 rounded-full bg-gray-300"
+              }
             />
-          </View>
+          ))}
         </View>
       )}
     </Card>
@@ -134,7 +124,14 @@ export default function CategoryGrid({ onSelectCategory }: CategoryGridProps) {
 }
 
 type CategoryItemProps = {
-  category: Category;
+  category: {
+    id: string;
+    name: string;
+    icon?: string;
+    image?: string;
+    is_special?: boolean;
+    bg_color?: string;
+  };
   onPress?: (id: string) => void;
 };
 
@@ -142,7 +139,7 @@ function CategoryItem({ category, onPress }: CategoryItemProps) {
   const shineAnim = useRef(new Animated.Value(-100)).current;
 
   useEffect(() => {
-    if (category.isSpecial) {
+    if (category.is_special) {
       // Continuous shine animation for special items
       Animated.loop(
         Animated.sequence([
@@ -155,7 +152,7 @@ function CategoryItem({ category, onPress }: CategoryItemProps) {
         ])
       ).start();
     }
-  }, [category.isSpecial]);
+  }, [category.is_special]);
 
   return (
     <Pressable
@@ -169,10 +166,10 @@ function CategoryItem({ category, onPress }: CategoryItemProps) {
         style={{
           width: 58,
           height: 58,
-          backgroundColor: category.bgColor || "#26C6DA",
+          backgroundColor: category.bg_color || "#26C6DA",
         }}
       >
-        {category.isSpecial && (
+        {category.is_special && (
           <Animated.View
             style={{
               position: "absolute",
@@ -210,7 +207,7 @@ function CategoryItem({ category, onPress }: CategoryItemProps) {
           />
         ) : (
           <Ionicons
-            name={category.icon || "help-outline"}
+            name={(category.icon as any) || "help-outline"}
             size={24}
             color="white"
           />
