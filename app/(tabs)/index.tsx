@@ -2,19 +2,22 @@
 import CategoryGrid from "@/components/index/CategoryGrid";
 import CategoryList from "@/components/index/CategoryList";
 import Header from "@/components/index/Header";
+import TrumDealNgon from "@/components/index/TrumDealNgon";
 import LocationPermissionModal from "@/components/location/LocationPermissionModal";
 import { trackBannerClick, useBanners } from "@/src/hooks";
 import { useLocationStore } from "@/src/store/locationStore";
 import { Banner } from "@/src/types";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
-import { ScrollView } from "react-native";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Animated, ScrollView } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
   const { address, location, setAll } = useLocationStore();
   const [showPermissionModal, setShowPermissionModal] = useState(false);
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const [headerMode, setHeaderMode] = useState<"full" | "searchOnly">("full");
 
   const label = useMemo(
     () => address?.formatted || "Chọn vị trí giao hàng",
@@ -31,6 +34,23 @@ export default function HomeScreen() {
       setShowPermissionModal(true);
     }
   }, [location, address]);
+
+  // Handle scroll for header mode change
+  useEffect(() => {
+    const listenerId = scrollY.addListener(({ value }) => {
+      // Switch to searchOnly when scrolled down more than 50px
+      // Switch back to full when scrolled to top (< 20px)
+      if (value > 50 && headerMode === "full") {
+        setHeaderMode("searchOnly");
+      } else if (value < 20 && headerMode === "searchOnly") {
+        setHeaderMode("full");
+      }
+    });
+
+    return () => {
+      scrollY.removeListener(listenerId);
+    };
+  }, [scrollY, headerMode]);
 
   const handleLocationGranted = (
     loc: { latitude: number; longitude: number },
@@ -91,8 +111,13 @@ export default function HomeScreen() {
           className="flex-1 bg-gray-100"
           stickyHeaderIndices={[1]}
           keyboardShouldPersistTaps="handled"
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+            { useNativeDriver: false }
+          )}
+          scrollEventThrottle={16}
         >
-          <Header location={label} mode="full" onPressLocation={openPicker} />
+          <Header location={label} mode={headerMode} onPressLocation={openPicker} />
           <Header
             location={label}
             mode="searchOnly"
@@ -111,6 +136,11 @@ export default function HomeScreen() {
             />
 
             <CategoryGrid onSelectCategory={handleCategorySelect} />
+
+            <TrumDealNgon
+              onViewMore={() => console.log("View more deals")}
+              onSelectDeal={(id) => console.log("Selected deal:", id)}
+            />
 
             <CategoryList
               selectedId={selectedCategory}
