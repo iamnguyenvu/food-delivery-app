@@ -162,7 +162,7 @@ export default function VerifyOTPScreen() {
             Không nhận được mã?{" "}
             <Text
               className="text-primary-400 font-medium"
-              onPress={() => router.push("/help-center" as any)}
+              onPress={() => router.push("/(screens)/help-center" as any)}
             >
               Trung tâm trợ giúp
             </Text>

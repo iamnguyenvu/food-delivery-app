@@ -1,7 +1,7 @@
 export default {
   expo: {
-    name: "food-delivery",
-    slug: "food-delivery",
+    name: "DearU Food",
+    slug: "dearu-food",
     version: "1.0.0",
     orientation: "portrait",
     icon: "./assets/images/icon.png",

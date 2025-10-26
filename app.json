@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "DearU Food",
-    "slug": "DearU Food",
+    "slug": "dearu-food",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
