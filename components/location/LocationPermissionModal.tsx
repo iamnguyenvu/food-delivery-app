@@ -97,59 +97,71 @@ export default function LocationPermissionModal({
       transparent
       animationType="fade"
       statusBarTranslucent
+      onRequestClose={() => {
+        // Prevent dismissing with back button - location is required
+        return;
+      }}
     >
-      <View className="flex-1 bg-black/50 justify-center items-center px-6">
-        <View className="bg-white rounded-lg p-4 w-full max-w-sm">
-          {/* Icon */}
-          <View className="items-center my-4">
-            <View className="w-20 h-20 bg-primary-50 rounded-full items-center justify-center">
-              <Ionicons name="location" size={40} color="#26C6DA" />
+      <Pressable 
+        className="flex-1 bg-black/50 justify-center items-center px-6"
+        onPress={() => {
+          // Prevent dismissing by tapping outside - location is required
+          return;
+        }}
+      >
+        <Pressable onPress={(e) => e.stopPropagation()}>
+          <View className="bg-white rounded-lg p-4 w-full max-w-sm">
+            {/* Icon */}
+            <View className="items-center my-4">
+              <View className="w-20 h-20 bg-primary-50 rounded-full items-center justify-center">
+                <Ionicons name="location" size={40} color="#26C6DA" />
+              </View>
             </View>
-          </View>
 
-          {/* Title */}
-          <Text className="text-xl font-bold text-gray-800 text-center mb-2">
-            Cho phép truy cập vị trí
-          </Text>
+            {/* Title */}
+            <Text className="text-xl font-bold text-gray-800 text-center mb-2">
+              Cho phép truy cập vị trí
+            </Text>
 
-          {/* Description */}
-          <Text className="text-sm text-gray-600 text-center mb-6">
-            Để giao hàng chính xác, chúng tôi cần biết vị trí của bạn
-          </Text>
+            {/* Description */}
+            <Text className="text-sm text-gray-600 text-center mb-6">
+              Để giao hàng chính xác, chúng tôi cần biết vị trí của bạn
+            </Text>
 
-          {/* Allow Location Button */}
-          <Pressable
-            onPress={handleAllowLocation}
-            disabled={loading}
-            className="bg-primary-400 py-4 rounded-md mb-3 active:bg-primary-500"
-          >
-            {loading ? (
-              <ActivityIndicator color="white" />
-            ) : (
+            {/* Allow Location Button */}
+            <Pressable
+              onPress={handleAllowLocation}
+              disabled={loading}
+              className="bg-primary-400 py-4 rounded-md mb-3 active:bg-primary-500"
+            >
+              {loading ? (
+                <ActivityIndicator color="white" />
+              ) : (
+                <View className="flex-row items-center justify-center">
+                  <Ionicons name="navigate" size={20} color="white" />
+                  <Text className="text-white font-semibold text-base ml-2">
+                    Cho phép truy cập vị trí
+                  </Text>
+                </View>
+              )}
+            </Pressable>
+
+            {/* Manual Input Button */}
+            <Pressable
+              onPress={onManualInput}
+              disabled={loading}
+              className="bg-gray-100 py-4 rounded-md active:bg-gray-200"
+            >
               <View className="flex-row items-center justify-center">
-                <Ionicons name="navigate" size={20} color="white" />
-                <Text className="text-white font-semibold text-base ml-2">
-                  Cho phép truy cập vị trí
+                <Ionicons name="create-outline" size={20} color="#26C6DA" />
+                <Text className="text-primary-400 font-semibold text-base ml-2">
+                  Nhập địa chỉ thủ công
                 </Text>
               </View>
-            )}
-          </Pressable>
-
-          {/* Manual Input Button */}
-          <Pressable
-            onPress={onManualInput}
-            disabled={loading}
-            className="bg-gray-100 py-4 rounded-md active:bg-gray-200"
-          >
-            <View className="flex-row items-center justify-center">
-              <Ionicons name="create-outline" size={20} color="#26C6DA" />
-              <Text className="text-primary-400 font-semibold text-base ml-2">
-                Nhập địa chỉ thủ công
-              </Text>
-            </View>
-          </Pressable>
-        </View>
-      </View>
+            </Pressable>
+          </View>
+        </Pressable>
+      </Pressable>
     </Modal>
   );
 }

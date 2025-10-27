@@ -69,16 +69,15 @@ export default function HomeScreen() {
   };
 
   const handleManualInput = () => {
-    // Don't mark as dismissed - let user complete address selection
-    setShowPermissionModal(false);
+    // Don't hide modal, keep it visible in background
+    // User must complete address selection to proceed
     router.push("/(screens)/address-input" as any);
   };
 
   const handleModalDismiss = () => {
-    // User tries to dismiss without selecting location
-    // Modal will re-appear due to useEffect since location is still not set
-    setShowPermissionModal(false);
-    setUserDismissedModal(true);
+    // Don't allow dismissing - location is required
+    // Modal will stay visible
+    return;
   };
 
   const handleBannerPress = (banner: Banner) => {
