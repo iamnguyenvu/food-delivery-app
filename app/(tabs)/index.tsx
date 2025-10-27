@@ -18,6 +18,7 @@ export default function HomeScreen() {
   const [showPermissionModal, setShowPermissionModal] = useState(false);
   const scrollY = useRef(new Animated.Value(0)).current;
   const [headerMode, setHeaderMode] = useState<"full" | "searchOnly">("full");
+  const [userDismissedModal, setUserDismissedModal] = useState(false);
 
   const label = useMemo(
     () => address?.formatted || "Chọn vị trí giao hàng",
@@ -29,9 +30,15 @@ export default function HomeScreen() {
   const [selectedCategory, setSelectedCategory] = useState("1");
 
   // Show permission modal whenever location is not set
+  // Modal will persist until user either grants location or manually inputs address
   useEffect(() => {
     if (!location || !address?.formatted) {
+      // Always show modal if no location, regardless of previous dismissal
       setShowPermissionModal(true);
+      setUserDismissedModal(false);
+    } else {
+      // Has location, hide modal
+      setShowPermissionModal(false);
     }
   }, [location, address]);
 
@@ -52,22 +59,26 @@ export default function HomeScreen() {
     };
   }, [scrollY, headerMode]);
 
-  const handleLocationGranted = (
-    loc: { latitude: number; longitude: number },
-    addressText: string
-  ) => {
-    setAll({
-      location: loc,
-      address: {
-        formatted: addressText,
-      },
+  const handleLocationGranted = (grantedLocation: { latitude: number; longitude: number }, addr: string) => {
+    setAll({ 
+      location: grantedLocation, 
+      address: { formatted: addr, street: addr } 
     });
     setShowPermissionModal(false);
+    setUserDismissedModal(false);
   };
 
   const handleManualInput = () => {
+    // Don't mark as dismissed - let user complete address selection
     setShowPermissionModal(false);
     router.push("/(screens)/address-input" as any);
+  };
+
+  const handleModalDismiss = () => {
+    // User tries to dismiss without selecting location
+    // Modal will re-appear due to useEffect since location is still not set
+    setShowPermissionModal(false);
+    setUserDismissedModal(true);
   };
 
   const handleBannerPress = (banner: Banner) => {

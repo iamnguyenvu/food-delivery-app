@@ -15,6 +15,11 @@ import MapPicker from "./MapPicker";
 export default function LocationPickerScreen() {
   // Get saved location and address from global store
   const { location, address, setAll } = useLocationStore();
+  const { user } = useAuth();
+  const userId = user?.id;
+  
+  // Get saveAddress function
+  const { saveAddress: saveToDatabase } = useAddresses(userId);
 
   // Local state for current selected location
   const [loc, setLoc] = useState<Location | null>(location);
@@ -36,13 +41,18 @@ export default function LocationPickerScreen() {
       latitude: 10.8231,
       longitude: 106.6297,
     });
-  }, [loc]);
+  }, []);
 
   // Debounce map movements to avoid too many geocode requests
   const debRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const onMapChange = (l: Location) => {
+    // Clear previous timeout
     if (debRef.current) clearTimeout(debRef.current);
-    debRef.current = setTimeout(() => setLoc(l), 350);
+    
+    // Set new timeout for geocoding
+    debRef.current = setTimeout(() => {
+      setLoc(l);
+    }, 500); // Increased to 500ms for smoother experience
   };
 
   const onConfirm = async () => {
@@ -54,30 +64,47 @@ export default function LocationPickerScreen() {
       return;
     }
 
-    // Use reverse-geocoded address if available and valid
-    const finalAddr =
-      revAddr.formatted && revAddr.formatted.trim()
-        ? revAddr
-        : {
-            formatted: `${loc.latitude.toFixed(6)}, ${loc.longitude.toFixed(6)}`,
-          };
-
-    setAll({ location: loc, address: finalAddr });
-
-    const { user } = useAuth();
-
-    if (user?.id) {
-      const { saveAddress: saveToDatabase } = useAddresses(user?.id);
-      await saveToDatabase(loc, finalAddr, "other", false);
+    // ALWAYS use text address, never coordinates
+    // Priority: 1. Reverse geocoded, 2. Fallback to generic Vietnam address
+    let finalAddr;
+    
+    if (revAddr.formatted && revAddr.formatted.trim() && !revAddr.formatted.includes(',')) {
+      // Valid reverse geocoded address
+      finalAddr = revAddr;
+    } else if (revAddr.street || revAddr.formatted) {
+      // Has some address info
+      finalAddr = {
+        formatted: revAddr.formatted || revAddr.street || "Việt Nam",
+        street: revAddr.street || "Địa chỉ chưa xác định",
+      };
     } else {
-      await LocationStorage.saveAddress({
-        location: loc,
-        address: finalAddr,
-        timestamp: new Date().toISOString(),
-      });
+      // Fallback: Use generic Vietnam address with region info
+      finalAddr = {
+        formatted: "Việt Nam",
+        street: "Địa chỉ chưa xác định",
+      };
     }
 
-    router.push("/");
+    // Save to store
+    setAll({ location: loc, address: finalAddr });
+
+    // Save to database or local storage
+    try {
+      if (userId) {
+        await saveToDatabase(loc, finalAddr, "other", false);
+      } else {
+        await LocationStorage.saveAddress({
+          location: loc,
+          address: finalAddr,
+          timestamp: new Date().toISOString(),
+        });
+      }
+    } catch (error) {
+      console.error("Failed to save address:", error);
+      // Continue even if save fails
+    }
+
+    router.back();
   };
 
   const onSearch = async () => {
