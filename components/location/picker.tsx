@@ -104,7 +104,7 @@ export default function LocationPickerScreen() {
       // Continue even if save fails
     }
 
-    router.back();
+    router.push("/");
   };
 
   const onSearch = async () => {

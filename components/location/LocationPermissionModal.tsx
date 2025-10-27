@@ -1,3 +1,4 @@
+import LocationDeniedModal from "@/components/location/LocationDeniedModal";
 import { useAuth } from "@/src/contexts/AuthContext";
 import { useAddresses } from "@/src/hooks";
 import { formatAddress } from "@/src/hooks/useReverseGeocode";
@@ -30,6 +31,7 @@ export default function LocationPermissionModal({
   onManualInput,
 }: Props) {
   const [loading, setLoading] = useState(false);
+  const [showDeniedModal, setShowDeniedModal] = useState(false);
   
   // Hooks MUST be called at top level
   const { user } = useAuth();
@@ -39,6 +41,7 @@ export default function LocationPermissionModal({
     try {
       setLoading(true);
 
+      // Check if location services are enabled
       const enabled = await ExpoLocation.hasServicesEnabledAsync();
       if (!enabled) {
         Alert.alert(
@@ -49,16 +52,23 @@ export default function LocationPermissionModal({
         return;
       }
 
+      // Request permission - respect user choice
       const { status } = await ExpoLocation.requestForegroundPermissionsAsync();
+      
+      if (status === "denied") {
+        // User explicitly denied - show helpful modal
+        setLoading(false);
+        setShowDeniedModal(true);
+        return;
+      }
+      
       if (status !== "granted") {
-        Alert.alert(
-          "Quyền bị từ chối",
-          "Ứng dụng cần quyền truy cập vị trí để giao hàng."
-        );
+        // Permission not granted for other reasons
         setLoading(false);
         return;
       }
 
+      // Permission granted - get location
       const location = await ExpoLocation.getCurrentPositionAsync({
         accuracy: ExpoLocation.Accuracy.Balanced,
       });
@@ -92,64 +102,85 @@ export default function LocationPermissionModal({
   };
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      statusBarTranslucent
-    >
-      <View className="flex-1 bg-black/50 justify-center items-center px-6">
-        <View className="bg-white rounded-lg p-4 w-full max-w-sm">
-          {/* Icon */}
-          <View className="items-center my-4">
-            <View className="w-20 h-20 bg-primary-50 rounded-full items-center justify-center">
-              <Ionicons name="location" size={40} color="#26C6DA" />
-            </View>
-          </View>
-
-          {/* Title */}
-          <Text className="text-xl font-bold text-gray-800 text-center mb-2">
-            Cho phép truy cập vị trí
-          </Text>
-
-          {/* Description */}
-          <Text className="text-sm text-gray-600 text-center mb-6">
-            Để giao hàng chính xác, chúng tôi cần biết vị trí của bạn
-          </Text>
-
-          {/* Allow Location Button */}
-          <Pressable
-            onPress={handleAllowLocation}
-            disabled={loading}
-            className="bg-primary-400 py-4 rounded-md mb-3 active:bg-primary-500"
-          >
-            {loading ? (
-              <ActivityIndicator color="white" />
-            ) : (
-              <View className="flex-row items-center justify-center">
-                <Ionicons name="navigate" size={20} color="white" />
-                <Text className="text-white font-semibold text-base ml-2">
-                  Cho phép truy cập vị trí
-                </Text>
+    <>
+      {/* Main Location Permission Modal */}
+      <Modal
+        visible={visible}
+        transparent
+        animationType="fade"
+        statusBarTranslucent
+        onRequestClose={() => {
+          // Prevent dismissing with back button - location is required
+          return;
+        }}
+      >
+        <Pressable 
+          className="flex-1 bg-black/50 justify-center items-center px-6"
+          onPress={() => {
+            // Prevent dismissing by tapping outside - location is required
+            return;
+          }}
+        >
+          <Pressable onPress={(e) => e.stopPropagation()}>
+            <View className="bg-white rounded-lg p-4 w-full max-w-sm">
+              {/* Icon */}
+              <View className="items-center my-4">
+                <View className="w-20 h-20 bg-primary-50 rounded-full items-center justify-center">
+                  <Ionicons name="location" size={40} color="#26C6DA" />
+                </View>
               </View>
-            )}
-          </Pressable>
 
-          {/* Manual Input Button */}
-          <Pressable
-            onPress={onManualInput}
-            disabled={loading}
-            className="bg-gray-100 py-4 rounded-md active:bg-gray-200"
-          >
-            <View className="flex-row items-center justify-center">
-              <Ionicons name="create-outline" size={20} color="#26C6DA" />
-              <Text className="text-primary-400 font-semibold text-base ml-2">
-                Nhập địa chỉ thủ công
+              {/* Title */}
+              <Text className="text-xl font-bold text-gray-800 text-center mb-2">
+                Cho phép truy cập vị trí
               </Text>
+
+              {/* Description */}
+              <Text className="text-sm text-gray-600 text-center mb-6">
+                Để giao hàng chính xác, chúng tôi cần biết vị trí của bạn
+              </Text>
+
+              {/* Allow Location Button */}
+              <Pressable
+                onPress={handleAllowLocation}
+                disabled={loading}
+                className="bg-primary-400 py-4 rounded-md mb-3 active:bg-primary-500"
+              >
+                {loading ? (
+                  <ActivityIndicator color="white" />
+                ) : (
+                  <View className="flex-row items-center justify-center">
+                    <Ionicons name="navigate" size={20} color="white" />
+                    <Text className="text-white font-semibold text-base ml-2">
+                      Cho phép truy cập vị trí
+                    </Text>
+                  </View>
+                )}
+              </Pressable>
+
+              {/* Manual Input Button */}
+              <Pressable
+                onPress={onManualInput}
+                disabled={loading}
+                className="bg-gray-100 py-4 rounded-md active:bg-gray-200"
+              >
+                <View className="flex-row items-center justify-center">
+                  <Ionicons name="create-outline" size={20} color="#26C6DA" />
+                  <Text className="text-primary-400 font-semibold text-base ml-2">
+                    Nhập địa chỉ thủ công
+                  </Text>
+                </View>
+              </Pressable>
             </View>
           </Pressable>
-        </View>
-      </View>
-    </Modal>
+        </Pressable>
+      </Modal>
+
+      {/* Permission Denied Modal - overlays on top */}
+      <LocationDeniedModal 
+        visible={showDeniedModal}
+        onDismiss={() => setShowDeniedModal(false)}
+      />
+    </>
   );
 }

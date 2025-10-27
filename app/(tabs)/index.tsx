@@ -11,7 +11,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Animated, ScrollView } from "react-native";
-import { SafeAreaProvider } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
   const { address, location, setAll } = useLocationStore();
@@ -69,16 +68,15 @@ export default function HomeScreen() {
   };
 
   const handleManualInput = () => {
-    // Don't mark as dismissed - let user complete address selection
-    setShowPermissionModal(false);
+    // Don't hide modal, keep it visible in background
+    // User must complete address selection to proceed
     router.push("/(screens)/address-input" as any);
   };
 
   const handleModalDismiss = () => {
-    // User tries to dismiss without selecting location
-    // Modal will re-appear due to useEffect since location is still not set
-    setShowPermissionModal(false);
-    setUserDismissedModal(true);
+    // Don't allow dismissing - location is required
+    // Modal will stay visible
+    return;
   };
 
   const handleBannerPress = (banner: Banner) => {
@@ -117,49 +115,47 @@ export default function HomeScreen() {
         onLocationGranted={handleLocationGranted}
         onManualInput={handleManualInput}
       />
-      <SafeAreaProvider>
-        <ScrollView
-          className="flex-1 bg-gray-100"
-          stickyHeaderIndices={[1]}
-          keyboardShouldPersistTaps="handled"
-          onScroll={Animated.event(
-            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-            { useNativeDriver: false }
-          )}
-          scrollEventThrottle={16}
+      <ScrollView
+        className="flex-1 bg-gray-100"
+        stickyHeaderIndices={[1]}
+        keyboardShouldPersistTaps="handled"
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: false }
+        )}
+        scrollEventThrottle={16}
+      >
+        <Header location={label} mode={headerMode} onPressLocation={openPicker} />
+        <Header
+          location={label}
+          mode="searchOnly"
+          onPressLocation={openPicker}
+        />
+
+        <LinearGradient
+          colors={["#26C6DA", "#4DD0E1", "#80DEEA", "#B2EBF2", "#F3F4F6"]}
+          locations={[0, 0.15, 0.3, 0.5, 0.8]}
+          className="flex-1"
         >
-          <Header location={label} mode={headerMode} onPressLocation={openPicker} />
-          <Header
-            location={label}
-            mode="searchOnly"
-            onPressLocation={openPicker}
+          <BannerCarousel
+            banners={banners}
+            isLoading={isLoading}
+            onBannerPress={handleBannerPress}
           />
 
-          <LinearGradient
-            colors={["#26C6DA", "#4DD0E1", "#80DEEA", "#B2EBF2", "#F3F4F6"]}
-            locations={[0, 0.15, 0.3, 0.5, 0.8]}
-            className="flex-1"
-          >
-            <BannerCarousel
-              banners={banners}
-              isLoading={isLoading}
-              onBannerPress={handleBannerPress}
-            />
+          <CategoryGrid onSelectCategory={handleCategorySelect} />
 
-            <CategoryGrid onSelectCategory={handleCategorySelect} />
+          <TrumDealNgon
+            onViewMore={() => console.log("View more deals")}
+            onSelectDeal={(id) => console.log("Selected deal:", id)}
+          />
 
-            <TrumDealNgon
-              onViewMore={() => console.log("View more deals")}
-              onSelectDeal={(id) => console.log("Selected deal:", id)}
-            />
-
-            <CategoryList
-              selectedId={selectedCategory}
-              onSelectCategory={handleCategorySelect}
-            />
-          </LinearGradient>
-        </ScrollView>
-      </SafeAreaProvider>
+          <CategoryList
+            selectedId={selectedCategory}
+            onSelectCategory={handleCategorySelect}
+          />
+        </LinearGradient>
+      </ScrollView>
     </>
   );
 }
