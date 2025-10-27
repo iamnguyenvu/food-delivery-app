@@ -8,12 +8,12 @@ import { Ionicons } from "@expo/vector-icons";
 import * as ExpoLocation from "expo-location";
 import React, { useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Modal,
-  Pressable,
-  Text,
-  View,
+    ActivityIndicator,
+    Alert,
+    Modal,
+    Pressable,
+    Text,
+    View,
 } from "react-native";
 
 type Props = {
