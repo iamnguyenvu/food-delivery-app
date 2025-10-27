@@ -1,307 +1,269 @@
-<div align="center">
-  <h1>🍔 Food Delivery App</h1>
-  <p>A production-ready food delivery application built with React Native, Expo, and Supabase</p>
+﻿<div align="center">
+  <img src="./assets/images/icon.png" alt="DearU Food" width="120" height="120" />
   
-  [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org/)
-  [![React Native](https://img.shields.io/badge/React%20Native-0.81-61dafb.svg)](https://reactnative.dev/)
-  [![Expo SDK](https://img.shields.io/badge/Expo-54-000020.svg)](https://expo.dev/)
-  [![Supabase](https://img.shields.io/badge/Supabase-2.0-3ecf8e.svg)](https://supabase.com/)
-  [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+  #  DearU Food
+  
+  ### Modern Food Delivery Experience
+  
+  *Built with React Native, Expo & Supabase*
+  
+  [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+  [![React Native](https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactnative.dev/)
+  [![Expo](https://img.shields.io/badge/Expo-000020?style=for-the-badge&logo=expo&logoColor=white)](https://expo.dev/)
+  [![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
+  
+  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
+  [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)](docs/CONTRIBUTING.md)
+  
+  [ Documentation](docs/)  [ Quick Start](#-quick-start)  [ Contributing](docs/CONTRIBUTING.md)
+  
 </div>
 
 ---
 
-## 📋 Table of Contents
+##  Features
 
-- [Features](#-features)
-- [Tech Stack](#-tech-stack)
-- [Prerequisites](#-prerequisites)
-- [Getting Started](#-getting-started)
-- [Project Structure](#-project-structure)
-- [Environment Variables](#-environment-variables)
-- [Available Scripts](#-available-scripts)
-- [Documentation](#-documentation)
-- [Architecture](#-architecture)
-- [Security](#-security)
-- [Contributing](#-contributing)
-- [License](#-license)
+-  **Smart Home Screen** - GPS location, restaurant discovery, category filtering
+-  **Food Ordering** - Browse menus, manage cart, track orders, reorder favorites
+-  **User Management** - OAuth (Google/Github), profile settings, saved addresses
+-  **Location Services** - Auto-detect GPS, address search, interactive map picker
+-  **Real-time Updates** - Order status, push notifications, live tracking
+-  **Modern UI** - NativeWind/Tailwind CSS, smooth animations, responsive design
+-  **Cross-Platform** - iOS, Android, Web support with single codebase
+-  **Secure & Private** - Supabase Auth, Row Level Security, encrypted storage
 
 ---
 
-## ✨ Features
+##  Quick Start
 
-- 🏪 **Restaurant Discovery** - Browse restaurants with real-time data
-- 🍽️ **Menu Browsing** - View dishes with images, descriptions, and prices
-- 🛒 **Shopping Cart** - Add/remove items with quantity management
-- ❤️ **Favorites** - Save favorite dishes and restaurants
-- 📦 **Order Management** - Create and track orders
-- 🔔 **Notifications** - Real-time order updates
-- 👤 **Authentication** - Secure user authentication with Supabase Auth
-- 🎨 **Theme Support** - Light and dark mode
-- 📱 **Cross-Platform** - iOS, Android, and Web support
+### Prerequisites
 
----
+- Node.js 18+ & npm/yarn
+- Expo CLI: `npm install -g expo-cli`
+- [Supabase account](https://supabase.com) (free tier)
 
-## 🛠️ Tech Stack
-
-### Frontend
-- **[React Native](https://reactnative.dev/)** - Cross-platform mobile framework
-- **[Expo](https://expo.dev/)** - Development platform and tooling
-- **[TypeScript](https://www.typescriptlang.org/)** - Type-safe JavaScript
-- **[Expo Router](https://docs.expo.dev/router/introduction/)** - File-based navigation
-
-### State Management
-- **[Zustand](https://zustand-demo.pmnd.rs/)** - Lightweight state management
-- **[TanStack Query](https://tanstack.com/query)** - Data fetching and caching
-
-### Backend
-- **[Supabase](https://supabase.com/)** - Backend-as-a-Service
-  - PostgreSQL database
-  - Authentication
-  - Real-time subscriptions
-  - Row Level Security (RLS)
-
-### Form & Validation
-- **[React Hook Form](https://react-hook-form.com/)** - Form state management
-- **[Zod](https://zod.dev/)** - Schema validation
-
----
-
-## 📦 Prerequisites
-
-Before you begin, ensure you have the following installed:
-
-- **Node.js** 18.x or higher ([Download](https://nodejs.org/))
-- **npm** 9.x or higher (comes with Node.js)
-- **Git** ([Download](https://git-scm.com/))
-- **Expo Go** app on your mobile device ([iOS](https://apps.apple.com/app/expo-go/id982107779) | [Android](https://play.google.com/store/apps/details?id=host.exp.exponent))
-
-**Optional but recommended:**
-- **[Xcode](https://developer.apple.com/xcode/)** (for iOS development on macOS)
-- **[Android Studio](https://developer.android.com/studio)** (for Android development)
-
----
-
-## 🚀 Getting Started
-
-### 1. Clone the repository
+### Installation
 
 ```bash
+# Clone & install
 git clone https://github.com/iamnguyenvu/food-delivery-app.git
 cd food-delivery-app
-```
-
-### 2. Install dependencies
-
-```bash
 npm install
-```
 
-### 3. Setup Supabase
-
-Create a free account at [supabase.com](https://supabase.com) and create a new project.
-
-### 4. Configure environment variables
-
-```bash
+# Setup environment
 cp .env.example .env
-```
+# Add your Supabase credentials to .env:
+# EXPO_PUBLIC_SUPABASE_URL=your_url
+# EXPO_PUBLIC_SUPABASE_ANON_KEY=your_key
 
-Edit `.env` and add your Supabase credentials:
-
-```env
-PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
-PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
-```
-
-Get these values from: **Supabase Dashboard → Settings → API**
-
-### 5. Setup database
-
-1. Open **SQL Editor** in your Supabase dashboard
-2. Copy the contents of `docs/database-schema.sql`
-3. Paste and execute the SQL
-
-### 6. Start the development server
-
-```bash
+# Start development
 npm start
+
+# Run on platform
+npm run android    # Android
+npm run ios        # iOS (macOS only)
+npm run web        # Web browser
 ```
 
-Scan the QR code with **Expo Go** app to run on your device.
-
-**For detailed setup instructions, see [SETUP.md](SETUP.md)**
+>  **Need help?** Check [Setup Guide](docs/SETUP.md) for detailed instructions.
 
 ---
 
-## 📂 Project Structure
+##  Tech Stack
+
+### Frontend
+<p>
+  <img src="https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React Native" />
+  <img src="https://img.shields.io/badge/Expo_SDK_54-000020?style=for-the-badge&logo=expo&logoColor=white" alt="Expo" />
+  <img src="https://img.shields.io/badge/TypeScript_5.9-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/NativeWind_v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="NativeWind" />
+</p>
+
+### Backend & Services
+<p>
+  <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase" />
+  <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL" />
+  <img src="https://img.shields.io/badge/Google_Maps-4285F4?style=for-the-badge&logo=google-maps&logoColor=white" alt="Google Maps" />
+</p>
+
+### State & Tools
+<p>
+  <img src="https://img.shields.io/badge/Zustand-443E38?style=for-the-badge&logo=react&logoColor=white" alt="Zustand" />
+  <img src="https://img.shields.io/badge/TanStack_Query-FF4154?style=for-the-badge&logo=react-query&logoColor=white" alt="TanStack Query" />
+  <img src="https://img.shields.io/badge/React_Native_Maps-4285F4?style=for-the-badge&logo=google-maps&logoColor=white" alt="React Native Maps" />
+  <img src="https://img.shields.io/badge/Expo_Location-000020?style=for-the-badge&logo=expo&logoColor=white" alt="Expo Location" />
+</p>
+
+>  **Learn more:** [Architecture Documentation](docs/ARCHITECTURE.md)
+
+---
+
+##  Project Structure
 
 ```
 food-delivery/
-├── app/                          # Expo Router (file-based routing)
-│   ├── (tabs)/                  # Tab navigator
-│   │   ├── _layout.tsx          # Tabs configuration
-│   │   ├── index.tsx            # Home screen
-│   │   ├── orders.tsx           # Orders screen
-│   │   ├── favorites.tsx        # Favorites screen
-│   │   ├── notifications.tsx    # Notifications screen
-│   │   └── profile.tsx          # Profile screen
-│   ├── _layout.tsx              # Root layout
-│   └── modal.tsx                # Modal screens
-│
-├── src/                         # Source code
-│   ├── lib/
-│   │   └── supabase.ts         # Supabase client configuration
-│   ├── hooks/
-│   │   ├── index.ts            # Hooks barrel export
-│   │   └── useAuth.ts          # Authentication hook
-│   ├── store/
-│   │   └── cartStore.ts        # Shopping cart state (Zustand)
-│   └── types/
-│       └── index.ts            # TypeScript type definitions
-│
-├── components/                  # Reusable UI components
-│   ├── Themed.tsx              # Themed components
-│   ├── StyledText.tsx          # Text components
-│   └── ...
-│
-├── constants/                   # App constants
-│   └── Colors.ts               # Color palette
-│
-├── assets/                      # Static assets
-│   ├── images/                 # Images
-│   └── fonts/                  # Custom fonts
-│
-├── docs/                        # Documentation (git-ignored)
-│   ├── CHANGELOG.md            # Change history
-│   ├── SUPABASE_GUIDE.md       # Supabase integration guide
-│   ├── QUICK_REFERENCE.md      # Quick reference
-│   └── database-schema.sql     # Database schema
-│
-├── .env.example                # Environment variables template
-├── app.config.js               # Expo configuration
-├── tsconfig.json               # TypeScript configuration
-└── package.json                # Dependencies
+ app/                     # Expo Router (file-based routing)
+    (tabs)/             # Tab navigation
+       index.tsx       #  Home
+       orders.tsx      #  Orders
+       favorites.tsx   #  Favorites
+       profile.tsx     #  Profile
+    (screens)/          # Stack screens
+       auth/           # Authentication
+       location-*.tsx  # Location features
+    _layout.tsx         # Root layout
+
+ components/             # React components
+    common/            # Shared UI
+    index/             # Home components
+    location/          # Location features
+    profile/           # Profile components
+
+ src/
+    contexts/          # React contexts
+    hooks/             # Custom hooks
+    lib/               # Utils & services
+       supabase.ts    # Supabase client
+       geocoding.ts   # Geocoding
+    store/             # Zustand stores
+       authStore.ts
+       cartStore.ts
+       locationStore.ts
+    types/             # TypeScript types
+
+ assets/                # Images, fonts
+ docs/                  # Documentation
+    SETUP.md
+    ARCHITECTURE.md
+    API.md
+    CONTRIBUTING.md
+
+ Configuration
+     .env.example
+     app.json
+     tsconfig.json
+     tailwind.config.js
 ```
 
 ---
 
-## 🔐 Environment Variables
+##  Development
 
-Create a `.env` file in the root directory:
+### Commands
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `PUBLIC_SUPABASE_URL` | Your Supabase project URL | ✅ Yes |
-| `PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous/public key | ✅ Yes |
+| Command | Description |
+|---------|-------------|
+| `npm start` | Start Expo dev server |
+| `npm run android` | Run on Android |
+| `npm run ios` | Run on iOS (macOS) |
+| `npm run web` | Run in browser |
+| `npm run type-check` | Check TypeScript |
+| `npm run lint` | Run ESLint |
+| `npm run format` | Format with Prettier |
+| `npm start -- --clear` | Clear cache & start |
 
-**Note:** These keys are safe to expose in the client app. Security is handled by Row Level Security (RLS) policies in Supabase.
+### Workflow
 
----
+1. **Branch:** `git checkout -b feature/your-feature`
+2. **Develop:** Make changes & test
+3. **Check:** `npm run type-check && npm run lint`
+4. **Commit:** `git commit -m "feat: your feature"`
+5. **Push:** `git push origin feature/your-feature`
+6. **PR:** Open pull request
 
-## 📜 Available Scripts
-
-```bash
-# Start development server
-npm start
-
-# Start with cache cleared
-npm start -- --clear
-
-# Run on iOS simulator (macOS only)
-npm run ios
-
-# Run on Android emulator
-npm run android
-
-# Run on web browser
-npm run web
-
-# Type checking
-npx tsc --noEmit
-
-# Lint check
-npx expo lint
-```
+>  Use [Conventional Commits](https://www.conventionalcommits.org/) format.
 
 ---
 
-## 📚 Documentation
+##  Documentation
 
 | Document | Description |
 |----------|-------------|
-| [SETUP.md](SETUP.md) | Complete setup guide with troubleshooting |
-| [PRODUCTION_SETUP.md](PRODUCTION_SETUP.md) | Production deployment guide |
-| [docs/SUPABASE_GUIDE.md](docs/SUPABASE_GUIDE.md) | Supabase integration explained |
-| [docs/QUICK_REFERENCE.md](docs/QUICK_REFERENCE.md) | Quick reference cheat sheet |
-| [docs/CHANGELOG.md](docs/CHANGELOG.md) | Version history and changes |
+| [ Setup Guide](docs/SETUP.md) | Installation & configuration |
+| [ Architecture](docs/ARCHITECTURE.md) | Technical design |
+| [ API Reference](docs/API.md) | Backend endpoints |
+| [ Contributing](docs/CONTRIBUTING.md) | Contribution guide |
+| [ Changelog](docs/CHANGELOG.md) | Version history |
 
 ---
 
-## 🏗️ Architecture
+##  Contributing
 
-### Authentication Flow
-```
-User Input → useAuth Hook → Supabase Auth → JWT Token → Stored Securely
-```
+We welcome contributions! 
 
-### Data Flow
-```
-Component → React Query → Supabase Client → PostgreSQL → RLS Policies → Data Returned
-```
+**How to contribute:**
 
-### State Management
-```
-Global State (Zustand) ← → Components ← → Server State (React Query)
-```
+1.  Fork the repo
+2.  Create branch: `git checkout -b feature/amazing`
+3.  Make changes & commit: `git commit -m 'feat: amazing feature'`
+4.  Push: `git push origin feature/amazing`
+5.  Open Pull Request
 
----
+**Ways to help:**
+-  Report bugs
+-  Suggest features
+-  Improve docs
+-  Submit PRs
 
-## 🔒 Security
-
-- **Row Level Security (RLS)** - Database-level security policies
-- **JWT Authentication** - Secure token-based auth
-- **Environment Variables** - Sensitive data not in source code
-- **API Key Protection** - Public keys only, service keys server-side
+>  Read our [Contributing Guide](docs/CONTRIBUTING.md) for details.
 
 ---
 
-## 🤝 Contributing
+##  Team
 
-Contributions are welcome! Please follow these steps:
+**Nguyen Hoang Nguyen Vu** ([@iamnguyenvu](https://github.com/iamnguyenvu))
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+<p>
+  <a href="https://github.com/iamnguyenvu">
+    <img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" />
+  </a>
+  <a href="mailto:iamnguyenvu.gm@gmail.com">
+    <img src="https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Email" />
+  </a>
+</p>
 
 ---
 
-## 👨‍💻 Author
+##  License
 
-**Nguyen Hoang Nguyen Vu**
-- GitHub: [@iamnguyenvu](https://github.com/iamnguyenvu)
-- Repository: [food-delivery-app](https://github.com/iamnguyenvu/food-delivery-app)
+Licensed under the **MIT License**. See [LICENSE](LICENSE) for details.
+
+**Copyright  2025 DearU Food & Nguyen Vu**
 
 ---
 
-## 🙏 Acknowledgments
+##  Acknowledgments
 
-- [Expo Team](https://expo.dev/) for the amazing development platform
-- [Supabase Team](https://supabase.com/) for the excellent BaaS solution
-- [React Native Community](https://reactnative.dev/) for the framework
-- Design inspiration from popular food delivery apps
+Built with amazing open-source tools:
+
+<p align="center">
+  <a href="https://expo.dev"><img src="https://img.shields.io/badge/Expo-000020?style=for-the-badge&logo=expo&logoColor=white" alt="Expo" /></a>
+  <a href="https://supabase.com"><img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase" /></a>
+  <a href="https://nativewind.dev"><img src="https://img.shields.io/badge/NativeWind-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="NativeWind" /></a>
+  <a href="https://tanstack.com/query"><img src="https://img.shields.io/badge/TanStack_Query-FF4154?style=for-the-badge&logo=react-query&logoColor=white" alt="TanStack Query" /></a>
+  <a href="https://github.com/react-native-maps/react-native-maps"><img src="https://img.shields.io/badge/RN_Maps-4285F4?style=for-the-badge&logo=google-maps&logoColor=white" alt="React Native Maps" /></a>
+</p>
 
 ---
 
 <div align="center">
-  <p>Made with ❤️ and ☕</p>
-  <p>© 2025 iamnguyenvu. All rights reserved.</p>
+
+###  Star Us!
+
+If you find this project helpful, please give it a star!
+
+[![GitHub stars](https://img.shields.io/github/stars/iamnguyenvu/food-delivery-app?style=social)](https://github.com/iamnguyenvu/food-delivery-app/stargazers)
+
+---
+
+<div align="center">
+
+  **Made with ❤️ and ☕**
+
+  **© 2025 [DearU Food](https://github.com/iamnguyenvu/food-delivery-app). All rights reserved**
+
+</div>
+
+[ Back to Top](#-dearu-food)
+
 </div>
