@@ -6,25 +6,27 @@ import { Platform } from "react-native";
 import { useClientOnlyValue } from "@/components/useClientOnlyValue";
 import { useColorScheme } from "@/components/useColorScheme";
 import Colors from '@/constants/Colors';
+import { useLanguage } from '@/src/hooks/useLanguage';
 import { useTheme } from '@react-navigation/native';
 
 
-const ICONS: Record<string, { on: keyof typeof Ionicons.glyphMap; off: keyof typeof Ionicons.glyphMap; title: string }> = {
-  index: { on: "home", off: "home-outline", title: "Home" },
-  orders: { on: "receipt", off: "receipt-outline", title: "My Order" },
-  favorites: { on: "heart", off: "heart-outline", title: "Favorites" },
-  notifications: { on: "mail", off: "mail-outline", title: "Notifications", },
-  profile: { on: "person", off: "person-outline", title: "Account" },
+const ICONS: Record<string, { on: keyof typeof Ionicons.glyphMap; off: keyof typeof Ionicons.glyphMap; title: {vi: string, en: string} }> = {
+  index: { on: "home", off: "home-outline", title: {vi: "Trang chủ", en: "Home"} },
+  orders: { on: "receipt", off: "receipt-outline", title: {vi: "Đơn hàng", en: "My Order"} },
+  favorites: { on: "heart", off: "heart-outline", title: { vi: "Yêu thích",   en: "Favorites" }},
+  notifications: { on: "mail", off: "mail-outline", title: { vi: "Thông báo",   en: "Notifications" }},
+  profile: { on: "person", off: "person-outline", title: { vi: "Tài khoản",   en: "Account" }},
 };
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const theme = useTheme();
+  const {lang} = useLanguage()
 
   return (
     <Tabs
       screenOptions={({route}) => {
-        const cfg = ICONS[route.name] ?? {on: "ellipse", off: "ellipse-outline", title: route.name}
+        const cfg = ICONS[route.name] ?? {on: "ellipse", off: "ellipse-outline", title: {vi: route.name, en: route.name}}
         return {
           tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
           // tabBarInactiveTintColor: Colors[colorScheme ?? "light"].tint,
@@ -35,7 +37,7 @@ export default function TabLayout() {
           tabBarIcon: ({color, size, focused}) => {
             return <Ionicons name={(focused ? cfg.on : cfg.off) as any} size={size} color={color} />
           },
-          tabBarLabel: cfg.title,
+          tabBarLabel: cfg.title[lang],
           tabBarStyle: {
             height: Platform.select({ ios: 68, android: 64, default: 64 }),
             // paddingBottom: Platform.select({ ios: 18, android: 10, default: 12 }),
@@ -52,7 +54,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"   
         options={{
-          title: ICONS.index.title,
+          title: ICONS.index.title[lang],
           headerShown: false,
           // headerRight: () => (
           //   <Link href="/modal" asChild>
