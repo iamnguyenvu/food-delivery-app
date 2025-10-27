@@ -5,17 +5,20 @@ import type { Address } from "../types/location";
 export function formatAddress(
   item?: ExpoLocation.LocationGeocodedAddress
 ): Address {
-  if (!item) return { formatted: "" };
+  if (!item) return { formatted: "Việt Nam", street: "Địa chỉ chưa xác định" };
 
   // Build address string from most specific to general
   // Format: street number + street, ward, district, city
   const parts: string[] = [];
   
   // Street address (most specific)
+  let streetPart = "";
   if (item.streetNumber && item.street) {
-    parts.push(`${item.streetNumber} ${item.street}`);
+    streetPart = `${item.streetNumber} ${item.street}`;
+    parts.push(streetPart);
   } else if (item.name || item.street) {
-    parts.push(item.name || item.street!);
+    streetPart = item.name || item.street!;
+    parts.push(streetPart);
   }
   
   // Ward/Subregion (avoid duplicate with district)
@@ -32,15 +35,21 @@ export function formatAddress(
   if (item.city || item.region) {
     parts.push(item.city || item.region!);
   }
+  
+  // Always add country if available
+  if (item.country) {
+    parts.push(item.country);
+  }
 
   const formatted = parts.filter(Boolean).join(", ");
 
+  // If still empty, provide fallback
   return {
-    formatted: formatted || "",
-    street: item.name || item.street || undefined,
+    formatted: formatted || item.country || "Việt Nam",
+    street: streetPart || item.name || item.street || "Địa chỉ chưa xác định",
     district: (item.district || item.subregion) ?? undefined,
     city: (item.city || item.region) ?? undefined,
-    country: item.country ?? undefined,
+    country: item.country ?? "Vietnam",
   };
 }
 
@@ -68,21 +77,17 @@ export function useReverseGeocode(lat?: number, lng?: number) {
 
         const formatted = formatAddress(res[0]);
         
-        // If geocoding returned empty, fallback to coordinates
-        if (!formatted.formatted) {
-          setAdress({ 
-            formatted: `${lat.toFixed(6)}, ${lng.toFixed(6)}` 
-          });
-        } else {
-          setAdress(formatted);
-        }
+        // Geocoding successful - always has a text address now
+        setAdress(formatted);
       } catch (e: any) {
         if (!alive) return;
         setErr(String(e?.message || e));
 
-        // On error, show coordinates as fallback
+        // On error, use Vietnam as fallback (never show coordinates)
         setAdress({ 
-          formatted: `${lat.toFixed(6)}, ${lng.toFixed(6)}` 
+          formatted: "Việt Nam",
+          street: "Địa chỉ chưa xác định",
+          country: "Vietnam"
         });
       } finally {
         if (alive) setLoading(false);

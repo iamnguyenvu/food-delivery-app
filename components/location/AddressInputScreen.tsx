@@ -77,15 +77,20 @@ export default function AddressInputScreen() {
     try {
       setSearching(true);
 
-      // Request location permission first
-      const { status } = await ExpoLocation.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert(
-          "Quyền truy cập vị trí",
-          "Cần cấp quyền truy cập vị trí để tìm kiếm địa chỉ."
-        );
-        setSearching(false);
-        return;
+      // Check and request permission for geocoding
+      const { status: existingStatus } = await ExpoLocation.getForegroundPermissionsAsync();
+      
+      if (existingStatus !== 'granted') {
+        const { status: newStatus } = await ExpoLocation.requestForegroundPermissionsAsync();
+        
+        if (newStatus !== 'granted') {
+          Alert.alert(
+            'Cần quyền truy cập',
+            'Ứng dụng cần quyền truy cập vị trí để tìm kiếm địa chỉ. Vui lòng cấp quyền trong Cài đặt.'
+          );
+          setSearching(false);
+          return;
+        }
       }
 
       // Forward geocode with Vietnam region preference

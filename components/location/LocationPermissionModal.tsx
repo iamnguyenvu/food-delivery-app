@@ -101,7 +101,7 @@ export default function LocationPermissionModal({
       <View className="flex-1 bg-black/50 justify-center items-center px-6">
         <View className="bg-white rounded-lg p-4 w-full max-w-sm">
           {/* Icon */}
-          <View className="items-center mb-4">
+          <View className="items-center my-4">
             <View className="w-20 h-20 bg-primary-50 rounded-full items-center justify-center">
               <Ionicons name="location" size={40} color="#26C6DA" />
             </View>

@@ -3,7 +3,6 @@ import { Tabs } from "expo-router";
 import React from "react";
 import { Platform } from "react-native";
 
-import { useClientOnlyValue } from "@/components/useClientOnlyValue";
 import { useColorScheme } from "@/components/useColorScheme";
 import Colors from '@/constants/Colors';
 import { useLanguage } from '@/src/hooks/useLanguage';
@@ -33,7 +32,7 @@ export default function TabLayout() {
           // tabBarBackground: Colors.light.background,
           // Disable the static render of the header on web
           // to prevent a hydration error in React Navigation v6.
-          headerShown: useClientOnlyValue(false, true),
+          headerShown: false,
           tabBarIcon: ({color, size, focused}) => {
             return <Ionicons name={(focused ? cfg.on : cfg.off) as any} size={size} color={color} />
           },
@@ -76,7 +75,7 @@ export default function TabLayout() {
       <Tabs.Screen name="orders" />
       <Tabs.Screen name="favorites" />
       <Tabs.Screen name="notifications" />
-      <Tabs.Screen name="profile" options={{headerShown: false}}/>
+      <Tabs.Screen name="profile" />
     </Tabs>
   );
 }
