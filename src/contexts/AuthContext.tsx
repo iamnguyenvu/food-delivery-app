@@ -1,12 +1,15 @@
 import type { Session, User } from "@supabase/supabase-js";
 import {
-    createContext,
-    useContext,
-    useEffect,
-    useState,
-    type ReactNode,
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
 } from "react";
 import { supabase } from "../lib/supabase";
+
+type OAuthResponse = Awaited<ReturnType<typeof supabase.auth.signInWithOAuth>>;
+type OAuthData = OAuthResponse["data"];
 
 type AuthContextType = {
   user: User | null;
@@ -15,6 +18,8 @@ type AuthContextType = {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  signInWithGoogle: () => Promise<OAuthData>;
+  signInWithGithub: () => Promise<OAuthData>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -67,9 +72,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) throw error;
   };
 
+  const signInWithGoogle = async () => {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: "fooddelivery://auth/callback",
+        },
+      });
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error("Google sign in error:", error);
+      throw error;
+    }
+  };
+
+  const signInWithGithub = async () => {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "github",
+        options: {
+          redirectTo: "fooddelivery://auth/callback",
+        },
+      });
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error("Github sign in error:", error);
+      throw error;
+    }
+  };
+
   return (
     <AuthContext.Provider
-      value={{ user, session, loading, signIn, signUp, signOut }}
+      value={{
+        user,
+        session,
+        loading,
+        signIn,
+        signUp,
+        signOut,
+        signInWithGoogle,
+        signInWithGithub,
+      }}
     >
       {children}
     </AuthContext.Provider>

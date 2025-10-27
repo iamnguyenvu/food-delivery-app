@@ -2,21 +2,29 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
-    Image,
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    ScrollView,
-    Text,
-    TextInput,
-    View,
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useAuth } from "@/src/contexts/AuthContext";
+import * as WebBrowser from "expo-web-browser";
+
+// Required for OAuth to work properly
+WebBrowser.maybeCompleteAuthSession();
 
 export default function LoginScreen() {
+  const { signInWithGoogle, signInWithGithub } = useAuth();
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [showPasswordInput, setShowPasswordInput] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const isPhoneValid = phone.length === 10 && /^\d+$/.test(phone);
   const canContinue = showPasswordInput
@@ -44,13 +52,63 @@ export default function LoginScreen() {
   };
 
   const handleGoogleLogin = async () => {
-    // Implement later Google OAuth
-    console.log("Login with Google");
+    try {
+      setIsLoading(true);
+      const { url } = await signInWithGoogle();
+      
+      if (!url) {
+        throw new Error("No URL returned from OAuth");
+      }
+
+      // Open OAuth URL in browser
+      const result = await WebBrowser.openAuthSessionAsync(
+        url,
+        "fooddelivery://auth/callback"
+      );
+
+      if (result.type === "success") {
+        // Session will be handled by AuthContext listener
+        router.replace("/(tabs)");
+      }
+    } catch (error: any) {
+      console.error("Google login error:", error);
+      Alert.alert(
+        "Lỗi đăng nhập",
+        error.message || "Không thể đăng nhập bằng Google"
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleGithubLogin = async () => {
-    // Implement later Github OAuth
-    console.log("Login with Github");
+    try {
+      setIsLoading(true);
+      const { url } = await signInWithGithub();
+      
+      if (!url) {
+        throw new Error("No URL returned from OAuth");
+      }
+
+      // Open OAuth URL in browser
+      const result = await WebBrowser.openAuthSessionAsync(
+        url,
+        "fooddelivery://auth/callback"
+      );
+
+      if (result.type === "success") {
+        // Session will be handled by AuthContext listener
+        router.replace("/(tabs)");
+      }
+    } catch (error: any) {
+      console.error("Github login error:", error);
+      Alert.alert(
+        "Lỗi đăng nhập",
+        error.message || "Không thể đăng nhập bằng Github"
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -144,17 +202,17 @@ export default function LoginScreen() {
             {/* Continue Button */}
             <Pressable
               onPress={handleContinue}
-              disabled={!canContinue}
+              disabled={!canContinue || isLoading}
               className={`py-4 rounded-md items-center mb-3 ${
-                canContinue ? "bg-primary-400" : "bg-gray-300"
+                canContinue && !isLoading ? "bg-primary-400" : "bg-gray-300"
               }`}
             >
               <Text
                 className={`font-semibold text-base ${
-                  canContinue ? "text-white" : "text-gray-500"
+                  canContinue && !isLoading ? "text-white" : "text-gray-500"
                 }`}
               >
-                Tiếp tục
+                {isLoading ? "Đang xử lý..." : "Tiếp tục"}
               </Text>
             </Pressable>
 
@@ -180,7 +238,10 @@ export default function LoginScreen() {
               {/* Google */}
               <Pressable
                 onPress={handleGoogleLogin}
-                className="flex-row items-center justify-center border border-gray-300 rounded-md py-3 bg-white active:bg-gray-50"
+                disabled={isLoading}
+                className={`flex-row items-center justify-center border border-gray-300 rounded-md py-3 ${
+                  isLoading ? "bg-gray-100" : "bg-white active:bg-gray-50"
+                }`}
               >
                 <Ionicons name="logo-google" size={20} color="#DB4437" />
                 <Text className="ml-3 font-medium text-gray-700 text-base">
@@ -191,7 +252,10 @@ export default function LoginScreen() {
               {/* Github */}
               <Pressable
                 onPress={handleGithubLogin}
-                className="flex-row items-center justify-center border border-gray-300 rounded-md py-3 bg-white active:bg-gray-50"
+                disabled={isLoading}
+                className={`flex-row items-center justify-center border border-gray-300 rounded-md py-3 ${
+                  isLoading ? "bg-gray-100" : "bg-white active:bg-gray-50"
+                }`}
               >
                 <Ionicons name="logo-github" size={20} color="black" />
                 <Text className="ml-3 font-medium text-gray-700 text-base">
