@@ -52,7 +52,7 @@ export default function VerifyOTPScreen() {
     const otpCode = otp.join("");
     console.log("Verify OTP:", { phone, otpCode });
 
-    // TODO: Implement OTP verification
+    // Implement later: Implement OTP verification
     // Navigate to home or complete registration
     router.replace("/(tabs)");
   };

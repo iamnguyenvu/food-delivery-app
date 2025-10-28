@@ -5,4 +5,7 @@ export { trackBannerClick, trackBannerImpression, useBanners } from './useBanner
 export type { UseBannersResult } from './useBanners';
 export { useCategories, useDeals } from './useCategories';
 export type { Category, Deal } from './useCategories';
+export { trackCollectionClick, trackCollectionView, useCollections } from './useCollections';
+export type { Collection } from './useCollections';
+
 
