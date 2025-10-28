@@ -176,20 +176,14 @@ export default function CollectionsSection({
   }
 
   return (
-    <Card className="mx-2 my-3">
-      {/* Header */}
-      <View className="flex-row items-center justify-between px-3 pt-4 pb-3">
-        <Text className="text-primary-400 text-base font-medium">Bộ sưu tập</Text>
-
-        <Pressable
-          onPress={handleViewAll}
-          className="flex-row items-center active:opacity-70"
-        >
-          <Text className="text-gray-600 text-xs font-normal mr-1">Xem tất cả</Text>
-          <Ionicons name="chevron-forward" size={16} color="#9E9E9E" />
-        </Pressable>
-      </View>
-
+    <Card 
+      className="mx-2 my-3"
+      header={{
+        title: "Bộ sưu tập",
+        onViewAllPress: handleViewAll,
+        titleSize: "text-base",
+      }}
+    >
       {/* Horizontal scroll list */}
       <View className="px-2 pb-4">
         <ScrollView

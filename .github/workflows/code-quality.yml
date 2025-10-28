@@ -1,0 +1,67 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [main, develop, nguyenvu]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  quality-checks:
+    name: Code Quality Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run ESLint with annotations
+        run: |
+          npm run lint 2>&1 | tee eslint-report.txt || true
+        continue-on-error: true
+        
+      - name: TypeScript Check
+        run: npm run type-check
+        
+      - name: Check for TODO comments
+        run: |
+          echo "Checking for TODO/FIXME comments..."
+          grep -r "TODO\|FIXME" --include="*.ts" --include="*.tsx" . || echo "No TODO/FIXME found"
+        continue-on-error: true
+        
+      - name: Check bundle size (if configured)
+        run: |
+          echo "Bundle size check placeholder - configure metro-bundler stats"
+        continue-on-error: true
+
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Run npm audit
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
+        
+      - name: Check for outdated packages
+        run: npm outdated || true
+        continue-on-error: true
