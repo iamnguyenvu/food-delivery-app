@@ -203,14 +203,8 @@ export default function TrumDealNgon({
     );
   }
 
-  // Don't hide if no deals - show sample data instead
-  // if (deals.length === 0) {
-  //   return null;
-  // }
-
   return (
     <Card className="mx-2 mt-3">
-      {/* Header with Gradient */}
       <LinearGradient
         colors={["#26C6DA", "#4DD0E1", "#80DEEA", "#B2EBF2", "#FFFFFF"]}
         locations={[0, 0.15, 0.3, 0.5, 0.8]}
@@ -218,12 +212,9 @@ export default function TrumDealNgon({
         style={{ borderRadius: 12 }}
       >
         <View className="flex-row items-center justify-between">
-          {/* Title */}
           <Text className="text-white text-base font-black my-2">
             TRÙM DEAL NGON
           </Text>
-
-          {/* View More Link */}
           <Pressable
             onPress={onViewMore}
             className="flex-row items-center active:opacity-70"
@@ -235,15 +226,12 @@ export default function TrumDealNgon({
           </Pressable>
         </View>
 
-        {/* Content Body - 2 Column Layout */}
-        <View className=" rounded-md" style={{ height: 220 }}>
+        <View className="rounded-md" style={{ height: 220 }}>
           <View className="flex-row h-full gap-1">
-            {/* Left Column - 3/10 width - Single Large Card */}
             <Card className="flex-[3] mr-2" style={{ height: "89%" }}>
               {deals[0] && renderLargeCard(deals[0])}
             </Card>
 
-            {/* Right Column - 7/10 width - 2 Stacked Cards */}
             <View className="flex-[7]" style={{ gap: 10 }}>
               <Card style={{ height: "42.5%", marginRight: 0 }}>
                 {deals[1] && renderSmallCard(deals[1])}
