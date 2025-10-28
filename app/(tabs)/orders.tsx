@@ -103,7 +103,7 @@ export default function OrderScreen() {
     return (
         <View className="flex-1 bg-white pt-10">
             <View className="px-5 pb-3">
-                <Text className="text-2xl font-bold text-gray-900">Đơn hàng</Text>
+                <Text lightColor="#000" darkColor="#fff" className={"text-2xl font-bold"}></Text>
             </View>
 
             <TabsUI activeTab={activeTab} onChange={setActiveTab} />
@@ -195,12 +195,13 @@ function TabsUI({
                         color={activeTab === tab.key ? "#26C6DA" : "#7E7E7E"}
                     />
                     <Text
-                        className={`text-xs mt-1 ${
-                            activeTab === tab.key ? "text-primary-400 font-bold" : "text-gray-500"
-                        }`}
+                        lightColor={activeTab === tab.key ?"#26C6DA":"#555"}
+                        darkColor={activeTab === tab.key ?"#26C6DA":"#bbb"}
+                        className={`text-xs mt-1 ${activeTab === tab.key ? "font-bold": ""}`}
                     >
                         {tab.key}
                     </Text>
+
                     {activeTab === tab.key && (
                         <View className="h-1 w-8 bg-primary-400 mt-1 rounded-full" />
                     )}
@@ -215,7 +216,7 @@ function EmptyTabView({ tab }: { tab: string }) {
     return (
         <View className="items-center justify-center mt-20">
             <Ionicons name="receipt-outline" size={70} color="#26C6DA" />
-            <Text className="text-lg font-bold text-gray-800 text-center mt-4">
+            <Text lightColor={"#000"} darkColor={"#fff"} className={"text-lg font-bold text-center mt-4"}>
                 {tab} chưa có dữ liệu
             </Text>
         </View>
@@ -229,9 +230,9 @@ function OrderCard({ order }: { order: Order }) {
     return (
         <View className="bg-white rounded-xl p-4 shadow-sm mb-4 border border-gray-100">
             <Text
-                className={`text-xs font-bold mb-2 ${
-                    isDelivering ? "text-primary-400" : "text-success-400"
-                }`}
+                lightColor={isDelivering ? "#26C6DA" : "#2E7D32"}
+                darkColor={isDelivering ? "#26C6DA" : "#81C784"}
+                className="text-xs font-bold mb-2"
             >
                 {order.status}
             </Text>
@@ -243,36 +244,32 @@ function OrderCard({ order }: { order: Order }) {
                 />
 
                 <View className="flex-1">
-                    <Text className="font-bold text-[15px]" numberOfLines={1}>
+                    <Text lightColor="#000" darkColor="#fff" className="font-bold text-[15px]" numberOfLines={1}>
                         {order.items[0].name}
                     </Text>
 
-                    <Text className="text-gray-600 text-xs mt-1">
+
+                    <Text lightColor="#444" darkColor="#ccc" className="text-xs mt-1">
                         {order.items[0].quantity} món • {order.total.toLocaleString()}đ
                     </Text>
 
+
                     {isDelivering ? (
-                        <>
-                            {/*Estimated time*/}
-                            <Text className="text-[#26C6DA] text-xs mt-1">
-                                Dự kiến giao lúc: {
-                                new Date(
-                                    order.date.getTime() + order.deliveryEstimate * 60000
-                                ).toLocaleTimeString("vi-VN", {
-                                    hour: "2-digit",
-                                    minute: "2-digit"
-                                })
-                            }
-                            </Text>
-                        </>
+                        <Text lightColor="#26C6DA" darkColor="#26C6DA" className="text-xs mt-1">
+                            Dự kiến giao lúc: {
+                            new Date(order.date.getTime() + order.deliveryEstimate * 60000)
+                                .toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })
+                        }
+                        </Text>
                     ) : (
-                        <Text className="text-green-600 text-xs mt-1">
+                        <Text lightColor="#2E7D32" darkColor="#81C784" className="text-xs mt-1">
                             Đã giao lúc: {order.date.toLocaleTimeString("vi-VN", {
                             hour: "2-digit",
-                            minute: "2-digit"
+                            minute: "2-digit",
                         })}
                         </Text>
                     )}
+
                 </View>
             </View>
         </View>
@@ -283,7 +280,7 @@ function OrderCard({ order }: { order: Order }) {
 function SuggestionSection({ foods }: { foods: FoodSuggestion[] }) {
     return (
         <View className="mt-8">
-            <Text className="font-bold text-lg text-gray-900 mb-3">
+            <Text lightColor="#000" darkColor="#fff" className="font-bold text-lg mb-3">
                 Có thể bạn cũng thích
             </Text>
 
@@ -297,10 +294,13 @@ function SuggestionSection({ foods }: { foods: FoodSuggestion[] }) {
                         className="w-20 h-20 rounded-xl mr-3"
                     />
                     <View className="flex-1">
-                        <Text className="font-semibold text-[15px]">{item.name}</Text>
-                        <Text className="text-gray-500 text-xs mt-1">
+                        <Text lightColor="#000" darkColor="#fff" className="font-semibold text-[15px]">
+                            {item.name}
+                        </Text>
+                        <Text lightColor="#26C6DA" darkColor="#26C6DA" className="text-xs mt-1">
                             ⭐ {item.rating} • {item.distance}
                         </Text>
+
                     </View>
                 </View>
             ))}
