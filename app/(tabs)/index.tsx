@@ -1,6 +1,7 @@
 ﻿import BannerCarousel from "@/components/index/BannerCarousel";
 import CategoryGrid from "@/components/index/CategoryGrid";
 import CategoryList from "@/components/index/CategoryList";
+import CollectionsSection from "@/components/index/CollectionsSection";
 import Header from "@/components/index/Header";
 import TrumDealNgon from "@/components/index/TrumDealNgon";
 import LocationPermissionModal from "@/components/location/LocationPermissionModal";
@@ -149,6 +150,8 @@ export default function HomeScreen() {
             onViewMore={() => console.log("View more deals")}
             onSelectDeal={(id) => console.log("Selected deal:", id)}
           />
+
+          <CollectionsSection maxItems={6} />
 
           <CategoryList
             selectedId={selectedCategory}

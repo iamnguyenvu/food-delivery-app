@@ -27,7 +27,7 @@ export default function CategoryList({
   onSelectCategory,
 }: CategoryListProps) {
   return (
-    <View className="mt-2">
+    <View className="my-2">
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}

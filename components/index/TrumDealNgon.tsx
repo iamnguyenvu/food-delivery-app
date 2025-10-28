@@ -209,12 +209,12 @@ export default function TrumDealNgon({
   // }
 
   return (
-    <Card className="mx-2 mt-2">
+    <Card className="mx-2 mt-3">
       {/* Header with Gradient */}
       <LinearGradient
         colors={["#26C6DA", "#4DD0E1", "#80DEEA", "#B2EBF2", "#FFFFFF"]}
         locations={[0, 0.15, 0.3, 0.5, 0.8]}
-        className="rounded-t-md p-2"
+        className="rounded-t-md p-2 pb-0"
         style={{ borderRadius: 12 }}
       >
         <View className="flex-row items-center justify-between">
@@ -245,10 +245,10 @@ export default function TrumDealNgon({
 
             {/* Right Column - 7/10 width - 2 Stacked Cards */}
             <View className="flex-[7]" style={{ gap: 10 }}>
-              <Card style={{ height: "42.5%" }}>
+              <Card style={{ height: "42.5%", marginRight: 0 }}>
                 {deals[1] && renderSmallCard(deals[1])}
               </Card>
-              <Card style={{ height: "42.5%" }}>
+              <Card style={{ height: "42.5%", marginRight: 0 }}>
                 {deals[2] && renderSmallCard(deals[2])}
               </Card>
             </View>
