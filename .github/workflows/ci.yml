@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main, develop, nguyenvu]
+    branches: ['**']
   pull_request:
-    branches: [main, develop]
+    branches: ['**']
 
 jobs:
   lint-and-typecheck:
