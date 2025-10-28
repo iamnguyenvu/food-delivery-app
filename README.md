@@ -15,7 +15,10 @@
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
   [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)](docs/CONTRIBUTING.md)
   
-  [ Documentation](docs/)  [ Quick Start](#-quick-start)  [ Contributing](docs/CONTRIBUTING.md)
+  ![CI Status](https://github.com/iamnguyenvu/food-delivery-app/workflows/CI/badge.svg)
+  ![Code Quality](https://github.com/iamnguyenvu/food-delivery-app/workflows/Code%20Quality/badge.svg)
+  
+  [ Documentation](docs/)  [ Quick Start](#-quick-start)  [ Contributing](docs/CONTRIBUTING.md)  [🔧 CI/CD](.github/workflows/)
   
 </div>
 
