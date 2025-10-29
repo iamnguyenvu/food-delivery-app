@@ -14,7 +14,7 @@ import "../global.css";
 
 import { useColorScheme } from "@/components/useColorScheme";
 import { AuthProvider } from "@/src/contexts/AuthContext";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import { initialWindowMetrics, SafeAreaProvider } from "react-native-safe-area-context";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -68,7 +68,7 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
   return (
-    <SafeAreaProvider>
+    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme} >

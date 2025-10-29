@@ -1,12 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from "expo-router";
-import React from "react";
+import React, { useMemo } from "react";
 import { Platform } from "react-native";
 
 import { useColorScheme } from "@/components/useColorScheme";
 import Colors from '@/constants/Colors';
 import { useLanguage } from '@/src/hooks/useLanguage';
 import { useTheme } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 
 const ICONS: Record<string, { on: keyof typeof Ionicons.glyphMap; off: keyof typeof Ionicons.glyphMap; title: {vi: string, en: string} }> = {
@@ -20,7 +21,13 @@ const ICONS: Record<string, { on: keyof typeof Ionicons.glyphMap; off: keyof typ
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const theme = useTheme();
-  const {lang} = useLanguage()
+  const {lang} = useLanguage();
+  const insets = useSafeAreaInsets();
+
+  const baseHeight = useMemo(
+    () => Platform.select({ ios: 56, android: 56, default: 56 })!,
+    []
+  );
 
   return (
     <Tabs
@@ -28,23 +35,19 @@ export default function TabLayout() {
         const cfg = ICONS[route.name] ?? {on: "ellipse", off: "ellipse-outline", title: {vi: route.name, en: route.name}}
         return {
           tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
-          // tabBarInactiveTintColor: Colors[colorScheme ?? "light"].tint,
-          // tabBarBackground: Colors.light.background,
-          // Disable the static render of the header on web
-          // to prevent a hydration error in React Navigation v6.
           headerShown: false,
           tabBarIcon: ({color, size, focused}) => {
             return <Ionicons name={(focused ? cfg.on : cfg.off) as any} size={size} color={color} />
           },
           tabBarLabel: cfg.title[lang],
           tabBarStyle: {
-            height: Platform.select({ ios: 68, android: 64, default: 64 }),
-            // paddingBottom: Platform.select({ ios: 18, android: 10, default: 12 }),
-            // paddingTop: Platform.select({ ios: 8, android: 6, default: 6 }),
-            marginBottom: Platform.select({ ios: 18, android: 10, default: 12 }),
+            height: baseHeight + insets.bottom,
+            paddingBottom: Math.max(insets.bottom, 8),
+            paddingTop: 6,
             backgroundColor: Colors.light.background ?? "#FFFFFF",
             borderWidth: 0,
-            borderColor: "transparent"
+            borderColor: "transparent",
+            elevation: 12
           },
           tabBarHideOnKeyboard: true,
         }
@@ -55,20 +58,6 @@ export default function TabLayout() {
         options={{
           title: ICONS.index.title[lang],
           headerShown: false,
-          // headerRight: () => (
-          //   <Link href="/modal" asChild>
-          //     <Pressable>
-          //       {({ pressed }) => (
-          //         <Ionicons
-          //           name="information-circle-outline"
-          //           size={25}
-          //           color={Colors[colorScheme ?? "light"].text}
-          //           style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
-          //         />
-          //       )}
-          //     </Pressable>
-          //   </Link>
-          // ),
         }}
       />
 
