@@ -6,10 +6,7 @@ export interface Collection {
   name: string;
   slug: string;
   description?: string;
-  icon?: string;
-  image?: string;
-  bg_color?: string;
-  text_color?: string;
+  image: string; // Required - always use image
   display_order?: number;
   is_featured?: boolean;
   is_active?: boolean;

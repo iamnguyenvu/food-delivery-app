@@ -135,7 +135,7 @@ export default function HomeScreen() {
 
         <LinearGradient
           colors={["#26C6DA", "#4DD0E1", "#80DEEA", "#B2EBF2", "#F3F4F6"]}
-          locations={[0, 0.15, 0.3, 0.5, 0.8]}
+          locations={[0, 0.02, 0.04, 0.06, 0.08]}
           className="flex-1"
         >
           <BannerCarousel
