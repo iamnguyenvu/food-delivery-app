@@ -99,8 +99,8 @@ export default function TrumDealNgon({
               resizeMode="cover"
             />
             {/* Discount Badge */}
-            <View className="absolute top-1 right-1 bg-red-500 px-2 py-1 rounded-md">
-              <Text className="text-white text-xs font-bold">
+            <View className="absolute top-1 right-1 bg-red-500 px-2 py-1 rounded">
+              <Text className="text-white text-[10px] font-bold">
                 -{deal.discount_percent}%
               </Text>
             </View>
@@ -227,12 +227,12 @@ export default function TrumDealNgon({
         </View>
 
         <View className="rounded-md" style={{ height: 220 }}>
-          <View className="flex-row h-full gap-1">
-            <Card className="flex-[3] mr-2" style={{ height: "89%" }}>
+          <View className="flex-row h-full">
+            <Card className="flex-[3] mr-1" style={{ height: "89%" }}>
               {deals[0] && renderLargeCard(deals[0])}
             </Card>
 
-            <View className="flex-[7]" style={{ gap: 10 }}>
+            <View className="flex-[7]">
               <Card style={{ height: "42.5%", marginRight: 0 }}>
                 {deals[1] && renderSmallCard(deals[1])}
               </Card>
