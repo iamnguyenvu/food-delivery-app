@@ -1,7 +1,7 @@
-import { Text } from "@/components/Themed";
+import { Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Image, ScrollView, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Image, Pressable, ScrollView, View } from "react-native";
 
 // Order type
 interface OrderItem { name: string; quantity: number; price: number; }
@@ -105,9 +105,9 @@ export default function OrderScreen() {
 
             {/* HEADER */}
             <View className="flex-row justify-between items-center px-5 pb-4 bg-white shadow-sm">
-                <Text className="text-2xl font-bold text-[#222]">Đơn hàng</Text>
-                <View className="rounded-full bg-gray-100 p-2 border border-gray-200 shadow-xs">
-                    <Ionicons name="search" size={18} color="#555" />
+                <Text className="text-2xl font-semibold text-black">Đơn hàng</Text>
+                <View className="rounded-lg bg-gray-50 p-2 border border-gray-200">
+                    <Ionicons name="search" size={18} color="#4B5563" />
                 </View>
             </View>
 
@@ -137,7 +137,7 @@ function TabsUI({ activeTab, onChange }: { activeTab: string; onChange: (k: stri
             {tabs.map((tab, i) => {
                 const isActive = activeTab === tab;
                 return (
-                    <TouchableOpacity
+                    <Pressable
                         key={i}
                         onPress={() => onChange(tab)}
                         className="items-center px-3 pb-1"
@@ -145,13 +145,21 @@ function TabsUI({ activeTab, onChange }: { activeTab: string; onChange: (k: stri
                         <Ionicons
                             name={tabIcons[tab] as any}
                             size={17}
-                            color={isActive ? "#00ACC1" : "#A9A9A9"}
+                            color={isActive ? "#26C6DA" : "#9CA3AF"}
                         />
-                        <Text className={`text-xs mt-0.5 ${isActive ? "font-bold text-[#00ACC1]" : "text-gray-500"}`}>
+                        <Text
+                            className={`text-xs mt-0.5 ${
+                                isActive
+                                     ? "font-semibold text-primary-400"
+                                         : "text-black"
+                            }`}
+                        >
                             {tab}
                         </Text>
-                        {isActive && <View className="h-1 w-7 bg-[#00ACC1] mt-1 rounded-full" />}
-                    </TouchableOpacity>
+                        {isActive && (
+                            <View className="h-1 w-7 bg-primary-400 mt-1 rounded-lg" />
+                        )}
+                    </Pressable>
                 );
             })}
         </View>
@@ -164,12 +172,17 @@ function EmptyTabView() {
     return (
         <View className="items-center justify-center mt-16 px-8">
             <Ionicons name="clipboard-outline" size={80} color="#26C6DA" />
-            <Text className="text-lg font-bold mt-4 text-center">Bạn chưa có đơn nào</Text>
-            <Text className="text-gray-500 text-sm mt-2 text-center">Các đơn đã đặt sẽ hiển thị tại đây</Text>
-
-            <TouchableOpacity className="mt-5 bg-[#26C6DA] px-6 py-2 rounded-full shadow-sm">
-                <Text className="text-white font-semibold">Đặt ngay</Text>
-            </TouchableOpacity>
+            <Text className="text-lg font-semibold mt-4 text-center text-black">
+                Bạn chưa có đơn nào
+            </Text>
+            <Text className="text-black text-sm mt-2 text-center">
+                Các đơn đã đặt sẽ hiển thị tại đây
+            </Text>
+            <Pressable className="mt-5 bg-primary-400 px-6 py-2 rounded-lg shadow-sm">
+                <Text className="text-white font-medium">
+                    Đặt ngay
+                </Text>
+            </Pressable>
         </View>
     );
 }
@@ -207,15 +220,21 @@ function OrderCard({ order }: { order: Order }) {
     const progressPct = totalMs > 0 ? Math.min(100, Math.max(0, Math.round((elapsedMs / totalMs) * 100))) : 0;
 
     return (
-        <TouchableOpacity className="bg-white rounded-2xl p-4 shadow-md border border-[#e8e8e8] mb-4 active:opacity-80">
+        <Pressable className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 mb-4 active:opacity-80">
 
             <View className="flex-row justify-between">
-                <Text className="text-gray-500 text-xs">{order.type} • #{order.id}</Text>
-                <Text className="text-gray-500 text-xs">{order.date.toLocaleString("vi-VN")}</Text>
+                <Text className="text-black text-xs">
+                    {order.type} • #{order.id}
+                </Text>
+                <Text className="text-black text-xs">
+                    {order.date.toLocaleString("vi-VN")}
+                </Text>
             </View>
 
             <View className="flex-row items-center mt-2">
-                <Text className="font-bold text-[15px] flex-1">{order.restaurant}</Text>
+                <Text className="font-semibold text-[15px] flex-1 text-black">
+                    {order.restaurant}
+                </Text>
                 <Ionicons name="fast-food-outline" size={20} color="#26C6DA" />
             </View>
 
@@ -223,36 +242,54 @@ function OrderCard({ order }: { order: Order }) {
                 <Image source={{ uri: order.thumbnail }} className="w-20 h-20 rounded-xl mr-3" />
                 <View style={{ flex: 1 }}>
                     <Text className="text-[14px]">{order.items[0].name}</Text>
-                    <Text className="text-gray-600 text-xs mt-1">
+                    <Text className="text-black text-xs mt-1">
                         {order.items[0].quantity} món • {order.total.toLocaleString()}đ
                     </Text>
                 </View>
             </View>
 
             <View className="flex-row justify-between mt-3">
-                <View className={`px-2 py-1 rounded-full ${order.status === "Đang giao" ? "bg-[#E8F5E9]" : "bg-[#E3F2FD]"}`}>
-                    <Text className={`text-xs font-bold ${order.status === "Đang giao" ? "text-[#1B5E20]" : "text-[#1565C0]"}`}>{order.status}</Text>
+                <View className={`px-2 py-1 rounded-md ${
+                    order.status === "Đang giao"
+                        ? "bg-green-50"
+                        : "bg-blue-50"
+                }`}>
+                    <Text
+                        className={`text-xs font-medium ${
+                            order.status === "Đang giao"
+                                ? "text-green-700"
+                                : "text-blue-700"
+                        }`}
+                    >
+                        {order.status}
+                    </Text>
                 </View>
-                <Text className="text-gray-500 text-xs">Đang tìm tài xế…</Text>
+
+                <Text className="text-black text-xs">
+                    Đang tìm tài xế…
+                </Text>
             </View>
 
             <View className="flex-row items-center mt-1">
-                <Ionicons name="time-outline" size={14} color="#777" />
-                <Text className="text-gray-600 text-xs ml-1">
+                <Ionicons name="time-outline" size={14} color="#6B7280" />
+                <Text className="text-black text-xs ml-1">
                     Dự kiến giao lúc {deliveryTime}
                 </Text>
             </View>
 
             <View className="mt-3">
                 <View className="flex-row justify-between mb-1">
-                    <Text className="text-xs text-gray-600">Tiến độ</Text>
-                    <Text className="text-xs text-gray-600">{progressPct}%</Text>
+                    <Text className="text-xs text-black">Tiến độ</Text>
+                    <Text className="text-xs text-black">{progressPct}%</Text>
                 </View>
-                <View className="h-2 bg-gray-100 rounded-full">
-                    <View className="h-2 bg-[#26C6DA] rounded-full" style={{ width: `${progressPct}%` }} />
+                <View className="h-2 bg-gray-200 rounded-lg">
+                    <View
+                        className="h-2 bg-primary-400 rounded-lg"
+                        style={{ width: `${progressPct}%` }}
+                    />
                 </View>
             </View>
-        </TouchableOpacity>
+        </Pressable>
     );
 }
 //Suggestion list Recommended items
@@ -261,9 +298,9 @@ function SuggestionSection({ foods }: { foods: FoodSuggestion[] }) {
         <View className="mt-8 mb-10">
             <View className="flex-row items-center justify-between pr-1 mb-3">
                 <Text className="font-bold text-lg">Có thể bạn cũng thích</Text>
-                <TouchableOpacity className="px-2 py-1">
+                <Pressable className="px-2 py-1">
                     <Text className="text-xs text-[#00ACC1] font-semibold">Xem tất cả</Text>
-                </TouchableOpacity>
+                </Pressable>
             </View>
 
             <View>
@@ -277,32 +314,36 @@ function SuggestionSection({ foods }: { foods: FoodSuggestion[] }) {
 // display suggestion item
 function SuggestionCard({ item }: { item: FoodSuggestion }) {
     return (
-        <TouchableOpacity className="flex-row bg-white rounded-2xl p-3 mb-3 shadow border border-[#eee] active:opacity-90">
+        <Pressable className="flex-row bg-white rounded-xl p-3 mb-3 shadow-sm border border-gray-200 active:opacity-90">
             <View>
                 <Image source={{ uri: item.image }} className="w-20 h-20 rounded-xl" />
-                <View className="absolute top-1 left-1 px-1.5 py-0.5 rounded-full bg-primary-400/60">
+                <View className="absolute top-1 left-1 px-1.5 py-0.5 rounded-xl bg-primary-400/60">
                     <Text className="text-[10px] text-white">⭐ {item.rating.toFixed(1)}</Text>
                 </View>
             </View>
 
             <View className="flex-1 ml-3 justify-center">
-                <Text className="font-semibold text-[15px]" numberOfLines={1}>{item.name}</Text>
+                <Text className="font-semibold text-[15px] text-black" numberOfLines={1}>
+                    {item.name}
+                </Text>
                 <View className="flex-row items-center mt-1">
-                    <View className="px-2 py-0.5 rounded-full bg-white border border-[#eee] mr-2">
-                        <Text className="text-[10px] text-gray-700">{item.distance}</Text>
+                    <View className="px-2 py-0.5 rounded-xl bg-white border border-[#eee] mr-2">
+                        <Text className="text-[10px] text-black">
+                            {item.distance}
+                        </Text>
                     </View>
-                    <View className="px-2 py-0.5 rounded-full bg-[#FFF4E5]">
+                    <View className="px-2 py-0.5 rounded-xl bg-[#FFF4E5]">
                         <Text className="text-orange-600 text-[10px] font-semibold">Gợi ý</Text>
                     </View>
                 </View>
             </View>
 
             <View className="justify-center">
-                <View className="flex-row items-center px-3 py-1 rounded-full border border-[#26C6DA]">
+                <View className="flex-row items-center px-3 py-1 rounded-lg border border-primary-400">
                     <Ionicons name="add" size={14} color="#26C6DA" />
-                    <Text className="text-xs text-[#26C6DA] ml-1">Thêm</Text>
+                    <Text className="text-xs text-primary-400 ml-1 font-medium">Thêm</Text>
                 </View>
             </View>
-        </TouchableOpacity>
+        </Pressable>
     );
 }
