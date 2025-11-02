@@ -1,5 +1,6 @@
 import Card from "@/components/common/Card";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
 
 interface RecentlyViewedItem {
@@ -43,11 +44,11 @@ function RecentlyViewedItemCard({
   onPress: () => void;
 }) {
   return (
-    <Pressable
-      onPress={onPress}
-      className="w-[280px] mr-3 active:opacity-80"
-    >
-      <View className="flex-row bg-white rounded-lg overflow-hidden" style={{ height: 100 }}>
+    <Pressable onPress={onPress} className="w-[280px] mr-3 active:opacity-80">
+      <View
+        className="flex-row bg-white rounded-lg overflow-hidden"
+        style={{ height: 100 }}
+      >
         {/* Left: Image */}
         <View className="w-[100px] h-full">
           <Image
@@ -125,10 +126,13 @@ const SAMPLE_ITEMS: RecentlyViewedItem[] = [
   },
 ];
 
-export default function RecentlyViewed({
-  onViewMore,
-  onSelectItem,
-}: RecentlyViewedProps) {
+export default function RecentlyViewed({ onSelectItem }: RecentlyViewedProps) {
+  const handleViewAll = () => {
+    // Implement later: Navigate to collections list screen
+    router.push("/(screens)/recentlyviewed" as any);
+    console.log("View all collections");
+  };
+
   // In a real app, this would fetch from local storage or API
   const items = SAMPLE_ITEMS;
 
@@ -141,7 +145,7 @@ export default function RecentlyViewed({
       className="mx-2 mb-3"
       header={{
         title: "Xem gần đây",
-        onViewAllPress: onViewMore,
+        onViewAllPress: handleViewAll,
         titleSize: "text-base",
       }}
     >
@@ -162,7 +166,7 @@ export default function RecentlyViewed({
 
           {/* View All card at the end */}
           <Pressable
-            onPress={onViewMore}
+            onPress={handleViewAll}
             className="w-[280px] mr-3 justify-center"
           >
             <View className="items-center justify-center h-full">

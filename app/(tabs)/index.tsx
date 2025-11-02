@@ -4,6 +4,7 @@ import CollectionsSection from "@/components/index/CollectionsSection";
 import FlashSale from "@/components/index/FlashSale";
 import Header from "@/components/index/Header";
 import RecentlyViewed from "@/components/index/RecentlyViewed";
+import SecondaryBannerCarousel from "@/components/index/SecondaryBannerCarousel";
 import TrumDealNgon from "@/components/index/TrumDealNgon";
 import LocationPermissionModal from "@/components/location/LocationPermissionModal";
 import { trackBannerClick, useBanners } from "@/src/hooks";
@@ -137,7 +138,14 @@ export default function HomeScreen() {
             onSelectItem={(id) => console.log("Selected flash sale:", id)}
           />
 
-          <RecentlyViewed />
+          <RecentlyViewed 
+            onViewMore={() => console.log("View more recently viewed")}
+            onSelectItem={(id) => console.log("Selected recently viewed:", id)}
+          />
+
+          <SecondaryBannerCarousel
+            onBannerPress={handleBannerPress}
+          />
 
           {/* <CategoryList
             selectedId={selectedCategory}
