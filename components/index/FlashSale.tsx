@@ -122,14 +122,16 @@ function FlashSaleItem({
 
         {/* Progress Bar */}
         <View className="w-full">
-          <View className="h-5 bg-red-50 rounded-full overflow-hidden relative">
+          <View className="h-6 bg-red-100 rounded-full overflow-hidden relative">
+            {/* Animated progress fill */}
             <View
-              className="h-full bg-gradient-to-r from-red-400 to-red-500"
+              className="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-red-500 to-red-600 rounded-full"
               style={{ width: `${Math.min(soldPercentage, 100)}%` }}
             />
+            {/* Overlay text */}
             <View className="absolute inset-0 items-center justify-center">
-              <Text className="text-[10px] font-bold text-red-600">
-                {isSoldOut ? "Đã bán hết" : `Đã bán ${sold}/${total}`}
+              <Text className="text-[11px] font-bold text-white drop-shadow">
+                {isSoldOut ? "Đã bán hết" : "Đang bán chạy"}
               </Text>
             </View>
           </View>
