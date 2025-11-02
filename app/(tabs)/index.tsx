@@ -3,6 +3,7 @@ import CategoryGrid from "@/components/index/CategoryGrid";
 import CollectionsSection from "@/components/index/CollectionsSection";
 import FlashSale from "@/components/index/FlashSale";
 import Header from "@/components/index/Header";
+import RecentlyViewed from "@/components/index/RecentlyViewed";
 import TrumDealNgon from "@/components/index/TrumDealNgon";
 import LocationPermissionModal from "@/components/location/LocationPermissionModal";
 import { trackBannerClick, useBanners } from "@/src/hooks";
@@ -135,6 +136,8 @@ export default function HomeScreen() {
             onViewMore={() => console.log("View more flash sales")}
             onSelectItem={(id) => console.log("Selected flash sale:", id)}
           />
+
+          <RecentlyViewed />
 
           {/* <CategoryList
             selectedId={selectedCategory}

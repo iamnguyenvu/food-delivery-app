@@ -18,6 +18,29 @@ import {
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const ITEM_WIDTH = 90;
 
+// Map category names to appropriate icons
+function getCategoryIcon(categoryName: string, defaultIcon?: string): string {
+  const name = categoryName.toLowerCase();
+  
+  // Specific mappings
+  if (name.includes("mart") || name.includes("giảm 111k")) return "cart";
+  if (name.includes("ăn khuya") || name.includes("freeship")) return "restaurant";
+  if (name.includes("đặt trước") || name.includes("bữa sáng")) return "cafe";
+  if (name.includes("ưu đãi đối tác") || name.includes("đối tác")) return "people";
+  if (name.includes("trà sữa") || name.includes("milk tea")) return "wine";
+  if (name.includes("cơm") || name.includes("rice")) return "fast-food";
+  if (name.includes("dashboard") || name.includes("thống kê")) return "stats-chart";
+  if (name.includes("giao hàng") || name.includes("delivery")) return "bicycle";
+  if (name.includes("khuyến mãi") || name.includes("giảm giá")) return "pricetag";
+  if (name.includes("món mới") || name.includes("new")) return "star";
+  if (name.includes("đồ uống") || name.includes("drink")) return "beer";
+  if (name.includes("món nướng") || name.includes("bbq")) return "flame";
+  if (name.includes("đồ ăn vặt") || name.includes("snack")) return "pizza";
+  if (name.includes("tráng miệng") || name.includes("dessert")) return "ice-cream";
+  
+  return defaultIcon || "help-outline";
+}
+
 type CategoryGridProps = {
   onSelectCategory?: (id: string) => void;
 };
@@ -207,8 +230,8 @@ function CategoryItem({ category, onPress }: CategoryItemProps) {
           />
         ) : (
           <Ionicons
-            name={(category.icon as any) || "help-outline"}
-            size={24}
+            name={(getCategoryIcon(category.name, category.icon) as any) || "help-outline"}
+            size={28}
             color="white"
           />
         )}
