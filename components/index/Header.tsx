@@ -18,10 +18,10 @@ export default function Header({
   onPressLocation,
   scrollY,
 }: HeaderProps) {
-  // Smooth, slower interpolation tied to scrollY (more gradual)
+  // Smooth interpolation that matches scroll speed (1:1 ratio)
   const locationOpacity = scrollY
     ? scrollY.interpolate({
-        inputRange: [0, 200],
+        inputRange: [0, 50],
         outputRange: [1, 0],
         extrapolate: "clamp",
       })
@@ -29,7 +29,7 @@ export default function Header({
 
   const locationHeight = scrollY
     ? scrollY.interpolate({
-        inputRange: [0, 200],
+        inputRange: [0, 50],
         outputRange: [48, 0],
         extrapolate: "clamp",
       })
@@ -37,8 +37,8 @@ export default function Header({
 
   const paddingTop = scrollY
     ? scrollY.interpolate({
-        inputRange: [0, 200],
-        outputRange: [48, 12],
+        inputRange: [0, 50],
+        outputRange: [48, 48],
         extrapolate: "clamp",
       })
     : 48;
@@ -46,7 +46,7 @@ export default function Header({
   return (
     <Animated.View
       style={{ paddingTop, zIndex: 1000, elevation: 1000 }}
-      className="bg-primary-400 px-2 pb-2"
+      className="bg-primary-400 px-2 pb-3"
     >
       <Animated.View
         style={{
