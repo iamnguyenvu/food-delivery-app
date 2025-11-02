@@ -122,7 +122,7 @@ export default function BannerCarousel({
       </ScrollView>
 
       {banners.length > 1 && (
-        <View className="absolute bottom-2 left-0 right-0 flex-row justify-center gap-2 z-10">
+        <View className="absolute bottom-2 left-0 right-0 flex-row justify-center gap-2 z-1">
           {banners.map((_, i) => (
             <View
               key={i}
