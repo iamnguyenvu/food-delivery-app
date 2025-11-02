@@ -5,6 +5,7 @@ import FlashSale from "@/components/index/FlashSale";
 import Header from "@/components/index/Header";
 import RecentlyViewed from "@/components/index/RecentlyViewed";
 import SecondaryBannerCarousel from "@/components/index/SecondaryBannerCarousel";
+import TopRatedRestaurants from "@/components/index/TopRatedRestaurants";
 import TrumDealNgon from "@/components/index/TrumDealNgon";
 import LocationPermissionModal from "@/components/location/LocationPermissionModal";
 import { trackBannerClick, useBanners } from "@/src/hooks";
@@ -145,6 +146,11 @@ export default function HomeScreen() {
 
           <SecondaryBannerCarousel
             onBannerPress={handleBannerPress}
+          />
+
+          <TopRatedRestaurants
+            onViewMore={() => console.log("View more top rated restaurants")}
+            onSelectRestaurant={(id) => console.log("Selected restaurant:", id)}
           />
 
           {/* <CategoryList
