@@ -1,18 +1,22 @@
 import Card from "@/components/common/Card";
+import { useFlashSales, type FlashSale } from "@/src/hooks";
 import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Image, Pressable, Text, View } from "react-native";
+import { Image, Pressable, ScrollView, Text, View } from "react-native";
 
 interface FlashSaleProps {
-  endTime: Date;
   onViewMore?: () => void;
   onSelectItem?: (id: string) => void;
 }
 
 // Countdown Timer Component
-function CountdownTimer({ endTime }: { endTime: Date }) {
-  const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 });
+function CountdownTimer({ endTime }: { endTime: string }) {
+  const [timeLeft, setTimeLeft] = useState({
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+  });
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -26,7 +30,9 @@ function CountdownTimer({ endTime }: { endTime: Date }) {
         return;
       }
 
-      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const hours = Math.floor(
+        (distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+      );
       const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
@@ -38,20 +44,20 @@ function CountdownTimer({ endTime }: { endTime: Date }) {
 
   return (
     <View className="flex-row items-center gap-1">
-      <View className="bg-white/20 px-2 py-1 rounded">
-        <Text className="text-white text-xs font-bold">
+      <View className="bg-red-500/20 px-2 py-1 rounded">
+        <Text className="text-red-600 text-xs font-bold">
           {String(timeLeft.hours).padStart(2, "0")}
         </Text>
       </View>
-      <Text className="text-white text-xs">:</Text>
-      <View className="bg-white/20 px-2 py-1 rounded">
-        <Text className="text-white text-xs font-bold">
+      <Text className="text-red-600 text-xs font-bold">:</Text>
+      <View className="bg-red-500/20 px-2 py-1 rounded">
+        <Text className="text-red-600 text-xs font-bold">
           {String(timeLeft.minutes).padStart(2, "0")}
         </Text>
       </View>
-      <Text className="text-white text-xs">:</Text>
-      <View className="bg-white/20 px-2 py-1 rounded">
-        <Text className="text-white text-xs font-bold">
+      <Text className="text-red-600 text-xs font-bold">:</Text>
+      <View className="bg-red-500/20 px-2 py-1 rounded">
+        <Text className="text-red-600 text-xs font-bold">
           {String(timeLeft.seconds).padStart(2, "0")}
         </Text>
       </View>
@@ -59,83 +65,154 @@ function CountdownTimer({ endTime }: { endTime: Date }) {
   );
 }
 
+// Flash Sale Item Card
+function FlashSaleItem({
+  item,
+  onPress,
+}: {
+  item: FlashSale;
+  onPress: () => void;
+}) {
+  const total = item.total_quantity || 0;
+  const sold = item.sold_quantity || 0;
+  const soldPercentage = total > 0 ? (sold / total) * 100 : 0;
+  const isSoldOut = total > 0 ? sold >= total : false;
+
+  return (
+    <Pressable onPress={onPress} className="w-[130px] mr-3 active:opacity-80">
+      <View className="items-center">
+        {/* Image Container */}
+        <View className="w-full aspect-square rounded-md mb-2 overflow-hidden">
+          <Image
+            source={{
+              uri:
+                item.dish?.image ||
+                item.image ||
+                "https://via.placeholder.com/200",
+            }}
+            className="w-full h-full"
+            resizeMode="cover"
+          />
+          {/* Discount Badge */}
+          <View className="absolute top-1 right-1 bg-red-500 pl-1 pr-2 py-0.5 rounded flex-row">
+            <Ionicons name="flash" size={16} color={"white"} />
+            <Text className="text-white text-xs font-bold">
+              -{item.discount_percent}%
+            </Text>
+          </View>
+        </View>
+
+        {/* Title */}
+        <Text
+          className="text-sm font-semibold text-gray-800 leading-tight mb-1"
+          numberOfLines={1}
+        >
+          {item.dish?.name || item.title}
+        </Text>
+
+        {/* Price */}
+        <View className="flex-row items-center gap-1 mb-2">
+          <Text className="text-sm font-bold text-primary-400">
+            {item.flash_sale_price?.toLocaleString()}đ
+          </Text>
+          <Text className="text-xs text-gray-400 line-through">
+            {item.original_price?.toLocaleString()}đ
+          </Text>
+        </View>
+
+        {/* Progress Bar */}
+        <View className="w-full">
+          <View className="h-5 bg-red-50 rounded-full overflow-hidden relative">
+            <View
+              className="h-full bg-gradient-to-r from-red-400 to-red-500"
+              style={{ width: `${Math.min(soldPercentage, 100)}%` }}
+            />
+            <View className="absolute inset-0 items-center justify-center">
+              <Text className="text-[10px] font-bold text-red-600">
+                {isSoldOut ? "Đã bán hết" : `Đã bán ${sold}/${total}`}
+              </Text>
+            </View>
+          </View>
+        </View>
+      </View>
+    </Pressable>
+  );
+}
+
 export default function FlashSale({
-  endTime,
   onViewMore,
   onSelectItem,
 }: FlashSaleProps) {
-  // Sample data
-  const items = [
-    { id: "1", name: "Bún Bò Huế", price: 25000, originalPrice: 50000, image: "https://via.placeholder.com/200" },
-    { id: "2", name: "Phở Bò", price: 27000, originalPrice: 45000, image: "https://via.placeholder.com/200" },
-  ];
+  const { flashSales, isLoading } = useFlashSales({ limit: 10 });
+
+  const handleViewAll = () => {
+    // Implement later: Navigate to flash sales list screen
+    router.push("/(screens)/flashsales" as any);
+    console.log("View all collections");
+  };
+
+  if (isLoading || !flashSales || flashSales.length === 0) {
+    return null;
+  }
+
+  // Get earliest end time for countdown
+  const endTime =
+    flashSales[0]?.valid_until || new Date(Date.now() + 3600000).toISOString();
 
   return (
-    <Card
-      className="mx-2 my-3"
-      customHeader={
-        <LinearGradient
-          colors={["#EF4444", "#F87171", "#FCA5A5"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          className="rounded-t-xl"
-        >
-          <View className="flex-row items-center justify-between px-4 py-3">
-            {/* Left side: Icon + FLASH SALE + Timer */}
-            <View className="flex-row items-center gap-2">
-              <View className="w-6 h-6 bg-white rounded-full items-center justify-center">
-                <Ionicons name="flash" size={16} color="#EF4444" />
-              </View>
-              <Text className="text-white text-lg font-black tracking-wide">
-                FLASH SALE
-              </Text>
-              <CountdownTimer endTime={endTime} />
-            </View>
-
-            {/* Right side: Xem thêm */}
-            <Pressable
-              onPress={onViewMore}
-              className="flex-row items-center gap-1 active:opacity-70"
-            >
-              <Text className="text-white text-sm font-medium">Xem thêm</Text>
-              <Ionicons name="chevron-forward" size={16} color="white" />
-            </Pressable>
+    <Card className="mx-2 mb-3">
+      {/* Header */}
+      <View className="flex-row items-center justify-between px-4 pt-4 pb-3 border-b border-red-100">
+        <View className="flex-row items-center gap-2">
+          <View className="w-7 h-7 bg-red-500 rounded-full items-center justify-center">
+            <Ionicons name="flash" size={16} color="white" />
           </View>
-        </LinearGradient>
-      }
-    >
-      {/* Content */}
-      <View className="p-4">
-        <View className="flex-row gap-3">
-          {items.map((item) => (
-            <Pressable
-              key={item.id}
-              onPress={() => onSelectItem?.(item.id)}
-              className="flex-1 active:opacity-80"
-            >
-              <View className="bg-gray-50 rounded-lg overflow-hidden">
-                <Image
-                  source={{ uri: item.image }}
-                  className="w-full h-32"
-                  resizeMode="cover"
-                />
-                <View className="p-2">
-                  <Text className="font-semibold text-gray-900" numberOfLines={1}>
-                    {item.name}
-                  </Text>
-                  <View className="flex-row items-center gap-2 mt-1">
-                    <Text className="text-primary-400 font-bold">
-                      {item.price.toLocaleString()}đ
-                    </Text>
-                    <Text className="text-gray-400 text-xs line-through">
-                      {item.originalPrice.toLocaleString()}đ
-                    </Text>
-                  </View>
-                </View>
-              </View>
-            </Pressable>
-          ))}
+          <Text className="text-lg font-black text-red-600 tracking-wide">
+            FLASH SALE
+          </Text>
+          <CountdownTimer endTime={endTime} />
         </View>
+
+        <Pressable
+          onPress={onViewMore}
+          className="flex-row items-center gap-1 active:opacity-70"
+        >
+          <Text className="text-xs text-gray-500">Xem tất cả</Text>
+          <Ionicons name="chevron-forward" size={16} color="#6B7280" />
+        </Pressable>
+      </View>
+
+      {/* Horizontal Scroll */}
+      <View className="px-2 py-4">
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingRight: 12 }}
+        >
+          {flashSales.map((item: FlashSale) => (
+            <FlashSaleItem
+              key={item.id}
+              item={item}
+              onPress={() => onSelectItem?.(item.id)}
+            />
+          ))}
+          {/* View All card at the end */}
+          <Pressable onPress={handleViewAll} className="w-[130px] mr-3 justify-center">
+            <View className="items-center justify-center h-full">
+              <Ionicons
+                name="chevron-forward-circle-outline"
+                size={40}
+                color="#26C6DA"
+              />
+              <Text
+                className="text-sm font-semibold text-gray-800 text-center mt-2"
+                numberOfLines={2}
+              >
+                Xem tất cả
+              </Text>
+            </View>
+          </Pressable>
+        </ScrollView>
       </View>
     </Card>
   );
