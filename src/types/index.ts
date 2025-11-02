@@ -111,3 +111,32 @@ export interface Banner {
   updatedAt: string;
   deletedAt?: string;
 }
+
+export interface FlashSale {
+  id: string;
+  dish_id: string;
+  restaurant_id: string;
+  title: string;
+  description?: string;
+  image?: string;
+  original_price: number;
+  flash_sale_price: number;
+  discount_percent: number;
+  total_quantity: number;
+  sold_quantity: number;
+  max_per_user: number;
+  valid_from: string;
+  valid_until: string;
+  display_order: number;
+  is_featured: boolean;
+  is_active: boolean;
+  view_count: number;
+  click_count: number;
+  dish?: {
+    name: string;
+    image: string;
+  };
+  restaurant?: {
+    name: string;
+  };
+}

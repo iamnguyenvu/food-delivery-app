@@ -20,7 +20,12 @@ export default {
       backgroundColor: "#ffffff"
     },
     ios: {
-      supportsTablet: true
+      bundleIdentifier: "com.fooddelivery.app",
+      supportsTablet: true,
+      infoPlist: {
+        NSLocationWhenInUseUsageDescription:
+          "We use your location to delivery food to your address.",
+      },
     },
     android: {
       adaptiveIcon: {
@@ -28,7 +33,8 @@ export default {
         backgroundColor: "#ffffff"
       },
       edgeToEdgeEnabled: true,
-      predictiveBackGestureEnabled: false
+      predictiveBackGestureEnabled: false,
+      package: "com.fooddelivery.app",
     },
     web: {
       bundler: "metro",

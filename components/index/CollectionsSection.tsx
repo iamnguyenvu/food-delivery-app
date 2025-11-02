@@ -172,11 +172,11 @@ export default function CollectionsSection({
               <View className="w-full aspect-square rounded-md mb-2 items-center justify-center overflow-hidden">
                 <View className="items-center justify-center">
                   <Ionicons name="chevron-forward-circle-outline" size={40} color="#26C6DA" />
-                </View>
-              </View>
               <Text className="text-sm font-semibold text-gray-800 text-center" numberOfLines={2}>
                 Xem tất cả
               </Text>
+                </View>
+              </View>
             </View>
           </Pressable>
         </ScrollView>

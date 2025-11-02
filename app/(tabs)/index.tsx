@@ -1,7 +1,7 @@
 ﻿import BannerCarousel from "@/components/index/BannerCarousel";
 import CategoryGrid from "@/components/index/CategoryGrid";
-import CategoryList from "@/components/index/CategoryList";
 import CollectionsSection from "@/components/index/CollectionsSection";
+import FlashSale from "@/components/index/FlashSale";
 import Header from "@/components/index/Header";
 import TrumDealNgon from "@/components/index/TrumDealNgon";
 import LocationPermissionModal from "@/components/location/LocationPermissionModal";
@@ -17,7 +17,6 @@ export default function HomeScreen() {
   const { address, location, setAll } = useLocationStore();
   const [showPermissionModal, setShowPermissionModal] = useState(false);
   const scrollY = useRef(new Animated.Value(0)).current;
-  const [headerMode, setHeaderMode] = useState<"full" | "searchOnly">("full");
   const [userDismissedModal, setUserDismissedModal] = useState(false);
 
   const label = useMemo(
@@ -30,34 +29,14 @@ export default function HomeScreen() {
   const [selectedCategory, setSelectedCategory] = useState("1");
 
   // Show permission modal whenever location is not set
-  // Modal will persist until user either grants location or manually inputs address
   useEffect(() => {
     if (!location || !address?.formatted) {
-      // Always show modal if no location, regardless of previous dismissal
       setShowPermissionModal(true);
       setUserDismissedModal(false);
     } else {
-      // Has location, hide modal
       setShowPermissionModal(false);
     }
   }, [location, address]);
-
-  // Handle scroll for header mode change
-  useEffect(() => {
-    const listenerId = scrollY.addListener(({ value }) => {
-      // Switch to searchOnly when scrolled down more than 50px
-      // Switch back to full when scrolled to top (< 20px)
-      if (value > 50 && headerMode === "full") {
-        setHeaderMode("searchOnly");
-      } else if (value < 20 && headerMode === "searchOnly") {
-        setHeaderMode("full");
-      }
-    });
-
-    return () => {
-      scrollY.removeListener(listenerId);
-    };
-  }, [scrollY, headerMode]);
 
   const handleLocationGranted = (grantedLocation: { latitude: number; longitude: number }, addr: string) => {
     setAll({ 
@@ -118,7 +97,7 @@ export default function HomeScreen() {
       />
       <ScrollView
         className="flex-1 bg-gray-100"
-        stickyHeaderIndices={[1]}
+        stickyHeaderIndices={[0]}
         keyboardShouldPersistTaps="handled"
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
@@ -126,11 +105,10 @@ export default function HomeScreen() {
         )}
         scrollEventThrottle={16}
       >
-        <Header location={label} mode={headerMode} onPressLocation={openPicker} />
-        <Header
-          location={label}
-          mode="searchOnly"
+        <Header 
+          location={label} 
           onPressLocation={openPicker}
+          scrollY={scrollY}
         />
 
         <LinearGradient
@@ -153,10 +131,15 @@ export default function HomeScreen() {
 
           <CollectionsSection maxItems={6} />
 
-          <CategoryList
+          <FlashSale 
+            onViewMore={() => console.log("View more flash sales")}
+            onSelectItem={(id) => console.log("Selected flash sale:", id)}
+          />
+
+          {/* <CategoryList
             selectedId={selectedCategory}
             onSelectCategory={handleCategorySelect}
-          />
+          /> */}
         </LinearGradient>
       </ScrollView>
     </>

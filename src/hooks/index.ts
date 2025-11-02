@@ -1,3 +1,4 @@
+export type { FlashSale } from '../types';
 export { useAddresses } from './useAddresses';
 export type { SavedAddress } from './useAddresses';
 export { useAuth } from './useAuth';
@@ -7,5 +8,6 @@ export { useCategories, useDeals } from './useCategories';
 export type { Category, Deal } from './useCategories';
 export { trackCollectionClick, trackCollectionView, useCollections } from './useCollections';
 export type { Collection } from './useCollections';
+export { trackFlashSaleClick, trackFlashSaleView, useFlashSales } from './useFlashSales';
 
 
