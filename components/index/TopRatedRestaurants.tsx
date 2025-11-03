@@ -1,5 +1,6 @@
 import Card from "@/components/common/Card";
 import { Ionicons } from "@expo/vector-icons";
+import { useMemo } from "react";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
 
 interface TopRatedRestaurant {
@@ -29,9 +30,9 @@ function TopRatedRestaurantCard({
   return (
     <Pressable
       onPress={onPress}
-      className="w-[160px] mr-3 active:opacity-80"
+      className="w-[120px] active:opacity-80"
     >
-      <View className="bg-white rounded-lg overflow-hidden">
+      <View className="bg-white rounded-md overflow-hidden">
         {/* Image Container */}
         <View className="w-full h-[120px] relative">
           <Image
@@ -40,22 +41,22 @@ function TopRatedRestaurantCard({
             resizeMode="cover"
           />
           {/* Rating Badge */}
-          <View className="absolute top-2 right-2 bg-amber-500 rounded-full px-2 py-1 flex-row items-center gap-1">
-            <Ionicons name="star" size={12} color="white" />
-            <Text className="text-white text-xs font-bold">
+          <View className="absolute top-1 right-1 bg-amber-500 rounded px-1 py-0.5 flex-row items-center gap-1">
+            <Ionicons name="star" size={10} color="white" />
+            <Text className="text-white text-[10px] font-bold">
               {restaurant.rating.toFixed(1)}
             </Text>
           </View>
           {/* Partner Badge */}
           {restaurant.isPartner && (
-            <View className="absolute top-2 left-2 bg-primary-400 rounded px-2 py-1">
-              <Text className="text-white text-[10px] font-bold">ĐỐI TÁC</Text>
+            <View className="absolute top-1 left-0 bg-primary-400 px-1 py-0.5">
+              <Text className="text-white text-[8px] font-bold">ĐỐI TÁC</Text>
             </View>
           )}
         </View>
 
         {/* Info Container */}
-        <View className="p-3">
+        <View className="p-1 pb-2">
           {/* Restaurant Name */}
           <Text
             className="text-sm font-bold text-gray-800 leading-tight mb-1"
@@ -74,16 +75,16 @@ function TopRatedRestaurantCard({
 
           {/* Delivery Info */}
           <View className="flex-row items-center justify-between">
-            <View className="flex-row items-center gap-1">
-              <Ionicons name="time-outline" size={14} color="#9CA3AF" />
-              <Text className="text-xs text-gray-500">
+            <View className="flex-row items-center gap-0.5">
+              <Ionicons name="time-outline" size={12} color="#9CA3AF" />
+              <Text className="text-[10px] text-gray-500">
                 {restaurant.deliveryTime}
               </Text>
             </View>
             {restaurant.distance && (
-              <View className="flex-row items-center gap-1">
-                <Ionicons name="location-outline" size={14} color="#9CA3AF" />
-                <Text className="text-xs text-gray-500">
+              <View className="flex-row items-center gap-0.5">
+                <Ionicons name="location-outline" size={12} color="#9CA3AF" />
+                <Text className="text-[10px] text-gray-500">
                   {restaurant.distance}
                 </Text>
               </View>
@@ -153,6 +154,8 @@ export default function TopRatedRestaurants({
   onViewMore,
   onSelectRestaurant,
 }: TopRatedRestaurantsProps) {
+  const scrollContentStyle = useMemo(() => ({ paddingRight: 12, gap: 10 }), []);
+  
   // In a real app, this would fetch from API
   const restaurants = SAMPLE_RESTAURANTS;
 
@@ -170,11 +173,11 @@ export default function TopRatedRestaurants({
       }}
     >
       {/* Horizontal scroll list */}
-      <View className="px-2 pb-4">
+      <View className="pl-2 pb-0" >
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingRight: 12 }}
+          contentContainerStyle={scrollContentStyle}
         >
           {restaurants.map((restaurant) => (
             <TopRatedRestaurantCard
@@ -183,23 +186,6 @@ export default function TopRatedRestaurants({
               onPress={() => onSelectRestaurant?.(restaurant.id)}
             />
           ))}
-
-          {/* View All card at the end */}
-          <Pressable
-            onPress={onViewMore}
-            className="w-[160px] mr-3 justify-center"
-          >
-            <View className="items-center justify-center h-full">
-              <Ionicons
-                name="chevron-forward-circle-outline"
-                size={40}
-                color="#26C6DA"
-              />
-              <Text className="text-sm font-semibold text-gray-800 text-center mt-2">
-                Xem tất cả
-              </Text>
-            </View>
-          </Pressable>
         </ScrollView>
       </View>
     </Card>

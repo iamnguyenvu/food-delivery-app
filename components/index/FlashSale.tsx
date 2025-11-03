@@ -2,7 +2,7 @@ import Card from "@/components/common/Card";
 import { useFlashSales, type FlashSale } from "@/src/hooks";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
 
 interface FlashSaleProps {
@@ -141,25 +141,127 @@ function FlashSaleItem({
   );
 }
 
+// Sample data for demonstration when no database data available (moved outside to avoid re-render)
+const SAMPLE_FLASH_SALES: FlashSale[] = [
+  {
+    id: "sample-fs-1",
+    dish_id: "dish-1",
+    restaurant_id: "rest-1",
+    title: "Phở Bò Đặc Biệt",
+    description: "Flash sale cuối tuần",
+    image: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=400",
+    original_price: 50000,
+    flash_sale_price: 35000,
+    discount_percent: 30,
+    total_quantity: 50,
+    sold_quantity: 23,
+    max_per_user: 2,
+    valid_from: "2025-11-03T00:00:00.000Z",
+    valid_until: "2025-11-03T23:59:59.000Z",
+    display_order: 1,
+    is_featured: true,
+    is_active: true,
+    view_count: 0,
+    click_count: 0,
+    dish: {
+      name: "Phở Bò Đặc Biệt",
+      image: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=400",
+    },
+    restaurant: {
+      name: "Phở Hà Nội",
+    },
+  },
+  {
+    id: "sample-fs-2",
+    dish_id: "dish-2",
+    restaurant_id: "rest-2",
+    title: "Bún Bò Huế",
+    description: "Giảm giá hấp dẫn",
+    image: "https://images.unsplash.com/photo-1569562211093-4ed0d0758f12?w=400",
+    original_price: 45000,
+    flash_sale_price: 29000,
+    discount_percent: 35,
+    total_quantity: 30,
+    sold_quantity: 18,
+    max_per_user: 2,
+    valid_from: "2025-11-03T00:00:00.000Z",
+    valid_until: "2025-11-03T23:59:59.000Z",
+    display_order: 2,
+    is_featured: true,
+    is_active: true,
+    view_count: 0,
+    click_count: 0,
+    dish: {
+      name: "Bún Bò Huế",
+      image: "https://images.unsplash.com/photo-1569562211093-4ed0d0758f12?w=400",
+    },
+    restaurant: {
+      name: "Quán Huế Xưa",
+    },
+  },
+  {
+    id: "sample-fs-3",
+    dish_id: "dish-3",
+    restaurant_id: "rest-3",
+    title: "Cơm Tấm Sườn Bì",
+    description: "Món ngon giá tốt",
+    image: "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400",
+    original_price: 40000,
+    flash_sale_price: 28000,
+    discount_percent: 30,
+    total_quantity: 40,
+    sold_quantity: 12,
+    max_per_user: 3,
+    valid_from: "2025-11-03T00:00:00.000Z",
+    valid_until: "2025-11-03T23:59:59.000Z",
+    display_order: 3,
+    is_featured: true,
+    is_active: true,
+    view_count: 0,
+    click_count: 0,
+    dish: {
+      name: "Cơm Tấm Sườn Bì",
+      image: "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400",
+    },
+    restaurant: {
+      name: "Cơm Tấm Sài Gòn",
+    },
+  },
+];
+
 export default function FlashSale({
   onViewMore,
   onSelectItem,
 }: FlashSaleProps) {
-  const { flashSales, isLoading } = useFlashSales({ limit: 10 });
+  const { flashSales, isLoading, error } = useFlashSales({ limit: 10 });
 
-  const handleViewAll = () => {
-    // Implement later: Navigate to flash sales list screen
-    router.push("/(screens)/flashsales" as any);
-    console.log("View all collections");
-  };
+  const handleViewAll = useCallback(() => {
+    if (onViewMore) {
+      onViewMore();
+    } else {
+      router.push("/(screens)/flashsales" as any);
+    }
+  }, [onViewMore]);
 
-  if (isLoading || !flashSales || flashSales.length === 0) {
+  const scrollContentStyle = useMemo(() => ({ paddingRight: 12 }), []);
+
+  // Use sample data if no data from database or error
+  const displayFlashSales = !error && flashSales && flashSales.length > 0 
+    ? flashSales 
+    : SAMPLE_FLASH_SALES;
+
+  // Show loading state
+  if (isLoading) {
+    return null; // Silent loading
+  }
+
+  if (!displayFlashSales || displayFlashSales.length === 0) {
     return null;
   }
 
   // Get earliest end time for countdown
   const endTime =
-    flashSales[0]?.valid_until || new Date(Date.now() + 3600000).toISOString();
+    displayFlashSales[0]?.valid_until || new Date(Date.now() + 3600000).toISOString();
 
   return (
     <Card className="mx-2 mb-3">
@@ -176,7 +278,7 @@ export default function FlashSale({
         </View>
 
         <Pressable
-          onPress={onViewMore}
+          onPress={handleViewAll}
           className="flex-row items-center gap-1 active:opacity-70"
         >
           <Text className="text-xs text-gray-500">Xem tất cả</Text>
@@ -185,35 +287,19 @@ export default function FlashSale({
       </View>
 
       {/* Horizontal Scroll */}
-      <View className="px-2 py-4">
+      <View className="px-2 py-4" style={{ height: 230 }}>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingRight: 12 }}
+          contentContainerStyle={scrollContentStyle}
         >
-          {flashSales.map((item: FlashSale) => (
+          {displayFlashSales.map((item: FlashSale) => (
             <FlashSaleItem
               key={item.id}
               item={item}
               onPress={() => onSelectItem?.(item.id)}
             />
           ))}
-          {/* View All card at the end */}
-          <Pressable onPress={handleViewAll} className="w-[130px] mr-3 justify-center">
-            <View className="items-center justify-center h-full">
-              <Ionicons
-                name="chevron-forward-circle-outline"
-                size={40}
-                color="#26C6DA"
-              />
-              <Text
-                className="text-sm font-semibold text-gray-800 text-center mt-2"
-                numberOfLines={2}
-              >
-                Xem tất cả
-              </Text>
-            </View>
-          </Pressable>
         </ScrollView>
       </View>
     </Card>
