@@ -1,6 +1,7 @@
 import Card from "@/components/common/Card";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useCallback, useMemo } from "react";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
 
 interface RecentlyViewedItem {
@@ -46,7 +47,7 @@ function RecentlyViewedItemCard({
   return (
     <Pressable onPress={onPress} className="w-[280px] mr-3 active:opacity-80">
       <View
-        className="flex-row bg-white rounded-lg overflow-hidden"
+        className="flex-row bg-white rounded-md overflow-hidden"
         style={{ height: 100 }}
       >
         {/* Left: Image */}
@@ -90,13 +91,13 @@ function RecentlyViewedItemCard({
   );
 }
 
-// Sample data for demonstration
+// Sample data for demonstration (moved outside component to avoid re-render issues)
 const SAMPLE_ITEMS: RecentlyViewedItem[] = [
   {
     id: "1",
     name: "Bún Bò Huế Cô Ba",
     image: "https://images.unsplash.com/photo-1569562211093-4ed0d0758f12?w=400",
-    viewedAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(), // 5 hours ago
+    viewedAt: "2025-11-02T10:00:00.000Z", // Fixed date instead of dynamic
     discount: "Giảm 30.000đ",
     restaurantName: "Cô Ba Restaurant",
   },
@@ -104,7 +105,7 @@ const SAMPLE_ITEMS: RecentlyViewedItem[] = [
     id: "2",
     name: "Phở Bò Tái Lăn",
     image: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=400",
-    viewedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+    viewedAt: "2025-11-03T08:00:00.000Z",
     discount: "Freeship 15K",
     restaurantName: "Phở Hà Nội",
   },
@@ -112,7 +113,7 @@ const SAMPLE_ITEMS: RecentlyViewedItem[] = [
     id: "3",
     name: "Cơm Tấm Sườn Bì Chả",
     image: "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400",
-    viewedAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+    viewedAt: "2025-11-01T12:00:00.000Z",
     discount: "Giảm 20%",
     restaurantName: "Cơm Tấm Sài Gòn",
   },
@@ -120,18 +121,18 @@ const SAMPLE_ITEMS: RecentlyViewedItem[] = [
     id: "4",
     name: "Bánh Mì Thịt Nướng",
     image: "https://images.unsplash.com/photo-1565299507177-b0ac66763828?w=400",
-    viewedAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(), // 3 hours ago
+    viewedAt: "2025-11-03T05:00:00.000Z",
     discount: "Mua 1 tặng 1",
     restaurantName: "Bánh Mì Hòa Mã",
   },
 ];
 
 export default function RecentlyViewed({ onSelectItem }: RecentlyViewedProps) {
-  const handleViewAll = () => {
-    // Implement later: Navigate to collections list screen
+  const handleViewAll = useCallback(() => {
     router.push("/(screens)/recentlyviewed" as any);
-    console.log("View all collections");
-  };
+  }, []);
+
+  const scrollContentStyle = useMemo(() => ({ paddingRight: 12 }), []);
 
   // In a real app, this would fetch from local storage or API
   const items = SAMPLE_ITEMS;
@@ -150,11 +151,11 @@ export default function RecentlyViewed({ onSelectItem }: RecentlyViewedProps) {
       }}
     >
       {/* Horizontal scroll list */}
-      <View className="px-2 pb-4">
+      <View className="px-2 pb-4" style={{ height: 120 }}>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingRight: 12 }}
+          contentContainerStyle={scrollContentStyle}
         >
           {items.map((item) => (
             <RecentlyViewedItemCard

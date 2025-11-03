@@ -19,7 +19,7 @@ type SecondaryBannerCarouselProps = {
   aspectRatio?: number;
 };
 
-// Sample secondary banners (different from main banners)
+// Sample secondary banners (different from main banners) - fixed dates
 const SAMPLE_SECONDARY_BANNERS: Banner[] = [
   {
     id: "sec-1",
@@ -33,8 +33,8 @@ const SAMPLE_SECONDARY_BANNERS: Banner[] = [
     isActive: true,
     clickCount: 0,
     impressionCount: 0,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    createdAt: "2025-11-01T00:00:00.000Z",
+    updatedAt: "2025-11-03T00:00:00.000Z",
   },
   {
     id: "sec-2",
@@ -48,8 +48,8 @@ const SAMPLE_SECONDARY_BANNERS: Banner[] = [
     isActive: true,
     clickCount: 0,
     impressionCount: 0,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    createdAt: "2025-11-01T00:00:00.000Z",
+    updatedAt: "2025-11-03T00:00:00.000Z",
   },
   {
     id: "sec-3",
@@ -63,8 +63,8 @@ const SAMPLE_SECONDARY_BANNERS: Banner[] = [
     isActive: true,
     clickCount: 0,
     impressionCount: 0,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    createdAt: "2025-11-01T00:00:00.000Z",
+    updatedAt: "2025-11-03T00:00:00.000Z",
   },
 ];
 
@@ -135,7 +135,7 @@ export default function SecondaryBannerCarousel({
   if (!hasData) return null;
 
   return (
-    <View className="my-1 mb-3">
+    <View className="mb-3">
       <ScrollView
         ref={scrollRef}
         horizontal

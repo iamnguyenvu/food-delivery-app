@@ -140,7 +140,6 @@ export default function HomeScreen() {
           />
 
           <RecentlyViewed 
-            onViewMore={() => console.log("View more recently viewed")}
             onSelectItem={(id) => console.log("Selected recently viewed:", id)}
           />
 
@@ -150,7 +149,7 @@ export default function HomeScreen() {
 
           <TopRatedRestaurants
             onViewMore={() => console.log("View more top rated restaurants")}
-            onSelectRestaurant={(id) => console.log("Selected restaurant:", id)}
+            // onSelectRestaurant={(id) => console.log("Selected restaurant:", id)}
           />
 
           {/* <CategoryList
