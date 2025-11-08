@@ -3,16 +3,32 @@ import { Pressable, Text, View } from "react-native";
 
 export default function EmptyTabView() {
     return (
-        <View className="items-center justify-center mt-16 px-8">
-            <Ionicons name="clipboard-outline" size={80} color="#26C6DA" />
-            <Text className="text-lg font-semibold mt-4 text-center text-black">
-                Bạn chưa có đơn nào
+        <View className="items-center justify-center mt-20 px-8">
+            <View
+                className="w-24 h-24 rounded-3xl items-center justify-center mb-4"
+                style={{
+                    backgroundColor: "#E0F7FA",
+                }}
+            >
+                <Ionicons name="clipboard-outline" size={40} color="#26C6DA" />
+            </View>
+            <Text className="text-lg font-bold text-[#0F172A] mb-1">
+                Chưa có đơn hàng
             </Text>
-            <Text className="text-black text-sm mt-2 text-center">
-                Các đơn đã đặt sẽ hiển thị tại đây
+            <Text className="text-sm text-gray-500 text-center mb-6">
+                Đặt món yêu thích và theo dõi tại đây
             </Text>
-            <Pressable className="mt-5 bg-primary-400 px-6 py-2 rounded-lg shadow-sm">
-                <Text className="text-white font-medium">
+            <Pressable
+                className="bg-[#26C6DA] px-6 py-3 rounded-xl"
+                style={{
+                    shadowColor: "#26C6DA",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.2,
+                    shadowRadius: 4,
+                    elevation: 3,
+                }}
+            >
+                <Text className="text-white font-semibold text-[14px]">
                     Đặt ngay
                 </Text>
             </Pressable>

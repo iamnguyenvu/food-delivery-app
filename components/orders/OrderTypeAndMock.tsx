@@ -203,6 +203,47 @@ export const ordersMockData: Order[] = [
 
         payment_method: "vnpay",
         payment_status: "refunded"
+    },
+    {
+        id: "O-437500",
+        order_number: "GF-437500",
+        restaurant_id: "R004",
+        restaurant_name: "Pizza Hut",
+        restaurant_thumbnail: "https://th.bing.com/th/id/R.f72283f2350081b235657f8f4438439c?rik=RK59iYE3azXY0Q&pid=ImgRaw&r=0",
+        items: [
+            {
+                name: "Pizza Hải Sản Phô Mai",
+                quantity: 1,
+                price: 89000,
+                thumbnail: "https://th.bing.com/th/id/R.f72283f2350081b235657f8f4438439c?rik=RK59iYE3azXY0Q&pid=ImgRaw&r=0"
+            }
+        ],
+
+        subtotal: 89000,
+        delivery_fee: 15000,
+        service_fee: 3000,
+        discount: 10000,
+        total: 97000,
+
+        delivery_address: {
+            street: "50 Nguyễn Văn Lượng",
+            ward: "P.6",
+            district: "Gò Vấp",
+            city: "TPHCM"
+        },
+
+        delivery_phone: "0911223344",
+        delivery_notes: "Thêm sốt cà",
+
+        status: "delivered",
+
+        estimated_delivery: new Date(Date.now() - 40 * 60000),
+        created_at: new Date(Date.now() - 120 * 60000),
+        delivered_at: new Date(Date.now() - 40 * 60000),
+
+        payment_method: "momo",
+        payment_status: "paid"
     }
+
 ];
 
