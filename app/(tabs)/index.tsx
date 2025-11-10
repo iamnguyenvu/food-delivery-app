@@ -96,18 +96,37 @@ export default function HomeScreen() {
   };
 
   const handleFlashSaleSelect = (id: string) => {
-    // Navigate to restaurant detail - for now use sample restaurant
-    router.push("/(screens)/restaurant-detail/sample-restaurant-1" as any);
+    // For flash sale items, navigate to dish detail
+    // In real app, would map flash sale ID to dish ID
+    const flashSaleToDishMap: Record<string, string> = {
+      'sample-fs-1': 'dish-1',
+      'sample-fs-2': 'dish-2', 
+      'sample-fs-3': 'dish-3',
+    };
+    const dishId = flashSaleToDishMap[id] || 'dish-1';
+    router.push(`/(screens)/dish-detail/${dishId}` as any);
   };
 
   const handleRecentlyViewedSelect = (id: string) => {
-    // Navigate to restaurant detail - for now use sample restaurant
-    router.push("/(screens)/restaurant-detail/sample-restaurant-1" as any);
+    // Navigate to dish detail
+    router.push(`/(screens)/dish-detail/${id}` as any);
   };
 
   const handleRestaurantSelect = (id: string) => {
     // Navigate to restaurant detail
     router.push(`/(screens)/restaurant-detail/${id}` as any);
+  };
+
+  const handleDealSelect = (id: string) => {
+    // For deals, navigate to dish detail
+    // In real app, would map deal ID to dish ID
+    const dealToDishMap: Record<string, string> = {
+      'sample-1': 'dish-1',
+      'sample-2': 'dish-2',
+      'sample-3': 'dish-3',
+    };
+    const dishId = dealToDishMap[id] || 'dish-1';
+    router.push(`/(screens)/dish-detail/${dishId}` as any);
   };
 
   return (
@@ -149,7 +168,7 @@ export default function HomeScreen() {
 
           <TrumDealNgon
             onViewMore={() => console.log("View more deals")}
-            onSelectDeal={(id) => console.log("Selected deal:", id)}
+            onSelectDeal={handleDealSelect}
           />
 
           <CollectionsSection maxItems={6} />
