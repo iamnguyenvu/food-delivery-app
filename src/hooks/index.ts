@@ -1,4 +1,4 @@
-export type { FlashSale } from '../types';
+export type { FlashSale, SearchHistory, SearchSuggestion } from '../types';
 export { useAddresses } from './useAddresses';
 export type { SavedAddress } from './useAddresses';
 export { useAuth } from './useAuth';
@@ -9,5 +9,10 @@ export type { Category, Deal } from './useCategories';
 export { trackCollectionClick, trackCollectionView, useCollections } from './useCollections';
 export type { Collection } from './useCollections';
 export { trackFlashSaleClick, trackFlashSaleView, useFlashSales } from './useFlashSales';
+export {
+    useAddSearchHistory,
+    useClearSearchHistory, useSearch, useSearchHistory, useSearchSuggestions,
+    useTrendingSuggestions
+} from './useSearch';
 
 
