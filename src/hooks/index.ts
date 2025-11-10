@@ -10,19 +10,15 @@ export { trackCollectionClick, trackCollectionView, useCollections } from './use
 export type { Collection } from './useCollections';
 export { trackFlashSaleClick, trackFlashSaleView, useFlashSales } from './useFlashSales';
 export {
+    SAMPLE_DISHES, SAMPLE_RESTAURANT, getDealToDishMapping, getDishToRestaurantMapping,
+    getFlashSaleToDishMapping, useBestSellerDishes,
+    useDiscountedDishes, useDish, usePopularDishes, useRestaurantCategories, useRestaurantDetail,
+    useRestaurantDishes, useRestaurantFromDish
+} from './useRestaurant';
+export {
     useAddSearchHistory,
     useClearSearchHistory, useSearch, useSearchHistory, useSearchSuggestions,
     useTrendingSuggestions
 } from './useSearch';
-export {
-    useRestaurantDetail,
-    useRestaurantDishes,
-    usePopularDishes,
-    useBestSellerDishes,
-    useDiscountedDishes,
-    useRestaurantCategories,
-    SAMPLE_RESTAURANT,
-    SAMPLE_DISHES
-} from './useRestaurant';
 
 

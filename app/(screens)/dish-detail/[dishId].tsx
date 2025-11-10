@@ -1,3 +1,4 @@
+import { useDish } from "@/src/hooks";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
@@ -9,16 +10,30 @@ import {
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { SAMPLE_DISHES } from "@/src/hooks";
-import type { Dish } from "@/src/types";
 
 export default function DishDetailScreen() {
   const { dishId } = useLocalSearchParams<{ dishId: string }>();
   const [quantity, setQuantity] = useState(1);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
 
-  // Use sample data - in real app would fetch from API
-  const dish = SAMPLE_DISHES.find(d => d.id === dishId) || SAMPLE_DISHES[0];
+  // Fetch dish data based on dishId
+  const { data: dish, isLoading } = useDish(dishId || '');
+
+  if (isLoading) {
+    return (
+      <SafeAreaView className="flex-1 bg-white justify-center items-center">
+        <Text className="text-gray-500">Đang tải...</Text>
+      </SafeAreaView>
+    );
+  }
+
+  if (!dish) {
+    return (
+      <SafeAreaView className="flex-1 bg-white justify-center items-center">
+        <Text className="text-gray-500">Món ăn không tồn tại</Text>
+      </SafeAreaView>
+    );
+  }
 
   const handleBack = () => {
     router.back();
@@ -177,7 +192,7 @@ export default function DishDetailScreen() {
                 Chất gây dị ứng
               </Text>
               <View className="flex-row flex-wrap gap-2">
-                {dish.allergens.map((allergen, index) => (
+                {dish.allergens.map((allergen: string, index: number) => (
                   <View key={index} className="bg-red-50 border border-red-200 rounded-full px-3 py-1">
                     <Text className="text-sm text-red-600">{allergen}</Text>
                   </View>

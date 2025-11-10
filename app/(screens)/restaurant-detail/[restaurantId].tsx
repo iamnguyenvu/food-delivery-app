@@ -1,13 +1,8 @@
 import {
-    useRestaurantDetail,
-    usePopularDishes,
-    useBestSellerDishes,
-    useDiscountedDishes,
-    useRestaurantCategories,
-    SAMPLE_RESTAURANT,
     SAMPLE_DISHES,
+    SAMPLE_RESTAURANT
 } from "@/src/hooks";
-import type { Restaurant, Dish } from "@/src/types";
+import type { Dish } from "@/src/types";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useRef, useState } from "react";
@@ -16,8 +11,7 @@ import {
     Pressable,
     ScrollView,
     Text,
-    View,
-    Animated,
+    View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
