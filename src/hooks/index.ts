@@ -14,5 +14,15 @@ export {
     useClearSearchHistory, useSearch, useSearchHistory, useSearchSuggestions,
     useTrendingSuggestions
 } from './useSearch';
+export {
+    useRestaurantDetail,
+    useRestaurantDishes,
+    usePopularDishes,
+    useBestSellerDishes,
+    useDiscountedDishes,
+    useRestaurantCategories,
+    SAMPLE_RESTAURANT,
+    SAMPLE_DISHES
+} from './useRestaurant';
 
 

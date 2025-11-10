@@ -18,6 +18,12 @@ export interface Restaurant {
   categories: string[];
   isOpen: boolean;
   isFavorite?: boolean;
+  // Extended fields for detail page
+  address?: string;
+  phone?: string;
+  reviewCount?: number;
+  commentCount?: number;
+  coverImage?: string;
 }
 
 export interface Dish {
@@ -31,6 +37,14 @@ export interface Dish {
   rating?: number;
   isFavorite?: boolean;
   isAvailable: boolean;
+  // Extended fields
+  originalPrice?: number;
+  discountPercent?: number;
+  isPopular?: boolean;
+  isBestSeller?: boolean;
+  spiceLevel?: 'mild' | 'medium' | 'hot' | 'very_hot';
+  ingredients?: string[];
+  allergens?: string[];
 }
 
 export interface CartItem {

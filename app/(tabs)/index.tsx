@@ -95,6 +95,21 @@ export default function HomeScreen() {
     router.push("/(screens)/search" as any);
   };
 
+  const handleFlashSaleSelect = (id: string) => {
+    // Navigate to restaurant detail - for now use sample restaurant
+    router.push("/(screens)/restaurant-detail/sample-restaurant-1" as any);
+  };
+
+  const handleRecentlyViewedSelect = (id: string) => {
+    // Navigate to restaurant detail - for now use sample restaurant
+    router.push("/(screens)/restaurant-detail/sample-restaurant-1" as any);
+  };
+
+  const handleRestaurantSelect = (id: string) => {
+    // Navigate to restaurant detail
+    router.push(`/(screens)/restaurant-detail/${id}` as any);
+  };
+
   return (
     <>
       <LocationPermissionModal
@@ -141,11 +156,11 @@ export default function HomeScreen() {
 
           <FlashSale 
             onViewMore={() => console.log("View more flash sales")}
-            onSelectItem={(id) => console.log("Selected flash sale:", id)}
+            onSelectItem={handleFlashSaleSelect}
           />
 
           <RecentlyViewed 
-            onSelectItem={(id) => console.log("Selected recently viewed:", id)}
+            onSelectItem={handleRecentlyViewedSelect}
           />
 
           <SecondaryBannerCarousel
@@ -154,7 +169,7 @@ export default function HomeScreen() {
 
           <TopRatedRestaurants
             onViewMore={() => console.log("View more top rated restaurants")}
-            // onSelectRestaurant={(id) => console.log("Selected restaurant:", id)}
+            onSelectRestaurant={handleRestaurantSelect}
           />
 
           {/* <CategoryList
