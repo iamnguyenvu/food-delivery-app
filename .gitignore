@@ -60,9 +60,8 @@ yarn-error.*
 *.vpp.bak*
 *.vpp~
 
-# Documentation (local only)
+# Documentation (local only) - Allow essential files
 docs/*.md
-!docs/README.md
 
 # Database backups and exports
 *.sql.backup
