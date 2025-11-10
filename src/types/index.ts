@@ -140,3 +140,28 @@ export interface FlashSale {
     name: string;
   };
 }
+
+export interface SearchHistory {
+  id: string;
+  user_id: string;
+  search_query: string;
+  search_type: 'general' | 'restaurant' | 'dish' | 'category';
+  result_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SearchSuggestion {
+  id: string;
+  title: string;
+  subtitle?: string;
+  image_url?: string;
+  suggestion_type: 'dish' | 'restaurant' | 'category' | 'cuisine';
+  target_id?: string;
+  popularity_score: number;
+  is_trending: boolean;
+  is_active: boolean;
+  display_order: number;
+  created_at: string;
+  updated_at: string;
+}

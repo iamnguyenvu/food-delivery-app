@@ -91,6 +91,10 @@ export default function HomeScreen() {
     console.log("Category selected:", id);
   };
 
+  const handleSearchPress = () => {
+    router.push("/(screens)/search" as any);
+  };
+
   return (
     <>
       <LocationPermissionModal
@@ -111,6 +115,7 @@ export default function HomeScreen() {
         <Header 
           location={label} 
           onPressLocation={openPicker}
+          onSearchPress={handleSearchPress}
           scrollY={scrollY}
         />
 

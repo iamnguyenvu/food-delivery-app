@@ -1,11 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Animated, Pressable, Text, TextInput, View } from "react-native";
+import { Animated, Pressable, Text, TextInput } from "react-native";
 
 type HeaderProps = {
   location: string;
   placeholder?: string;
   value?: string;
   onSearchChange?: (text: string) => void;
+  onSearchPress?: () => void;
   onPressLocation?: () => void;
   scrollY?: Animated.Value;
 };
@@ -15,6 +16,7 @@ export default function Header({
   placeholder = "Tìm kiếm món ăn, quán...",
   value,
   onSearchChange,
+  onSearchPress,
   onPressLocation,
   scrollY,
 }: HeaderProps) {
@@ -74,12 +76,16 @@ export default function Header({
         </Pressable>
       </Animated.View>
 
-      <View className="flex-row items-center bg-white rounded-md px-2 h-11">
+      <Pressable 
+        onPress={onSearchPress}
+        className="flex-row items-center bg-white rounded-md px-2 h-11"
+      >
         <Ionicons name="search" size={24} color="#26C6DA" />
         <TextInput
           placeholder={placeholder}
           value={value}
           onChangeText={onSearchChange}
+          onFocus={onSearchPress}
           returnKeyType="search"
           multiline={false}
           scrollEnabled={false}
@@ -88,8 +94,9 @@ export default function Header({
           className="flex-1 font-medium rounded-lg p-2 text-primary-400"
           placeholderTextColor="#26C6DA"
           underlineColorAndroid="transparent"
+          editable={!onSearchPress}
         />
-      </View>
+      </Pressable>
     </Animated.View>
   );
 }
