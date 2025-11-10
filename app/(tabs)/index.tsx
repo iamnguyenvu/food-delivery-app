@@ -8,7 +8,13 @@ import SecondaryBannerCarousel from "@/components/index/SecondaryBannerCarousel"
 import TopRatedRestaurants from "@/components/index/TopRatedRestaurants";
 import TrumDealNgon from "@/components/index/TrumDealNgon";
 import LocationPermissionModal from "@/components/location/LocationPermissionModal";
-import { trackBannerClick, useBanners } from "@/src/hooks";
+import {
+  getDealToDishMapping,
+  getDishToRestaurantMapping,
+  getFlashSaleToDishMapping,
+  trackBannerClick,
+  useBanners
+} from "@/src/hooks";
 import { useLocationStore } from "@/src/store/locationStore";
 import { Banner } from "@/src/types";
 import { LinearGradient } from "expo-linear-gradient";
@@ -96,18 +102,29 @@ export default function HomeScreen() {
   };
 
   const handleFlashSaleSelect = (id: string) => {
-    // Navigate to restaurant detail - for now use sample restaurant
-    router.push("/(screens)/restaurant-detail/sample-restaurant-1" as any);
+    // Flash sale items navigate to dish detail
+    const flashSaleMapping = getFlashSaleToDishMapping();
+    const dishId = flashSaleMapping[id] || 'dish-1';
+    router.push(`/(screens)/dish-detail/${dishId}` as any);
   };
 
   const handleRecentlyViewedSelect = (id: string) => {
-    // Navigate to restaurant detail - for now use sample restaurant
-    router.push("/(screens)/restaurant-detail/sample-restaurant-1" as any);
+    // Recently viewed items navigate to restaurant (not dish detail)
+    const dishToRestaurantMapping = getDishToRestaurantMapping();
+    const restaurantId = dishToRestaurantMapping[id] || 'sample-restaurant-1';
+    router.push(`/(screens)/restaurant-detail/${restaurantId}` as any);
   };
 
   const handleRestaurantSelect = (id: string) => {
     // Navigate to restaurant detail
     router.push(`/(screens)/restaurant-detail/${id}` as any);
+  };
+
+  const handleDealSelect = (id: string) => {
+    // Deals navigate to dish detail
+    const dealMapping = getDealToDishMapping();
+    const dishId = dealMapping[id] || 'dish-1';
+    router.push(`/(screens)/dish-detail/${dishId}` as any);
   };
 
   return (
@@ -149,7 +166,7 @@ export default function HomeScreen() {
 
           <TrumDealNgon
             onViewMore={() => console.log("View more deals")}
-            onSelectDeal={(id) => console.log("Selected deal:", id)}
+            onSelectDeal={handleDealSelect}
           />
 
           <CollectionsSection maxItems={6} />
