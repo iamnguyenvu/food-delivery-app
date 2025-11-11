@@ -1,15 +1,216 @@
 import { supabase } from "@/src/lib/supabase";
 import { Ionicons } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Modal, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import EmptyTabView from "./EmptyTabView";
 import OrderCard from "./OrderCard";
 import OrderDetail from "./OrderDetail";
 import { Dish, Order, ordersMockData } from "./OrderTypeAndMock";
 import SuggestionSection from "./SuggestionSection";
 
+// Custom Date Picker Component
+function CustomDatePicker({ 
+    visible, 
+    value, 
+    onClose, 
+    onConfirm 
+}: { 
+    visible: boolean; 
+    value: Date; 
+    onClose: () => void; 
+    onConfirm: (date: Date) => void;
+}) {
+    const [selectedDate, setSelectedDate] = useState(value);
+    const dayScrollRef = useRef<ScrollView>(null);
+    const monthScrollRef = useRef<ScrollView>(null);
+    const yearScrollRef = useRef<ScrollView>(null);
+    
+    const daysInMonth = (month: number, year: number) => {
+        return new Date(year, month + 1, 0).getDate();
+    };
+
+    const months = [
+        "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6",
+        "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"
+    ];
+
+    const currentYear = new Date().getFullYear();
+    const years = Array.from({ length: 50 }, (_, i) => currentYear - 10 + i);
+    
+    useEffect(() => {
+        if (visible) {
+            setSelectedDate(value);
+            // Auto-scroll to selected values after a short delay
+            setTimeout(() => {
+                const day = value.getDate();
+                const month = value.getMonth();
+                const year = value.getFullYear();
+                const yearIndex = years.findIndex(y => y === year);
+                
+                // Scroll to selected day (approximately 40px per item)
+                dayScrollRef.current?.scrollTo({ y: (day - 1) * 40, animated: true });
+                // Scroll to selected month (approximately 40px per item)
+                monthScrollRef.current?.scrollTo({ y: month * 40, animated: true });
+                // Scroll to selected year (approximately 40px per item)
+                if (yearIndex >= 0) {
+                    yearScrollRef.current?.scrollTo({ y: yearIndex * 40, animated: true });
+                }
+            }, 100);
+        }
+    }, [visible, value]);
+
+    const handleConfirm = () => {
+        onConfirm(selectedDate);
+        onClose();
+    };
+
+    const handleDayChange = (day: number) => {
+        const maxDay = daysInMonth(selectedDate.getMonth(), selectedDate.getFullYear());
+        const newDay = Math.min(Math.max(1, day), maxDay);
+        setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), newDay));
+    };
+
+    const handleMonthChange = (month: number) => {
+        const maxDay = daysInMonth(month, selectedDate.getFullYear());
+        const currentDay = Math.min(selectedDate.getDate(), maxDay);
+        setSelectedDate(new Date(selectedDate.getFullYear(), month, currentDay));
+    };
+
+    const handleYearChange = (year: number) => {
+        const maxDay = daysInMonth(selectedDate.getMonth(), year);
+        const currentDay = Math.min(selectedDate.getDate(), maxDay);
+        setSelectedDate(new Date(year, selectedDate.getMonth(), currentDay));
+    };
+
+    if (!visible) return null;
+
+    return (
+        <Modal
+            visible={visible}
+            transparent
+            animationType="slide"
+            onRequestClose={onClose}
+        >
+            <View className="flex-1 bg-black/50 justify-end">
+                <View className="bg-white rounded-t-3xl p-5" style={{ maxHeight: "60%" }}>
+                    <View className="flex-row items-center justify-between mb-4">
+                        <Text className="text-lg font-bold text-[#0F172A]">Chọn ngày</Text>
+                        <Pressable onPress={onClose}>
+                            <View className="w-8 h-8 rounded-full items-center justify-center" style={{ backgroundColor: "#F2FBFD" }}>
+                                <Ionicons name="close" size={20} color="#26C6DA" />
+                            </View>
+                        </Pressable>
+                    </View>
+
+                    <View className="flex-row justify-between mb-4" style={{ height: 200 }}>
+                        {/* Day Picker */}
+                        <View className="flex-1 mr-2">
+                            <Text className="text-xs text-gray-600 mb-2 text-center font-medium">Ngày</Text>
+                            <ScrollView 
+                                ref={dayScrollRef}
+                                className="border border-[#D3F3F7] rounded-xl bg-[#F8FDFE]"
+                                showsVerticalScrollIndicator={false}
+                            >
+                                {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => {
+                                    const maxDay = daysInMonth(selectedDate.getMonth(), selectedDate.getFullYear());
+                                    if (day > maxDay) return null;
+                                    const isSelected = day === selectedDate.getDate();
+                                    return (
+                                        <Pressable
+                                            key={day}
+                                            onPress={() => handleDayChange(day)}
+                                            className={`py-3 px-4 items-center ${isSelected ? "bg-[#26C6DA]" : ""}`}
+                                        >
+                                            <Text className={`text-sm font-semibold ${isSelected ? "text-white" : "text-black"}`}>
+                                                {day}
+                                            </Text>
+                                        </Pressable>
+                                    );
+                                })}
+                            </ScrollView>
+                        </View>
+
+                        {/* Month Picker */}
+                        <View className="flex-1 mr-2">
+                            <Text className="text-xs text-gray-600 mb-2 text-center font-medium">Tháng</Text>
+                            <ScrollView 
+                                ref={monthScrollRef}
+                                className="border border-[#D3F3F7] rounded-xl bg-[#F8FDFE]"
+                                showsVerticalScrollIndicator={false}
+                            >
+                                {months.map((month, index) => {
+                                    const isSelected = index === selectedDate.getMonth();
+                                    return (
+                                        <Pressable
+                                            key={index}
+                                            onPress={() => handleMonthChange(index)}
+                                            className={`py-3 px-2 items-center ${isSelected ? "bg-[#26C6DA]" : ""}`}
+                                        >
+                                            <Text className={`text-xs font-semibold ${isSelected ? "text-white" : "text-black"}`} numberOfLines={1}>
+                                                {month}
+                                            </Text>
+                                        </Pressable>
+                                    );
+                                })}
+                            </ScrollView>
+                        </View>
+
+                        {/* Year Picker */}
+                        <View className="flex-1">
+                            <Text className="text-xs text-gray-600 mb-2 text-center font-medium">Năm</Text>
+                            <ScrollView 
+                                ref={yearScrollRef}
+                                className="border border-[#D3F3F7] rounded-xl bg-[#F8FDFE]"
+                                showsVerticalScrollIndicator={false}
+                            >
+                                {years.map((year) => {
+                                    const isSelected = year === selectedDate.getFullYear();
+                                    return (
+                                        <Pressable
+                                            key={year}
+                                            onPress={() => handleYearChange(year)}
+                                            className={`py-3 px-4 items-center ${isSelected ? "bg-[#26C6DA]" : ""}`}
+                                        >
+                                            <Text className={`text-sm font-semibold ${isSelected ? "text-white" : "text-black"}`}>
+                                                {year}
+                                            </Text>
+                                        </Pressable>
+                                    );
+                                })}
+                            </ScrollView>
+                        </View>
+                    </View>
+
+                    <View className="flex-row mt-4">
+                        <Pressable
+                            onPress={onClose}
+                            className="px-4 py-3 rounded-xl border border-[#D3F3F7] bg-white mr-2 flex-1"
+                        >
+                            <Text className="text-sm font-semibold text-[#177C8A] text-center">Huỷ</Text>
+                        </Pressable>
+                        <Pressable
+                            onPress={handleConfirm}
+                            className="px-4 py-3 rounded-xl bg-[#26C6DA] flex-1"
+                            style={{
+                                shadowColor: "#26C6DA",
+                                shadowOffset: { width: 0, height: 2 },
+                                shadowOpacity: 0.2,
+                                shadowRadius: 4,
+                                elevation: 3,
+                            }}
+                        >
+                            <Text className="text-sm font-semibold text-white text-center">Xác nhận</Text>
+                        </Pressable>
+                    </View>
+                </View>
+            </View>
+        </Modal>
+    );
+}
+
 export default function OrdersTabs({ activeTab }: { activeTab: string }) {
+    const insets = useSafeAreaInsets();
     const [loading, setLoading] = useState(false);
     const [orders, setOrders] = useState<Order[]>([]);
     const [dishes, setDishes] = useState<Dish[]>([]);
@@ -141,7 +342,11 @@ export default function OrdersTabs({ activeTab }: { activeTab: string }) {
     ).filter(matchesSearch);
 
     return (
-        <ScrollView className="flex-1 px-4 pt-4 pb-6" showsVerticalScrollIndicator={false}>
+        <ScrollView
+            className="flex-1 px-4 pt-4 pb-6"
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 24 + insets.bottom + 80 }}
+        >
             {loading ? (
                 <View className="py-10 items-center">
                     <ActivityIndicator color="#26C6DA" size="large" />
@@ -229,29 +434,20 @@ export default function OrdersTabs({ activeTab }: { activeTab: string }) {
                                         >
                                             <Text className="text-sm text-black">{fromDateSel.toLocaleDateString("vi-VN")}</Text>
                                         </Pressable>
-                                        {showFromPicker && (
-                                            // @ts-ignore conditional require only on native
-                                            require("react").createElement(
-                                                // @ts-ignore only on native env
-                                                require("@react-native-community/datetimepicker").default,
-                                                {
-                                                    value: fromDateSel,
-                                                    mode: "date",
-                                                    display: "default",
-                                                    onChange: (_: any, selected?: Date) => {
-                                                        setShowFromPicker(false);
-                                                        if (!selected) return;
-                                                        const next = new Date(selected.getFullYear(), selected.getMonth(), selected.getDate());
-                                                        if (next > toDateSel) {
-                                                            setFromDateSel(next);
-                                                            setToDateSel(next);
-                                                        } else {
-                                                            setFromDateSel(next);
-                                                        }
-                                                    }
+                                        <CustomDatePicker
+                                            visible={showFromPicker}
+                                            value={fromDateSel}
+                                            onClose={() => setShowFromPicker(false)}
+                                            onConfirm={(selected) => {
+                                                const next = new Date(selected.getFullYear(), selected.getMonth(), selected.getDate());
+                                                if (next > toDateSel) {
+                                                    setFromDateSel(next);
+                                                    setToDateSel(next);
+                                                } else {
+                                                    setFromDateSel(next);
                                                 }
-                                            )
-                                        )}
+                                            }}
+                                        />
                                     </>
                                 )}
                             </View>
@@ -283,29 +479,20 @@ export default function OrdersTabs({ activeTab }: { activeTab: string }) {
                                         >
                                             <Text className="text-sm text-black">{toDateSel.toLocaleDateString("vi-VN")}</Text>
                                         </Pressable>
-                                        {showToPicker && (
-                                            // @ts-ignore conditional require only on native
-                                            require("react").createElement(
-                                                // @ts-ignore only on native env
-                                                require("@react-native-community/datetimepicker").default,
-                                                {
-                                                    value: toDateSel,
-                                                    mode: "date",
-                                                    display: "default",
-                                                    onChange: (_: any, selected?: Date) => {
-                                                        setShowToPicker(false);
-                                                        if (!selected) return;
-                                                        const next = new Date(selected.getFullYear(), selected.getMonth(), selected.getDate());
-                                                        if (next < fromDateSel) {
-                                                            setToDateSel(next);
-                                                            setFromDateSel(next);
-                                                        } else {
-                                                            setToDateSel(next);
-                                                        }
-                                                    }
+                                        <CustomDatePicker
+                                            visible={showToPicker}
+                                            value={toDateSel}
+                                            onClose={() => setShowToPicker(false)}
+                                            onConfirm={(selected) => {
+                                                const next = new Date(selected.getFullYear(), selected.getMonth(), selected.getDate());
+                                                if (next < fromDateSel) {
+                                                    setToDateSel(next);
+                                                    setFromDateSel(next);
+                                                } else {
+                                                    setToDateSel(next);
                                                 }
-                                            )
-                                        )}
+                                            }}
+                                        />
                                     </>
                                 )}
                             </View>
@@ -385,23 +572,21 @@ export default function OrdersTabs({ activeTab }: { activeTab: string }) {
                 <View className="flex-1 bg-[#F8FDFE]">
                     <SafeAreaView className="flex-1" edges={['top']}>
                         {/* Header */}
-                        <View className="bg-white px-4 pt-2 pb-3 border-b border-[#E0F7FA]">
-                            <View className="flex-row items-center">
-                                <Pressable
-                                    onPress={() => setShowOrderDetail(false)}
-                                    className="w-10 h-10 rounded-full items-center justify-center mr-3"
-                                    style={{ backgroundColor: "#E0F7FA" }}
-                                >
-                                    <Ionicons name="close" size={22} color="#26C6DA" />
-                                </Pressable>
-                                <View className="flex-1">
-                                    <Text className="text-lg font-bold text-[#0F172A]">Chi tiết đơn hàng</Text>
-                                    {selectedOrder && (
-                                        <Text className="text-[10px] text-gray-500 mt-0.5">#{selectedOrder.order_number}</Text>
-                                    )}
-                                </View>
-                            </View>
-                        </View>
+						<View className="bg-white px-4 pt-3 pb-3 border-b border-[#E0F7FA]">
+							<View className="flex-row items-center">
+								<Pressable onPress={() => setShowOrderDetail(false)} className="w-10 h-10 items-center justify-center -ml-1">
+									<Ionicons name="arrow-back" size={22} color="#0F172A" />
+								</Pressable>
+								<View className="flex-1 items-center">
+									<Text className="text-xl font-bold text-[#0F172A]">Chi tiết đơn hàng</Text>
+									{selectedOrder && (
+										<Text className="text-[11px] text-gray-500 mt-0.5">#{selectedOrder.order_number}</Text>
+									)}
+								</View>
+								{/* right spacer to balance layout */}
+								<View className="w-10" />
+							</View>
+						</View>
 
                         {selectedOrder && <OrderDetail order={selectedOrder} />}
                     </SafeAreaView>

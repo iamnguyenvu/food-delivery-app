@@ -1,8 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import { Image, Pressable, ScrollView, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-// import { supabase } from "@/src/lib/supabase";
+import { Image, Platform, Pressable, ScrollView, StatusBar, Text, View } from "react-native";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface NotificationItem {
     id: string;
@@ -75,67 +74,29 @@ const formatTime = (date: Date): string => {
 const getTypeConfig = (type: "order" | "promo" | "system") => {
     switch (type) {
         case "order":
-            return {
-                icon: "bag" as const,
-                bgColor: "#E0F7FA",
-                iconColor: "#26C6DA",
-                borderColor: "#B2EBF2",
-            };
+            return { icon: "bag" as const, bgColor: "#E0F7FA", iconColor: "#26C6DA" };
         case "promo":
-            return {
-                icon: "gift" as const,
-                bgColor: "#FFF3E0",
-                iconColor: "#FF9800",
-                borderColor: "#FFE0B2",
-            };
+            return { icon: "gift" as const, bgColor: "#FFF3E0", iconColor: "#FF9800" };
         case "system":
-            return {
-                icon: "information-circle" as const,
-                bgColor: "#F3E5F5",
-                iconColor: "#9C27B0",
-                borderColor: "#E1BEE7",
-            };
+            return { icon: "information-circle" as const, bgColor: "#F3E5F5", iconColor: "#9C27B0" };
     }
 };
 
 export default function NotificationsScreen() {
     const [notifications, setNotifications] = useState<NotificationItem[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
+    const insets = useSafeAreaInsets();
 
     const fetchData = async () => {
-        // Mock Data trước khi có API
         setNotifications(notificationsMockData);
         setUnreadCount(notificationsMockData.filter((n) => !n.is_read).length);
-
-        /*
-        const { data, error } = await supabase
-          .from("notifications")
-          .select("*")
-          .order("created_at", { ascending: false });
-
-        if (!error && data) {
-          const notificationList = data.map((n) => ({
-            ...n,
-            created_at: new Date(n.created_at),
-          }));
-          setNotifications(notificationList);
-          setUnreadCount(notificationList.filter((n) => !n.is_read).length);
-        }
-        */
     };
 
-    const markAsRead = async (id: string) => {
+    const markAsRead = (id: string) => {
         setNotifications((prev) =>
             prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
         );
         setUnreadCount((prev) => Math.max(0, prev - 1));
-
-        /*
-        await supabase
-          .from("notifications")
-          .update({ is_read: true })
-          .eq("id", id);
-        */
     };
 
     useEffect(() => {
@@ -143,164 +104,121 @@ export default function NotificationsScreen() {
     }, []);
 
     return (
-        <SafeAreaView className="flex-1 bg-[#F8FDFE]">
-            <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-                {/* Header */}
-                <View className="bg-white px-5 pt-4 pb-4 border-b border-[#E0F7FA]">
-                    <View className="flex-row items-center justify-between mb-2">
-                        <View className="flex-row items-center">
-                            <View className="bg-[#E0F7FA] w-11 h-11 rounded-full items-center justify-center mr-3">
-                                <Ionicons name="notifications" size={22} color="#26C6DA" />
-                            </View>
-                            <View>
-                                <Text className="text-2xl font-bold text-[#0F172A]">
-                                    Thông báo
-                                </Text>
-                                <Text className="text-xs text-gray-500 mt-0.5">
-                                    {unreadCount > 0
-                                        ? `${unreadCount} thông báo chưa đọc`
-                                        : "Tất cả đã đọc"}
-                                </Text>
-                            </View>
+        <SafeAreaView className="flex-1 bg-[#F8FDFE]" edges={["top", "left", "right"]}>
+            <StatusBar
+                translucent={false}
+                backgroundColor="#FFFFFF"
+                barStyle={Platform.OS === "ios" ? "dark-content" : "dark-content"}
+            />
+
+            {/* Header */}
+            <View className="bg-white px-5 pt-4 pb-4 border-b border-[#E0F7FA] mb-2">
+                <Text className="text-2xl font-bold text-[#0F172A]">Thông báo</Text>
+                <Text className="text-xs text-gray-500 mt-1">
+                    {unreadCount > 0 ? `${unreadCount} thông báo chưa đọc` : "Tất cả đã đọc"}
+                </Text>
+            </View>
+
+            {/* Notifications List */}
+            <ScrollView
+                className="flex-1 px-4"
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: 24 + insets.bottom + 60 }}
+            >
+                {notifications.length === 0 ? (
+                    <View className="h-[500px] items-center justify-center">
+                        <View className="w-24 h-24 rounded-3xl bg-[#E0F7FA] items-center justify-center mb-4">
+                            <Ionicons name="notifications-off-outline" size={40} color="#26C6DA" />
                         </View>
-                        {unreadCount > 0 && (
-                            <View className="bg-[#26C6DA] px-3 py-1.5 rounded-full">
-                                <Text className="text-white text-xs font-semibold">
-                                    {unreadCount}
-                                </Text>
-                            </View>
-                        )}
+                        <Text className="text-lg font-semibold text-[#0F172A] mb-1">
+                            Chưa có thông báo
+                        </Text>
+                        <Text className="text-sm text-gray-500 text-center px-8">
+                            Thông báo mới sẽ xuất hiện tại đây
+                        </Text>
                     </View>
-                </View>
+                ) : (
+                    notifications.map((item) => {
+                        const typeConfig = getTypeConfig(item.type);
+                        return (
+                            <Pressable
+                                key={item.id}
+                                onPress={() => !item.is_read && markAsRead(item.id)}
+                                className="mb-2"
+                                android_ripple={{ color: "#B2EBF2" }}
+                            >
+                                <View className="bg-white rounded-2xl overflow-hidden border border-[#E6F6F9]" style={{ elevation: item.is_read ? 2 : 4 }}>
+                                    {/* Left accent (stable width to avoid layout shift) */}
+                                    <View className="absolute left-0 top-0 bottom-0 w-1.5" style={{ backgroundColor: item.is_read ? "transparent" : "#26C6DA" }} />
 
-                {/* Notifications List */}
-                <View className="px-4 pt-4 pb-6">
-                    {notifications.length === 0 ? (
-                        <View className="h-[500px] items-center justify-center">
-                            <View className="w-24 h-24 rounded-3xl bg-[#E0F7FA] items-center justify-center mb-4">
-                                <Ionicons name="notifications-off-outline" size={40} color="#26C6DA" />
-                            </View>
-                            <Text className="text-lg font-semibold text-[#0F172A] mb-1">
-                                Chưa có thông báo
-                            </Text>
-                            <Text className="text-sm text-gray-500 text-center px-8">
-                                Thông báo mới sẽ xuất hiện tại đây
-                            </Text>
-                        </View>
-                    ) : (
-                        notifications.map((item, index) => {
-                            const typeConfig = getTypeConfig(item.type);
-                            const isLast = index === notifications.length - 1;
-
-                            return (
-                                <Pressable
-                                    key={item.id}
-                                    onPress={() => !item.is_read && markAsRead(item.id)}
-                                    className={`mb-3 ${isLast ? "mb-0" : ""}`}
-                                    android_ripple={{ color: "#B2EBF2" }}
-                                >
-                                    <View
-                                        className={`bg-white rounded-2xl overflow-hidden ${
-                                            !item.is_read
-                                                ? "border-l-4 border-[#26C6DA] shadow-lg"
-                                                : "border border-[#E6F6F9] shadow-sm"
-                                        }`}
-                                        style={
-                                            !item.is_read
-                                                ? {
-                                                      shadowColor: "#26C6DA",
-                                                      shadowOffset: { width: 0, height: 2 },
-                                                      shadowOpacity: 0.1,
-                                                      shadowRadius: 8,
-                                                      elevation: 4,
-                                                  }
-                                                : {
-                                                      shadowColor: "#000",
-                                                      shadowOffset: { width: 0, height: 1 },
-                                                      shadowOpacity: 0.05,
-                                                      shadowRadius: 3,
-                                                      elevation: 2,
-                                                  }
-                                        }
-                                    >
-                                        <View className="flex-row p-4">
-                                            {/* Icon/Image Container */}
-                                            <View className="relative mr-4">
-                                                {item.image ? (
-                                                    <Image
-                                                        source={{ uri: item.image }}
-                                                        className="w-14 h-14 rounded-xl"
-                                                        resizeMode="cover"
-                                                    />
-                                                ) : (
-                                                    <View
-                                                        className="w-14 h-14 rounded-xl items-center justify-center"
-                                                        style={{
-                                                            backgroundColor: typeConfig.bgColor,
-                                                        }}
-                                                    >
-                                                        <Ionicons
-                                                            name={typeConfig.icon}
-                                                            size={24}
-                                                            color={typeConfig.iconColor}
-                                                        />
-                                                    </View>
-                                                )}
-                                                {/* Type Badge */}
+                                    <View className="flex-row p-3 pl-4">
+                                        {/* Icon / Image */}
+                                        <View className="relative mr-3">
+                                            {item.image ? (
+                                                <Image
+                                                    source={{ uri: item.image }}
+                                                    className="w-12 h-12 rounded-lg"
+                                                    resizeMode="cover"
+                                                />
+                                            ) : (
                                                 <View
-                                                    className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full items-center justify-center border-2 border-white"
-                                                    style={{
-                                                        backgroundColor: typeConfig.bgColor,
-                                                    }}
+                                                    className="w-12 h-12 rounded-lg items-center justify-center"
+                                                    style={{ backgroundColor: typeConfig.bgColor }}
                                                 >
                                                     <Ionicons
                                                         name={typeConfig.icon}
-                                                        size={12}
+                                                        size={20}
                                                         color={typeConfig.iconColor}
                                                     />
                                                 </View>
+                                            )}
+                                            <View
+                                                className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full items-center justify-center border-2 border-white"
+                                                style={{ backgroundColor: typeConfig.bgColor }}
+                                            >
+                                                <Ionicons
+                                                    name={typeConfig.icon}
+                                                    size={10}
+                                                    color={typeConfig.iconColor}
+                                                />
                                             </View>
+                                        </View>
 
-                                            {/* Content */}
-                                            <View className="flex-1">
-                                                <View className="flex-row items-start justify-between mb-1">
-                                                    <Text
-                                                        className={`flex-1 font-bold text-[15px] leading-5 ${
-                                                            item.is_read
-                                                                ? "text-gray-700"
-                                                                : "text-[#0F172A]"
-                                                        }`}
-                                                        numberOfLines={2}
-                                                    >
-                                                        {item.title}
-                                                    </Text>
-                                                    {!item.is_read && (
-                                                        <View className="w-2.5 h-2.5 bg-[#26C6DA] rounded-full ml-2 mt-1" />
-                                                    )}
-                                                </View>
-
+                                        {/* Content */}
+                                        <View className="flex-1">
+                                            <View className="flex-row items-start justify-between mb-0.5">
                                                 <Text
-                                                    className={`text-[13px] leading-5 mb-1 ${
-                                                        item.is_read
-                                                            ? "text-gray-500"
-                                                            : "text-gray-600"
+                                                    className={`flex-1 font-bold text-[14px] leading-5 ${
+                                                        item.is_read ? "text-gray-700" : "text-[#0F172A]"
                                                     }`}
                                                     numberOfLines={2}
                                                 >
-                                                    {item.message}
+                                                    {item.title}
                                                 </Text>
-
-                                                <Text className="text-[11px] text-gray-400 mt-1">
-                                                    {formatTime(item.created_at)}
-                                                </Text>
+                                                {!item.is_read && (
+                                                    <View className="w-2 h-2 bg-[#26C6DA] rounded-full ml-2 mt-0.5" />
+                                                )}
                                             </View>
+
+                                            <Text
+                                                className={`text-[12px] leading-5 mb-0.5 ${
+                                                    item.is_read ? "text-gray-500" : "text-gray-600"
+                                                }`}
+                                                numberOfLines={2}
+                                            >
+                                                {item.message}
+                                            </Text>
+
+                                            <Text className="text-[10px] text-gray-400 mt-0.5">
+                                                {formatTime(item.created_at)}
+                                            </Text>
                                         </View>
                                     </View>
-                                </Pressable>
-                            );
-                        })
-                    )}
-                </View>
+                                </View>
+                            </Pressable>
+                        );
+                    })
+                )}
             </ScrollView>
         </SafeAreaView>
     );
