@@ -1,13 +1,14 @@
+import { useAuth } from "@/src/contexts/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  Text,
-  TextInput,
-  View
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    Text,
+    TextInput,
+    View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -15,6 +16,9 @@ export default function VerifyOTPScreen() {
   const { phone } = useLocalSearchParams<{ phone: string }>();
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [countdown, setCountdown] = useState(60);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { verifyOtp, sendOtpToPhone } = useAuth();
   const inputRefs = useRef<(TextInput | null)[]>([]);
 
   const isOtpComplete = otp.every((digit) => digit !== "");
@@ -50,20 +54,31 @@ export default function VerifyOTPScreen() {
     if (!isOtpComplete) return;
 
     const otpCode = otp.join("");
-    console.log("Verify OTP:", { phone, otpCode });
-
-    // Implement later: Implement OTP verification
-    // Navigate to home or complete registration
-    router.replace("/(tabs)");
+    try {
+      setIsLoading(true);
+      setError(null);
+      await verifyOtp(String(phone), otpCode);
+      router.replace("/(tabs)");
+    } catch (e: any) {
+      setError(e?.message || "Xác minh thất bại. Vui lòng thử lại");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleResendOTP = () => {
+  const handleResendOTP = async () => {
     if (countdown > 0) return;
-
-    console.log("Resend OTP to:", phone);
-    setCountdown(60);
-    setOtp(["", "", "", "", "", ""]);
-    inputRefs.current[0]?.focus();
+    try {
+      setIsLoading(true);
+      await sendOtpToPhone(String(phone));
+      setCountdown(60);
+      setOtp(["", "", "", "", "", ""]);
+      inputRefs.current[0]?.focus();
+    } catch (e: any) {
+      setError(e?.message || "Không thể gửi lại mã OTP");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -140,20 +155,24 @@ export default function VerifyOTPScreen() {
             )}
           </View>
 
+          {error ? (
+            <Text className="text-red-500 text-center mb-3">{error}</Text>
+          ) : null}
+
           {/* Verify Button */}
           <Pressable
             onPress={handleVerify}
-            disabled={!isOtpComplete}
+            disabled={!isOtpComplete || isLoading}
             className={`py-4 rounded-lg items-center ${
-              isOtpComplete ? "bg-primary-400" : "bg-gray-300"
+              isOtpComplete && !isLoading ? "bg-primary-400" : "bg-gray-300"
             }`}
           >
             <Text
               className={`font-semibold text-base ${
-                isOtpComplete ? "text-white" : "text-gray-500"
+                isOtpComplete && !isLoading ? "text-white" : "text-gray-500"
               }`}
             >
-              Xác nhận
+              {isLoading ? "Đang xử lý..." : "Xác nhận"}
             </Text>
           </Pressable>
 

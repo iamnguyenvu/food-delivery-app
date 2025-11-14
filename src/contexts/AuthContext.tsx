@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import { supabase } from "../lib/supabase";
+import { getAuthRedirectUrl } from "../lib/authRedirect";
 
 type OAuthResponse = Awaited<ReturnType<typeof supabase.auth.signInWithOAuth>>;
 type OAuthData = OAuthResponse["data"];
@@ -20,6 +21,10 @@ type AuthContextType = {
   signOut: () => Promise<void>;
   signInWithGoogle: () => Promise<OAuthData>;
   signInWithGithub: () => Promise<OAuthData>;
+  sendOtpToPhone: (phone: string) => Promise<void>;
+  verifyOtp: (phone: string, token: string) => Promise<void>;
+  signInWithPhonePassword: (phone: string, password: string) => Promise<void>;
+  updatePassword: (newPassword: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -72,22 +77,71 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) throw error;
   };
 
+  const formatPhoneE164 = (raw: string) => {
+    let digits = (raw || "").replace(/\D/g, "");
+    if (!digits) return "";
+    if (digits.startsWith("0")) return "+84" + digits.slice(1);
+    if (digits.startsWith("+")) return digits;
+    return "+84" + digits;
+  };
+
+  const mapPhoneAuthError = (error: unknown) => {
+    const message =
+      typeof error === "object" && error && "message" in error
+        ? String((error as any).message ?? "")
+        : "";
+
+    if (message.toLowerCase().includes("unsupported phone provider")) {
+      return new Error(
+        [
+          "Supabase project chưa cấu hình SMS provider nên không thể gửi OTP.",
+          "Mở Supabase Dashboard → Authentication → Phone và làm theo docs/PHONE_AUTH_SETUP.md.",
+        ].join(" ")
+      );
+    }
+
+    if (error instanceof Error) return error;
+    return new Error("Không thể thực hiện xác thực bằng số điện thoại");
+  };
+
+  const ensureProfile = async (u: User | null) => {
+    if (!u) return;
+    try {
+      const { data } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("id", u.id)
+        .single();
+
+      if (!data) {
+        await supabase.from("profiles").insert({
+          id: u.id,
+          email: u.email ?? null,
+          phone: (u as any).phone ?? null,
+        });
+      }
+    } catch (_e) {}
+  };
+
   const signInWithGoogle = async () => {
     try {
-      // Get the redirect URL based on environment
-      const redirectUrl = __DEV__
-        ? "exp://localhost:8081/--/auth/callback" // Development
-        : "fooddelivery://auth/callback"; // Production
+      const redirectUrl = getAuthRedirectUrl();
+      console.log("Google OAuth redirect URL:", redirectUrl);
 
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: redirectUrl,
-          skipBrowserRedirect: true, // Handle redirect manually
+          skipBrowserRedirect: false, // Let Supabase handle the redirect
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
         },
       });
 
       if (error) throw error;
+      // Profile will be ensured on auth state change
       return data;
     } catch (error) {
       console.error("Google sign in error:", error);
@@ -97,25 +151,60 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithGithub = async () => {
     try {
-      // Get the redirect URL based on environment
-      const redirectUrl = __DEV__
-        ? "exp://localhost:8081/--/auth/callback" // Development
-        : "fooddelivery://auth/callback"; // Production
+      const redirectUrl = getAuthRedirectUrl();
+      console.log("Github OAuth redirect URL:", redirectUrl);
 
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "github",
         options: {
           redirectTo: redirectUrl,
-          skipBrowserRedirect: true, // Handle redirect manually
+          skipBrowserRedirect: false, // Let Supabase handle the redirect
         },
       });
 
       if (error) throw error;
+      // Profile will be ensured on auth state change
       return data;
     } catch (error) {
       console.error("Github sign in error:", error);
       throw error;
     }
+  };
+
+  const sendOtpToPhone = async (phone: string) => {
+    const normalized = formatPhoneE164(phone);
+    if (!normalized) throw new Error("Invalid phone number");
+    const { error } = await supabase.auth.signInWithOtp({
+      phone: normalized,
+      options: { channel: "sms" },
+    });
+    if (error) throw mapPhoneAuthError(error);
+  };
+
+  const verifyOtp = async (phone: string, token: string) => {
+    const normalized = formatPhoneE164(phone);
+    const { data, error } = await supabase.auth.verifyOtp({
+      phone: normalized,
+      token,
+      type: "sms",
+    });
+    if (error) throw mapPhoneAuthError(error);
+    await ensureProfile(data.session?.user ?? null);
+  };
+
+  const signInWithPhonePassword = async (phone: string, password: string) => {
+    const normalized = formatPhoneE164(phone);
+    const { data, error } = await supabase.auth.signInWithPassword({
+      phone: normalized,
+      password,
+    });
+    if (error) throw error;
+    await ensureProfile(data.user ?? null);
+  };
+
+  const updatePassword = async (newPassword: string) => {
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) throw error;
   };
 
   return (
@@ -129,6 +218,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signOut,
         signInWithGoogle,
         signInWithGithub,
+        sendOtpToPhone,
+        verifyOtp,
+        signInWithPhonePassword,
+        updatePassword,
       }}
     >
       {children}

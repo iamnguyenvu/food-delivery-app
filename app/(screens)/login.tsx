@@ -4,81 +4,76 @@ import { router } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useState } from "react";
 import {
-  Alert,
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
+    Alert,
+    Image,
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    ScrollView,
+    Text,
+    TextInput,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { getAuthRedirectUrl } from "@/src/lib/authRedirect";
 
 // Required for OAuth to work properly
 WebBrowser.maybeCompleteAuthSession();
 
 export default function LoginScreen() {
-  const { signInWithGoogle, signInWithGithub } = useAuth();
+  const { signInWithGoogle, signInWithGithub, sendOtpToPhone, signInWithPhonePassword } = useAuth();
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [showPasswordInput, setShowPasswordInput] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const isValidVietnamPhone = (p: string) => {
+    // 10 digits, starts with 0, and next digit in 3/5/7/8/9
+    return /^0[35789]\d{8}$/.test(p);
+  };
 
-  const isPhoneValid = phone.length === 10 && /^\d+$/.test(phone);
+  const isPhoneValid = isValidVietnamPhone(phone);
   const canContinue = showPasswordInput
     ? isPhoneValid && password.length >= 6
     : isPhoneValid;
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (!canContinue) return;
 
     if (showPasswordInput) {
       // Login with password
-      handleLoginWithPassword();
+      await handleLoginWithPassword();
     } else {
-      // Send OTP
-      router.push({
-        pathname: "/verify-otp",
-        params: { phone },
-      } as any);
+      try {
+        setIsLoading(true);
+        await sendOtpToPhone(phone);
+        router.push({ pathname: "/verify-otp", params: { phone } } as any);
+      } catch (error: any) {
+        console.error("Send OTP error:", error);
+        Alert.alert("Lỗi", error.message || "Không thể gửi mã OTP");
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
   const handleLoginWithPassword = async () => {
-    // Implement later password login
-    console.log("Login with password:", { phone, password });
+    try {
+      setIsLoading(true);
+      await signInWithPhonePassword(phone, password);
+      router.replace("/(tabs)");
+    } catch (error: any) {
+      console.error("Password login error:", error);
+      Alert.alert("Lỗi đăng nhập", error.message || "Sai số điện thoại hoặc mật khẩu");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleGoogleLogin = async () => {
     try {
       setIsLoading(true);
-      const { url } = await signInWithGoogle();
-      
-      if (!url) {
-        throw new Error("No URL returned from OAuth");
-      }
-
-      // Get the redirect URL based on environment
-      const redirectUrl = __DEV__
-        ? "exp://localhost:8081/--/auth/callback"
-        : "fooddelivery://auth/callback";
-
-      // Open OAuth URL in browser
-      const result = await WebBrowser.openAuthSessionAsync(url, redirectUrl);
-
-      console.log("OAuth result:", result);
-
-      if (result.type === "success") {
-        // Session will be handled by AuthContext listener
-        // Wait a bit for the auth state to update
-        setTimeout(() => {
-          router.replace("/(tabs)");
-        }, 500);
-      } else if (result.type === "cancel") {
-        Alert.alert("Đã hủy", "Bạn đã hủy đăng nhập");
-      }
+      await signInWithGoogle();
+      // OAuth flow will handle navigation via callback
     } catch (error: any) {
       console.error("Google login error:", error);
       Alert.alert(
@@ -93,31 +88,8 @@ export default function LoginScreen() {
   const handleGithubLogin = async () => {
     try {
       setIsLoading(true);
-      const { url } = await signInWithGithub();
-      
-      if (!url) {
-        throw new Error("No URL returned from OAuth");
-      }
-
-      // Get the redirect URL based on environment
-      const redirectUrl = __DEV__
-        ? "exp://localhost:8081/--/auth/callback"
-        : "fooddelivery://auth/callback";
-
-      // Open OAuth URL in browser
-      const result = await WebBrowser.openAuthSessionAsync(url, redirectUrl);
-
-      console.log("OAuth result:", result);
-
-      if (result.type === "success") {
-        // Session will be handled by AuthContext listener
-        // Wait a bit for the auth state to update
-        setTimeout(() => {
-          router.replace("/(tabs)");
-        }, 500);
-      } else if (result.type === "cancel") {
-        Alert.alert("Đã hủy", "Bạn đã hủy đăng nhập");
-      }
+      await signInWithGithub();
+      // OAuth flow will handle navigation via callback
     } catch (error: any) {
       console.error("Github login error:", error);
       Alert.alert(
