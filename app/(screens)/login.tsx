@@ -1,21 +1,22 @@
 import { useAuth } from "@/src/contexts/AuthContext";
+import { getAuthRedirectUrl } from "@/src/lib/authRedirect";
+import { supabase } from "@/src/lib/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useState } from "react";
 import {
-    Alert,
-    Image,
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    ScrollView,
-    Text,
-    TextInput,
-    View,
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { getAuthRedirectUrl } from "@/src/lib/authRedirect";
 
 // Required for OAuth to work properly
 WebBrowser.maybeCompleteAuthSession();
@@ -73,26 +74,47 @@ export default function LoginScreen() {
     try {
       setIsLoading(true);
       const { url } = await signInWithGoogle();
-      
-      if (!url) {
-        throw new Error("No URL returned from OAuth");
-      }
-
+      if (!url) throw new Error("No OAuth URL returned");
       const redirectUrl = getAuthRedirectUrl();
-      console.log("Opening Google OAuth:", url);
-
-      // Open OAuth URL in browser
+      
+      console.log("Opening OAuth URL:", url);
+      
+      // Open browser for OAuth
       const result = await WebBrowser.openAuthSessionAsync(url, redirectUrl);
-
+      
       console.log("OAuth result:", result);
-
-      if (result.type === "success") {
-        // Wait for auth state to update
-        setTimeout(() => {
-          router.replace("/(tabs)");
-        }, 1000);
-      } else if (result.type === "cancel") {
-        Alert.alert("Đã hủy", "Bạn đã hủy đăng nhập");
+      
+      // Poll for session instead of relying on deep link callback
+      // This works around Expo Go not handling custom schemes properly
+      let attempts = 0;
+      const maxAttempts = 30; // 30 seconds timeout
+      
+      const pollSession = async () => {
+        while (attempts < maxAttempts) {
+          attempts++;
+          console.log(`Polling session attempt ${attempts}/${maxAttempts}`);
+          
+          const { data: { session } } = await supabase.auth.getSession();
+          
+          if (session) {
+            console.log("Session found!", session.user.id);
+            router.replace("/(tabs)");
+            return true;
+          }
+          
+          // Wait 1 second before next attempt
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+        return false;
+      };
+      
+      const success = await pollSession();
+      
+      if (!success) {
+        Alert.alert(
+          "Timeout",
+          "Không thể xác thực sau khi đăng nhập. Vui lòng thử lại."
+        );
       }
     } catch (error: any) {
       console.error("Google login error:", error);
@@ -109,26 +131,45 @@ export default function LoginScreen() {
     try {
       setIsLoading(true);
       const { url } = await signInWithGithub();
-      
-      if (!url) {
-        throw new Error("No URL returned from OAuth");
-      }
-
+      if (!url) throw new Error("No OAuth URL returned");
       const redirectUrl = getAuthRedirectUrl();
-      console.log("Opening Github OAuth:", url);
-
-      // Open OAuth URL in browser
+      
+      console.log("Opening OAuth URL:", url);
+      
+      // Open browser for OAuth
       const result = await WebBrowser.openAuthSessionAsync(url, redirectUrl);
-
+      
       console.log("OAuth result:", result);
-
-      if (result.type === "success") {
-        // Wait for auth state to update
-        setTimeout(() => {
-          router.replace("/(tabs)");
-        }, 1000);
-      } else if (result.type === "cancel") {
-        Alert.alert("Đã hủy", "Bạn đã hủy đăng nhập");
+      
+      // Poll for session instead of relying on deep link callback
+      let attempts = 0;
+      const maxAttempts = 30;
+      
+      const pollSession = async () => {
+        while (attempts < maxAttempts) {
+          attempts++;
+          console.log(`Polling session attempt ${attempts}/${maxAttempts}`);
+          
+          const { data: { session } } = await supabase.auth.getSession();
+          
+          if (session) {
+            console.log("Session found!", session.user.id);
+            router.replace("/(tabs)");
+            return true;
+          }
+          
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+        return false;
+      };
+      
+      const success = await pollSession();
+      
+      if (!success) {
+        Alert.alert(
+          "Timeout",
+          "Không thể xác thực sau khi đăng nhập. Vui lòng thử lại."
+        );
       }
     } catch (error: any) {
       console.error("Github login error:", error);

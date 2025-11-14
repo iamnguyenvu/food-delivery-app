@@ -6,8 +6,8 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { supabase } from "../lib/supabase";
 import { getAuthRedirectUrl } from "../lib/authRedirect";
+import { supabase } from "../lib/supabase";
 
 type OAuthResponse = Awaited<ReturnType<typeof supabase.auth.signInWithOAuth>>;
 type OAuthData = OAuthResponse["data"];
@@ -45,10 +45,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state change:", event);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      
+      // Ensure profile exists when user signs in
+      if (event === "SIGNED_IN" && session?.user) {
+        await ensureProfile(session.user);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -132,7 +138,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         provider: "google",
         options: {
           redirectTo: redirectUrl,
-          skipBrowserRedirect: true, // We handle browser manually
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
@@ -141,7 +146,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (error) throw error;
-      // Profile will be ensured on auth state change
       return data;
     } catch (error) {
       console.error("Google sign in error:", error);
@@ -158,12 +162,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         provider: "github",
         options: {
           redirectTo: redirectUrl,
-          skipBrowserRedirect: true, // We handle browser manually
         },
       });
 
       if (error) throw error;
-      // Profile will be ensured on auth state change
       return data;
     } catch (error) {
       console.error("Github sign in error:", error);
