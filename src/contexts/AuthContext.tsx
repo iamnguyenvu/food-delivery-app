@@ -74,10 +74,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithGoogle = async () => {
     try {
+      // Get the redirect URL based on environment
+      const redirectUrl = __DEV__
+        ? "exp://localhost:8081/--/auth/callback" // Development
+        : "fooddelivery://auth/callback"; // Production
+
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: "fooddelivery://auth/callback",
+          redirectTo: redirectUrl,
+          skipBrowserRedirect: true, // Handle redirect manually
         },
       });
 
@@ -91,10 +97,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithGithub = async () => {
     try {
+      // Get the redirect URL based on environment
+      const redirectUrl = __DEV__
+        ? "exp://localhost:8081/--/auth/callback" // Development
+        : "fooddelivery://auth/callback"; // Production
+
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "github",
         options: {
-          redirectTo: "fooddelivery://auth/callback",
+          redirectTo: redirectUrl,
+          skipBrowserRedirect: true, // Handle redirect manually
         },
       });
 

@@ -60,15 +60,24 @@ export default function LoginScreen() {
         throw new Error("No URL returned from OAuth");
       }
 
+      // Get the redirect URL based on environment
+      const redirectUrl = __DEV__
+        ? "exp://localhost:8081/--/auth/callback"
+        : "fooddelivery://auth/callback";
+
       // Open OAuth URL in browser
-      const result = await WebBrowser.openAuthSessionAsync(
-        url,
-        "fooddelivery://auth/callback"
-      );
+      const result = await WebBrowser.openAuthSessionAsync(url, redirectUrl);
+
+      console.log("OAuth result:", result);
 
       if (result.type === "success") {
         // Session will be handled by AuthContext listener
-        router.replace("/(tabs)");
+        // Wait a bit for the auth state to update
+        setTimeout(() => {
+          router.replace("/(tabs)");
+        }, 500);
+      } else if (result.type === "cancel") {
+        Alert.alert("Đã hủy", "Bạn đã hủy đăng nhập");
       }
     } catch (error: any) {
       console.error("Google login error:", error);
@@ -90,15 +99,24 @@ export default function LoginScreen() {
         throw new Error("No URL returned from OAuth");
       }
 
+      // Get the redirect URL based on environment
+      const redirectUrl = __DEV__
+        ? "exp://localhost:8081/--/auth/callback"
+        : "fooddelivery://auth/callback";
+
       // Open OAuth URL in browser
-      const result = await WebBrowser.openAuthSessionAsync(
-        url,
-        "fooddelivery://auth/callback"
-      );
+      const result = await WebBrowser.openAuthSessionAsync(url, redirectUrl);
+
+      console.log("OAuth result:", result);
 
       if (result.type === "success") {
         // Session will be handled by AuthContext listener
-        router.replace("/(tabs)");
+        // Wait a bit for the auth state to update
+        setTimeout(() => {
+          router.replace("/(tabs)");
+        }, 500);
+      } else if (result.type === "cancel") {
+        Alert.alert("Đã hủy", "Bạn đã hủy đăng nhập");
       }
     } catch (error: any) {
       console.error("Github login error:", error);
