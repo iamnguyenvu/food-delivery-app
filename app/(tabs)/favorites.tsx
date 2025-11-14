@@ -119,7 +119,7 @@ export default function FavoritesScreen() {
                 {/* -------------------- search bar-------------------- */}
                 <View className="flex-row items-center mb-4">
                     {/* Search box */}
-                    <View className="flex-1 flex-row items-center bg-white border border-[#D3F3F7] rounded-xl px-4 py-3 mr-2 shadow-sm">
+                    <View className="flex-1 flex-row items-center bg-white border border-[#D3F3F7] rounded-md px-4 py-3 mr-2 shadow-sm">
                         <Ionicons name="search" size={18} color="#26C6DA" />
                         <TextInput
                             value={searchQuery}
@@ -138,7 +138,7 @@ export default function FavoritesScreen() {
                     {/* Grid/List toggle */}
                     <Pressable
                         onPress={() => setViewMode((m) => (m === "grid" ? "list" : "grid"))}
-                        className="bg-white border border-[#D3F3F7] rounded-xl px-3 py-3 shadow-sm"
+                        className="bg-white border border-[#D3F3F7] rounded-md px-3 py-3 shadow-sm"
                     >
                         <Ionicons
                             name={viewMode === "grid" ? "list" : "grid"}
@@ -164,7 +164,7 @@ export default function FavoritesScreen() {
                             <Pressable
                                 key={f.key}
                                 onPress={() => setActiveFilter(f.key as any)}
-                                className={`mr-2 px-2.5 py-1.5 rounded-full border flex-row items-center ${
+                                className={`mr-2 px-2.5 py-1.5 rounded-md border flex-row items-center ${
                                     activeFilter === f.key
                                         ? "bg-[#26C6DA] border-[#26C6DA]"
                                         : "bg-white border-[#D3F3F7]"
@@ -192,7 +192,7 @@ export default function FavoritesScreen() {
                                     s === "recent" ? "rating" : s === "rating" ? "distance" : "recent"
                                 )
                             }
-                            className="flex-row items-center px-2.5 py-1.5 rounded-full bg-white border border-[#D3F3F7]"
+                            className="flex-row items-center px-2.5 py-1.5 rounded-md bg-white border border-[#D3F3F7]"
                         >
                             <Ionicons name="swap-vertical" size={14} color="#26C6DA" />
                             <Text className="ml-1 text-[10px] font-semibold text-[#177C8A]">
@@ -209,7 +209,7 @@ export default function FavoritesScreen() {
                 {/* -------------------- List Favorites-------------------- */}
                 {filteredAndSorted.length === 0 ? (
                     <View className="flex-1 h-[500px] justify-center items-center">
-                        <View className="w-24 h-24 rounded-3xl bg-[#E0F7FA] items-center justify-center mb-4">
+                        <View className="w-24 h-24 rounded-md bg-[#E0F7FA] items-center justify-center mb-4">
                             <Ionicons name="heart-dislike" size={40} color="#26C6DA" />
                         </View>
                         <Text className="text-lg font-bold text-[#0F172A] mb-1">
@@ -228,7 +228,7 @@ export default function FavoritesScreen() {
                                         setSelectedFavorite(item);
                                         setShowFavoriteDetail(true);
                                     }}
-                                    className="bg-white border border-[#E6F6F9] rounded-2xl overflow-hidden"
+                                    className="bg-white border border-[#E6F6F9] rounded-md overflow-hidden"
                                     style={{
                                         shadowColor: "#000",
                                         shadowOffset: { width: 0, height: 2 },
@@ -245,12 +245,12 @@ export default function FavoritesScreen() {
                                         />
                                         <Pressable
                                             onPress={() => removeFavorite(item.id)}
-                                            className="absolute right-2 top-2 w-9 h-9 rounded-full bg-white/95 items-center justify-center"
+                                            className="absolute right-2 top-2 w-9 h-9 rounded-md bg-white/95 items-center justify-center"
                                         >
                                             <Ionicons name="heart" size={18} color="#EF4444" />
                                         </Pressable>
                                         {/* Rating */}
-                                        <View className="absolute bottom-2 left-2 px-2 py-1 rounded-lg flex-row items-center bg-[#26C6DA]/90">
+                                        <View className="absolute bottom-2 left-2 px-2 py-1 rounded-md flex-row items-center bg-[#26C6DA]/90">
                                             <Ionicons name="star" size={12} color="#FFFFFF" />
                                             <Text className="text-[10px] text-white font-semibold ml-1">
                                                 {item.rating.toFixed(1)}
@@ -279,7 +279,7 @@ export default function FavoritesScreen() {
                                                 </Text>
                                             </View>
                                             <Pressable
-                                                className="px-3 py-1.5 rounded-full bg-[#E0F7FA]"
+                                                className="px-3 py-1.5 rounded-md bg-[#E0F7FA]"
                                             >
                                                 <Text className="text-[11px] font-semibold text-[#26C6DA]">
                                                     Đặt lại
@@ -299,12 +299,12 @@ export default function FavoritesScreen() {
                                 setSelectedFavorite(item);
                                 setShowFavoriteDetail(true);
                             }}
-                            className="flex-row bg-white rounded-2xl px-4 py-3 mb-3 border border-[#E6F6F9]"
+                            className="flex-row bg-white rounded-md px-4 py-3 mb-3 border border-[#E6F6F9]"
                             android_ripple={{ color: "#B2EBF2" }}
                         >
                             <Image
                                 source={{ uri: item.dish_image }}
-                                className="w-20 h-20 rounded-xl mr-3"
+                                className="w-20 h-20 rounded-md mr-3"
                                 resizeMode="cover"
                             />
                             <View className="flex-1">
@@ -322,13 +322,13 @@ export default function FavoritesScreen() {
                                     <Ionicons name="location" size={14} color="#26C6DA" className="ml-3" />
                                     <Text className="text-[12px] text-gray-600 ml-1">{item.distance}</Text>
                                 </View>
-                                <Pressable className="self-start px-4 py-1.5 rounded-full bg-[#E0F7FA]">
+                                <Pressable className="self-start px-4 py-1.5 rounded-md bg-[#E0F7FA]">
                                     <Text className="text-[12px] font-semibold text-[#26C6DA]">Đặt lại</Text>
                                 </Pressable>
                             </View>
                             <Pressable
                                 onPress={() => removeFavorite(item.id)}
-                                className="w-10 h-10 rounded-full items-center justify-center ml-2 bg-[#FFF5F5]"
+                                className="w-10 h-10 rounded-md items-center justify-center ml-2 bg-[#FFF5F5]"
                             >
                                 <Ionicons name="trash-outline" size={18} color="#EF4444" />
                             </Pressable>

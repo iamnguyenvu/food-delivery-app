@@ -42,13 +42,13 @@ export default function OrderDetail({ order }: OrderDetailProps) {
                 backgroundColor: "#26C6DA",
             }}>
                 <View className="items-center mb-3">
-                    <View className="w-12 h-12 rounded-full items-center justify-center mb-2" style={{ backgroundColor: "rgba(255, 255, 255, 0.2)" }}>
+                    <View className="w-12 h-12 rounded-md items-center justify-center mb-2" style={{ backgroundColor: "rgba(255, 255, 255, 0.2)" }}>
                         <Ionicons name="receipt" size={24} color="#FFFFFF" />
                     </View>
                     <Text className="text-white text-[10px] font-medium mb-0.5">Mã đơn hàng</Text>
                     <Text className="text-white text-lg font-bold">#{order.order_number}</Text>
                 </View>
-                <View className="bg-white/20 rounded-xl px-3 py-2 flex-row items-center justify-center">
+                <View className="bg-white/20 rounded-md px-3 py-2 flex-row items-center justify-center">
                     <Ionicons name={statusMeta.icon as any} size={16} color="#FFFFFF" />
                     <Text className="text-white text-sm font-semibold ml-1.5">
                         {statusMeta.label}
@@ -57,7 +57,7 @@ export default function OrderDetail({ order }: OrderDetailProps) {
             </View>
 
             {/* Restaurant Info */}
-            <View className="bg-white mx-4 -mt-4 rounded-xl p-3 border border-[#E6F6F9]" style={{
+            <View className="bg-white mx-4 -mt-4 rounded-md p-3 border border-[#E6F6F9]" style={{
                 shadowColor: "#000",
                 shadowOffset: { width: 0, height: 2 },
                 shadowOpacity: 0.08,
@@ -68,10 +68,10 @@ export default function OrderDetail({ order }: OrderDetailProps) {
                     <View className="relative">
                         <Image
                             source={{ uri: order.restaurant_thumbnail }}
-                            className="w-16 h-16 rounded-xl mr-3"
+                            className="w-16 h-16 rounded-md mr-3"
                             resizeMode="cover"
                         />
-                        <View className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full items-center justify-center border border-white" style={{ backgroundColor: "#26C6DA" }}>
+                        <View className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-md items-center justify-center border border-white" style={{ backgroundColor: "#26C6DA" }}>
                             <Ionicons name="restaurant" size={12} color="#FFFFFF" />
                         </View>
                     </View>
@@ -90,7 +90,7 @@ export default function OrderDetail({ order }: OrderDetailProps) {
             </View>
 
             {/* Order Items */}
-            <View className="bg-white mx-4 mt-3 rounded-xl p-3 border border-[#E6F6F9]" style={{
+            <View className="bg-white mx-4 mt-3 rounded-md p-3 border border-[#E6F6F9]" style={{
                 shadowColor: "#000",
                 shadowOffset: { width: 0, height: 2 },
                 shadowOpacity: 0.08,
@@ -98,7 +98,7 @@ export default function OrderDetail({ order }: OrderDetailProps) {
                 elevation: 3,
             }}>
                 <View className="flex-row items-center mb-3">
-                    <View className="w-8 h-8 rounded-full items-center justify-center mr-2" style={{ backgroundColor: "#E0F7FA" }}>
+                    <View className="w-8 h-8 rounded-md items-center justify-center mr-2" style={{ backgroundColor: "#E0F7FA" }}>
                         <Ionicons name="fast-food" size={18} color="#26C6DA" />
                     </View>
                     <View className="flex-1">
@@ -112,10 +112,10 @@ export default function OrderDetail({ order }: OrderDetailProps) {
                         <View className="relative">
                             <Image
                                 source={{ uri: item.thumbnail }}
-                                className="w-16 h-16 rounded-xl mr-3"
+                                className="w-16 h-16 rounded-md mr-3"
                                 resizeMode="cover"
                             />
-                            <View className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full items-center justify-center border border-white" style={{ backgroundColor: "#26C6DA" }}>
+                            <View className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-md items-center justify-center border border-white" style={{ backgroundColor: "#26C6DA" }}>
                                 <Text className="text-[9px] text-white font-bold">{item.quantity}</Text>
                             </View>
                         </View>
@@ -124,7 +124,7 @@ export default function OrderDetail({ order }: OrderDetailProps) {
                                 {item.name}
                             </Text>
                             {item.note && (
-                                <View className="mb-1.5 bg-[#F8FDFE] rounded-lg p-1.5 border border-[#E0F7FA]">
+                                <View className="mb-1.5 bg-[#F8FDFE] rounded-md p-1.5 border border-[#E0F7FA]">
                                     <View className="flex-row items-center mb-0.5">
                                         <Ionicons name="chatbubble-outline" size={10} color="#26C6DA" />
                                         <Text className="text-[10px] text-gray-500 ml-1 font-medium">Ghi chú:</Text>
@@ -149,7 +149,7 @@ export default function OrderDetail({ order }: OrderDetailProps) {
             </View>
 
             {/* Delivery Info */}
-            <View className="bg-white mx-4 mt-3 rounded-xl p-3 border border-[#E6F6F9]" style={{
+            <View className="bg-white mx-4 mt-3 rounded-md p-3 border border-[#E6F6F9]" style={{
                 shadowColor: "#000",
                 shadowOffset: { width: 0, height: 2 },
                 shadowOpacity: 0.08,
@@ -157,7 +157,7 @@ export default function OrderDetail({ order }: OrderDetailProps) {
                 elevation: 3,
             }}>
                 <View className="flex-row items-center mb-3">
-                    <View className="w-8 h-8 rounded-full items-center justify-center mr-2" style={{ backgroundColor: "#E0F7FA" }}>
+                    <View className="w-8 h-8 rounded-md items-center justify-center mr-2" style={{ backgroundColor: "#E0F7FA" }}>
                         <Ionicons name="location" size={18} color="#26C6DA" />
                     </View>
                     <Text className="text-sm font-bold text-[#0F172A]">Thông tin giao hàng</Text>
@@ -186,7 +186,7 @@ export default function OrderDetail({ order }: OrderDetailProps) {
                 </View>
 
                 {order.delivery_notes && (
-                    <View className="bg-[#F8FDFE] rounded-lg p-2 border border-[#E0F7FA]">
+                    <View className="bg-[#F8FDFE] rounded-md p-2 border border-[#E0F7FA]">
                         <View className="flex-row items-center mb-1">
                             <Ionicons name="document-text-outline" size={12} color="#26C6DA" />
                             <Text className="text-[10px] text-gray-500 ml-1.5 font-medium">Ghi chú giao hàng</Text>
@@ -197,7 +197,7 @@ export default function OrderDetail({ order }: OrderDetailProps) {
             </View>
 
             {/* Order Timeline */}
-            <View className="bg-white mx-4 mt-3 rounded-xl p-3 border border-[#E6F6F9]" style={{
+            <View className="bg-white mx-4 mt-3 rounded-md p-3 border border-[#E6F6F9]" style={{
                 shadowColor: "#000",
                 shadowOffset: { width: 0, height: 2 },
                 shadowOpacity: 0.08,
@@ -205,7 +205,7 @@ export default function OrderDetail({ order }: OrderDetailProps) {
                 elevation: 3,
             }}>
                 <View className="flex-row items-center mb-3">
-                    <View className="w-8 h-8 rounded-full items-center justify-center mr-2" style={{ backgroundColor: "#E0F7FA" }}>
+                    <View className="w-8 h-8 rounded-md items-center justify-center mr-2" style={{ backgroundColor: "#E0F7FA" }}>
                         <Ionicons name="time" size={18} color="#26C6DA" />
                     </View>
                     <Text className="text-sm font-bold text-[#0F172A]">Lịch sử đơn hàng</Text>
@@ -217,14 +217,14 @@ export default function OrderDetail({ order }: OrderDetailProps) {
 
                     {/* Timeline items */}
                     <View className="mb-3 relative">
-                        <View className="absolute left-[-15px] top-0.5 w-3 h-3 rounded-full border border-white" style={{ backgroundColor: "#26C6DA" }} />
+                        <View className="absolute left-[-15px] top-0.5 w-3 h-3 rounded-md border border-white" style={{ backgroundColor: "#26C6DA" }} />
                         <Text className="text-[10px] text-gray-500 mb-0.5 font-medium">Đặt hàng</Text>
                         <Text className="text-xs text-[#0F172A] font-semibold">{formatDateTime(order.created_at)}</Text>
                     </View>
 
                     {order.estimated_delivery && (
                         <View className="mb-3 relative">
-                            <View className="absolute left-[-15px] top-0.5 w-3 h-3 rounded-full border border-white" style={{ backgroundColor: order.status === "delivering" ? "#26C6DA" : "#B0BEC5" }} />
+                            <View className="absolute left-[-15px] top-0.5 w-3 h-3 rounded-md border border-white" style={{ backgroundColor: order.status === "delivering" ? "#26C6DA" : "#B0BEC5" }} />
                             <Text className="text-[10px] text-gray-500 mb-0.5 font-medium">Dự kiến giao</Text>
                             <Text className="text-xs text-[#0F172A] font-semibold">{formatDateTime(order.estimated_delivery)}</Text>
                         </View>
@@ -232,7 +232,7 @@ export default function OrderDetail({ order }: OrderDetailProps) {
 
                     {order.delivered_at && (
                         <View className="mb-3 relative">
-                            <View className="absolute left-[-15px] top-0.5 w-3 h-3 rounded-full border border-white" style={{ backgroundColor: "#26C6DA" }} />
+                            <View className="absolute left-[-15px] top-0.5 w-3 h-3 rounded-md border border-white" style={{ backgroundColor: "#26C6DA" }} />
                             <Text className="text-[10px] text-gray-500 mb-0.5 font-medium">Đã giao</Text>
                             <Text className="text-xs text-[#0F172A] font-semibold">{formatDateTime(order.delivered_at)}</Text>
                         </View>
@@ -240,7 +240,7 @@ export default function OrderDetail({ order }: OrderDetailProps) {
 
                     {order.cancelled_at && (
                         <View className="relative">
-                            <View className="absolute left-[-15px] top-0.5 w-3 h-3 rounded-full border border-white" style={{ backgroundColor: "#D32F2F" }} />
+                            <View className="absolute left-[-15px] top-0.5 w-3 h-3 rounded-md border border-white" style={{ backgroundColor: "#D32F2F" }} />
                             <Text className="text-[10px] text-gray-500 mb-0.5 font-medium">Đã huỷ</Text>
                             <Text className="text-xs text-[#0F172A] font-semibold">{formatDateTime(order.cancelled_at)}</Text>
                         </View>
@@ -249,7 +249,7 @@ export default function OrderDetail({ order }: OrderDetailProps) {
             </View>
 
             {/* Payment Info */}
-            <View className="bg-white mx-4 mt-3 rounded-xl p-3 border border-[#E6F6F9]" style={{
+            <View className="bg-white mx-4 mt-3 rounded-md p-3 border border-[#E6F6F9]" style={{
                 shadowColor: "#000",
                 shadowOffset: { width: 0, height: 2 },
                 shadowOpacity: 0.08,
@@ -257,7 +257,7 @@ export default function OrderDetail({ order }: OrderDetailProps) {
                 elevation: 3,
             }}>
                 <View className="flex-row items-center mb-3">
-                    <View className="w-8 h-8 rounded-full items-center justify-center mr-2" style={{ backgroundColor: "#E0F7FA" }}>
+                    <View className="w-8 h-8 rounded-md items-center justify-center mr-2" style={{ backgroundColor: "#E0F7FA" }}>
                         <Ionicons name="card" size={18} color="#26C6DA" />
                     </View>
                     <Text className="text-sm font-bold text-[#0F172A]">Thanh toán</Text>
@@ -269,7 +269,7 @@ export default function OrderDetail({ order }: OrderDetailProps) {
                         <View className="flex-1 ml-2">
                             <Text className="text-[10px] text-gray-500 mb-1 font-medium">Phương thức thanh toán</Text>
                             <View className="flex-row items-center">
-                                <View className="px-2 py-1 rounded-lg mr-2" style={{ backgroundColor: "#E0F7FA" }}>
+                                <View className="px-2 py-1 rounded-md mr-2" style={{ backgroundColor: "#E0F7FA" }}>
                                     <Ionicons 
                                         name={order.payment_method === "cash" ? "cash-outline" : "card-outline"} 
                                         size={12} 
@@ -286,7 +286,7 @@ export default function OrderDetail({ order }: OrderDetailProps) {
                     <Text className="text-[10px] text-gray-500 mb-1.5 font-medium">Trạng thái thanh toán</Text>
                     <View className="flex-row items-center">
                         <View
-                            className="px-3 py-2 rounded-lg flex-row items-center"
+                            className="px-3 py-2 rounded-md flex-row items-center"
                             style={{
                                 backgroundColor:
                                     order.payment_status === "paid"
@@ -336,7 +336,7 @@ export default function OrderDetail({ order }: OrderDetailProps) {
             </View>
 
             {/* Price Breakdown */}
-            <View className="bg-gradient-to-br from-[#26C6DA] to-[#00BCD4] mx-4 mt-3 rounded-xl p-3 mb-3" style={{
+            <View className="bg-gradient-to-br from-[#26C6DA] to-[#00BCD4] mx-4 mt-3 rounded-md p-3 mb-3" style={{
                 backgroundColor: "#26C6DA",
                 shadowColor: "#26C6DA",
                 shadowOffset: { width: 0, height: 2 },
@@ -345,7 +345,7 @@ export default function OrderDetail({ order }: OrderDetailProps) {
                 elevation: 5,
             }}>
                 <View className="flex-row items-center mb-3">
-                    <View className="w-8 h-8 rounded-full items-center justify-center mr-2" style={{ backgroundColor: "rgba(255, 255, 255, 0.2)" }}>
+                    <View className="w-8 h-8 rounded-md items-center justify-center mr-2" style={{ backgroundColor: "rgba(255, 255, 255, 0.2)" }}>
                         <Ionicons name="receipt" size={18} color="#FFFFFF" />
                     </View>
                     <Text className="text-sm font-bold text-white">Tổng tiền</Text>
@@ -386,7 +386,7 @@ export default function OrderDetail({ order }: OrderDetailProps) {
                 <View className="pt-3 border-t border-white/30 mt-1">
                     <View className="flex-row justify-between items-center">
                         <Text className="text-base font-bold text-white">Tổng cộng</Text>
-                        <View className="bg-white/20 rounded-lg px-3 py-1.5">
+                        <View className="bg-white/20 rounded-md px-3 py-1.5">
                             <Text className="text-lg font-bold text-white">
                                 {order.total.toLocaleString()}đ
                             </Text>
@@ -397,7 +397,7 @@ export default function OrderDetail({ order }: OrderDetailProps) {
 
             {/* Rating (if delivered and rated) */}
             {order.status === "delivered" && order.rating && (
-                <View className="bg-white mx-4 mt-3 rounded-xl p-3 border border-[#E6F6F9] mb-3" style={{
+                <View className="bg-white mx-4 mt-3 rounded-md p-3 border border-[#E6F6F9] mb-3" style={{
                     shadowColor: "#000",
                     shadowOffset: { width: 0, height: 2 },
                     shadowOpacity: 0.08,
@@ -405,13 +405,13 @@ export default function OrderDetail({ order }: OrderDetailProps) {
                     elevation: 3,
                 }}>
                     <View className="flex-row items-center mb-3">
-                        <View className="w-8 h-8 rounded-full items-center justify-center mr-2" style={{ backgroundColor: "#FFFBF0" }}>
+                        <View className="w-8 h-8 rounded-md items-center justify-center mr-2" style={{ backgroundColor: "#FFFBF0" }}>
                             <Ionicons name="star" size={18} color="#FBBF24" />
                         </View>
                         <Text className="text-sm font-bold text-[#0F172A]">Đánh giá của bạn</Text>
                     </View>
 
-                    <View className="flex-row items-center mb-3 bg-[#FFFBF0] rounded-lg p-2.5">
+                    <View className="flex-row items-center mb-3 bg-[#FFFBF0] rounded-md p-2.5">
                         <View className="flex-row items-center mr-3">
                             {[1, 2, 3, 4, 5].map((star) => (
                                 <Ionicons
@@ -422,7 +422,7 @@ export default function OrderDetail({ order }: OrderDetailProps) {
                                 />
                             ))}
                         </View>
-                        <View className="bg-white rounded-lg px-2 py-1">
+                        <View className="bg-white rounded-md px-2 py-1">
                             <Text className="text-sm font-bold text-[#0F172A]">
                                 {order.rating}/5
                             </Text>
@@ -430,7 +430,7 @@ export default function OrderDetail({ order }: OrderDetailProps) {
                     </View>
 
                     {order.review && (
-                        <View className="bg-[#FFFBF0] rounded-lg p-2.5 border border-[#FEF3C7]">
+                        <View className="bg-[#FFFBF0] rounded-md p-2.5 border border-[#FEF3C7]">
                             <View className="flex-row items-center mb-1.5">
                                 <Ionicons name="chatbubble" size={12} color="#FBBF24" />
                                 <Text className="text-[10px] text-gray-600 ml-1.5 font-medium">Nhận xét</Text>
@@ -443,9 +443,9 @@ export default function OrderDetail({ order }: OrderDetailProps) {
 
             {/* Cancellation Reason */}
             {order.status === "cancelled" && order.cancellation_reason && (
-                <View className="bg-[#FFF5F5] mx-4 mt-3 rounded-xl p-3 border border-[#FEE2E2] mb-3">
+                <View className="bg-[#FFF5F5] mx-4 mt-3 rounded-md p-3 border border-[#FEE2E2] mb-3">
                     <View className="flex-row items-start">
-                        <View className="w-8 h-8 rounded-full items-center justify-center mr-2" style={{ backgroundColor: "#FEE2E2" }}>
+                        <View className="w-8 h-8 rounded-md items-center justify-center mr-2" style={{ backgroundColor: "#FEE2E2" }}>
                             <Ionicons name="close-circle" size={18} color="#D32F2F" />
                         </View>
                         <View className="flex-1">

@@ -29,7 +29,7 @@ export default function FavoriteDetail({ favorite, onOrderPress, onViewRestauran
                 {/* Rating Badge */}
                 <View className="absolute top-4 right-4">
                     <View
-                        className="px-3 py-2 rounded-xl flex-row items-center"
+                        className="px-3 py-2 rounded-md flex-row items-center"
                         style={{ 
                             backgroundColor: "rgba(38, 198, 218, 0.95)",
                             shadowColor: "#26C6DA",
@@ -49,7 +49,7 @@ export default function FavoriteDetail({ favorite, onOrderPress, onViewRestauran
                 {/* Favorite Badge */}
                 <View className="absolute top-4 left-4">
                     <View
-                        className="w-10 h-10 rounded-full items-center justify-center"
+                        className="w-10 h-10 rounded-md items-center justify-center"
                         style={{ 
                             backgroundColor: "rgba(255, 255, 255, 0.95)",
                             shadowColor: "#000",
@@ -65,7 +65,7 @@ export default function FavoriteDetail({ favorite, onOrderPress, onViewRestauran
             </View>
 
             {/* Dish Info */}
-            <View className="bg-white mx-4 -mt-6 rounded-xl p-3 border border-[#E6F6F9]" style={{
+            <View className="bg-white mx-4 -mt-6 rounded-md p-3 border border-[#E6F6F9]" style={{
                 shadowColor: "#000",
                 shadowOffset: { width: 0, height: 2 },
                 shadowOpacity: 0.08,
@@ -78,7 +78,7 @@ export default function FavoriteDetail({ favorite, onOrderPress, onViewRestauran
 
                 <View className="flex-row items-center justify-between">
                     <View className="flex-1 mr-2">
-                        <View className="bg-[#FFFBF0] rounded-xl p-2.5 border border-[#FEF3C7]">
+                        <View className="bg-[#FFFBF0] rounded-md p-2.5 border border-[#FEF3C7]">
                             <View className="flex-row items-center mb-1.5">
                                 <Ionicons name="star" size={14} color="#FBBF24" />
                                 <Text className="text-[10px] text-gray-600 ml-1.5 font-medium">Đánh giá</Text>
@@ -103,7 +103,7 @@ export default function FavoriteDetail({ favorite, onOrderPress, onViewRestauran
                     </View>
 
                     <View className="flex-1">
-                        <View className="bg-[#E0F7FA] rounded-xl p-2.5 border border-[#B2EBF2]">
+                        <View className="bg-[#E0F7FA] rounded-md p-2.5 border border-[#B2EBF2]">
                             <View className="flex-row items-center mb-1.5">
                                 <Ionicons name="location" size={14} color="#26C6DA" />
                                 <Text className="text-[10px] text-gray-600 ml-1.5 font-medium">Khoảng cách</Text>
@@ -118,7 +118,7 @@ export default function FavoriteDetail({ favorite, onOrderPress, onViewRestauran
             </View>
 
             {/* Restaurant Info */}
-            <View className="bg-white mx-4 mt-3 rounded-xl p-3 border border-[#E6F6F9]" style={{
+            <View className="bg-white mx-4 mt-3 rounded-md p-3 border border-[#E6F6F9]" style={{
                 shadowColor: "#000",
                 shadowOffset: { width: 0, height: 2 },
                 shadowOpacity: 0.08,
@@ -126,7 +126,7 @@ export default function FavoriteDetail({ favorite, onOrderPress, onViewRestauran
                 elevation: 3,
             }}>
                 <View className="flex-row items-center mb-3">
-                    <View className="w-8 h-8 rounded-full items-center justify-center mr-2" style={{ backgroundColor: "#E0F7FA" }}>
+                    <View className="w-8 h-8 rounded-md items-center justify-center mr-2" style={{ backgroundColor: "#E0F7FA" }}>
                         <Ionicons name="restaurant" size={18} color="#26C6DA" />
                     </View>
                     <View className="flex-1">
@@ -135,16 +135,16 @@ export default function FavoriteDetail({ favorite, onOrderPress, onViewRestauran
                     </View>
                 </View>
 
-                <View className="bg-[#F8FDFE] rounded-xl p-2.5 border border-[#E0F7FA]">
+                <View className="bg-[#F8FDFE] rounded-md p-2.5 border border-[#E0F7FA]">
                     <View className="flex-row items-center">
-                        <View className="w-14 h-14 rounded-xl mr-3 items-center justify-center" style={{ backgroundColor: "#E0F7FA" }}>
+                        <View className="w-14 h-14 rounded-md mr-3 items-center justify-center" style={{ backgroundColor: "#E0F7FA" }}>
                             <Ionicons name="storefront" size={28} color="#26C6DA" />
                         </View>
                         <View className="flex-1">
                             <Text className="text-base font-bold text-[#0F172A] mb-1.5">
                                 {favorite.restaurant_name}
                             </Text>
-                            <View className="flex-row items-center bg-white rounded-lg px-2 py-1.5 self-start">
+                            <View className="flex-row items-center bg-white rounded-md px-2 py-1.5 self-start">
                                 <Ionicons name="location" size={12} color="#26C6DA" />
                                 <Text className="text-xs text-gray-600 ml-1.5 font-medium">
                                     {favorite.distance} từ vị trí của bạn
@@ -156,7 +156,7 @@ export default function FavoriteDetail({ favorite, onOrderPress, onViewRestauran
             </View>
 
             {/* Saved Info */}
-            <View className="bg-white mx-4 mt-3 rounded-xl p-3 border border-[#E6F6F9] mb-3" style={{
+            <View className="bg-white mx-4 mt-3 rounded-md p-3 border border-[#E6F6F9] mb-3" style={{
                 shadowColor: "#000",
                 shadowOffset: { width: 0, height: 2 },
                 shadowOpacity: 0.08,
@@ -164,7 +164,7 @@ export default function FavoriteDetail({ favorite, onOrderPress, onViewRestauran
                 elevation: 3,
             }}>
                 <View className="flex-row items-center mb-3">
-                    <View className="w-8 h-8 rounded-full items-center justify-center mr-2" style={{ backgroundColor: "#FFF5F5" }}>
+                    <View className="w-8 h-8 rounded-md items-center justify-center mr-2" style={{ backgroundColor: "#FFF5F5" }}>
                         <Ionicons name="heart" size={18} color="#EF4444" />
                     </View>
                     <View className="flex-1">
@@ -178,7 +178,7 @@ export default function FavoriteDetail({ favorite, onOrderPress, onViewRestauran
                         <Ionicons name="calendar-outline" size={14} color="#26C6DA" />
                         <Text className="text-[10px] text-gray-500 ml-1.5 font-medium">Đã lưu vào</Text>
                     </View>
-                    <View className="bg-[#F8FDFE] rounded-lg p-2 ml-6 border border-[#E0F7FA]">
+                    <View className="bg-[#F8FDFE] rounded-md p-2 ml-6 border border-[#E0F7FA]">
                         <Text className="text-xs text-[#0F172A] font-semibold">
                             {favorite.created_at.toLocaleDateString("vi-VN", {
                                 day: "2-digit",
@@ -196,7 +196,7 @@ export default function FavoriteDetail({ favorite, onOrderPress, onViewRestauran
                         <Ionicons name="barcode-outline" size={14} color="#26C6DA" />
                         <Text className="text-[10px] text-gray-500 ml-1.5 font-medium">Mã món yêu thích</Text>
                     </View>
-                    <View className="bg-[#F8FDFE] rounded-lg p-2 ml-6 border border-[#E0F7FA]">
+                    <View className="bg-[#F8FDFE] rounded-md p-2 ml-6 border border-[#E0F7FA]">
                         <Text className="text-xs text-[#0F172A] font-mono font-semibold">
                             {favorite.id}
                         </Text>
@@ -208,7 +208,7 @@ export default function FavoriteDetail({ favorite, onOrderPress, onViewRestauran
             <View className="px-4 pb-6">
                 <Pressable
                     onPress={onOrderPress}
-                    className="bg-[#26C6DA] rounded-xl py-3.5 items-center mb-3"
+                    className="bg-[#26C6DA] rounded-md py-3.5 items-center mb-3"
                     style={{
                         shadowColor: "#26C6DA",
                         shadowOffset: { width: 0, height: 4 },
@@ -218,7 +218,7 @@ export default function FavoriteDetail({ favorite, onOrderPress, onViewRestauran
                     }}
                 >
                     <View className="flex-row items-center">
-                        <View className="w-8 h-8 rounded-full items-center justify-center mr-2" style={{ backgroundColor: "rgba(255, 255, 255, 0.2)" }}>
+                        <View className="w-8 h-8 rounded-md items-center justify-center mr-2" style={{ backgroundColor: "rgba(255, 255, 255, 0.2)" }}>
                             <Ionicons name="cart" size={18} color="#FFFFFF" />
                         </View>
                         <Text className="text-white font-bold text-sm">
@@ -229,7 +229,7 @@ export default function FavoriteDetail({ favorite, onOrderPress, onViewRestauran
 
                 <Pressable
                     onPress={onViewRestaurantPress}
-                    className="bg-white border-2 border-[#26C6DA] rounded-xl py-3.5 items-center"
+                    className="bg-white border-2 border-[#26C6DA] rounded-md py-3.5 items-center"
                     style={{
                         shadowColor: "#000",
                         shadowOffset: { width: 0, height: 2 },
@@ -239,7 +239,7 @@ export default function FavoriteDetail({ favorite, onOrderPress, onViewRestauran
                     }}
                 >
                     <View className="flex-row items-center">
-                        <View className="w-8 h-8 rounded-full items-center justify-center mr-2" style={{ backgroundColor: "#E0F7FA" }}>
+                        <View className="w-8 h-8 rounded-md items-center justify-center mr-2" style={{ backgroundColor: "#E0F7FA" }}>
                             <Ionicons name="storefront-outline" size={18} color="#26C6DA" />
                         </View>
                         <Text className="text-[#26C6DA] font-bold text-sm">

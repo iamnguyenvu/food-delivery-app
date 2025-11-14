@@ -26,7 +26,7 @@ export default function TabsUI({ activeTab, onChange }: { activeTab: string; onC
                             <Pressable
                                 key={i}
                                 onPress={() => onChange(tab)}
-                                className={`px-4 py-2 rounded-full flex-row items-center mr-2 ${
+                                className={`px-4 py-2 rounded-md flex-row items-center mr-2 ${
                                     isActive
                                         ? "bg-[#26C6DA]"
                                         : "bg-[#F2FBFD] border border-[#D3F3F7]"

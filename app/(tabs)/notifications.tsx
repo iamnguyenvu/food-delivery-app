@@ -147,7 +147,7 @@ export default function NotificationsScreen() {
                                 className="mb-2"
                                 android_ripple={{ color: "#B2EBF2" }}
                             >
-                                <View className="bg-white rounded-2xl overflow-hidden border border-[#E6F6F9]" style={{ elevation: item.is_read ? 2 : 4 }}>
+                                <View className="bg-white rounded-md overflow-hidden border border-[#E6F6F9]" style={{ elevation: item.is_read ? 2 : 4 }}>
                                     {/* Left accent (stable width to avoid layout shift) */}
                                     <View className="absolute left-0 top-0 bottom-0 w-1.5" style={{ backgroundColor: item.is_read ? "transparent" : "#26C6DA" }} />
 
@@ -157,12 +157,12 @@ export default function NotificationsScreen() {
                                             {item.image ? (
                                                 <Image
                                                     source={{ uri: item.image }}
-                                                    className="w-12 h-12 rounded-lg"
+                                                    className="w-12 h-12 rounded-md"
                                                     resizeMode="cover"
                                                 />
                                             ) : (
                                                 <View
-                                                    className="w-12 h-12 rounded-lg items-center justify-center"
+                                                    className="w-12 h-12 rounded-md items-center justify-center"
                                                     style={{ backgroundColor: typeConfig.bgColor }}
                                                 >
                                                     <Ionicons
@@ -173,7 +173,7 @@ export default function NotificationsScreen() {
                                                 </View>
                                             )}
                                             <View
-                                                className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full items-center justify-center border-2 border-white"
+                                                className="absolute -bottom-1 -right-1 w-5 h-5 rounded-md items-center justify-center border-2 border-white"
                                                 style={{ backgroundColor: typeConfig.bgColor }}
                                             >
                                                 <Ionicons
@@ -196,7 +196,7 @@ export default function NotificationsScreen() {
                                                     {item.title}
                                                 </Text>
                                                 {!item.is_read && (
-                                                    <View className="w-2 h-2 bg-[#26C6DA] rounded-full ml-2 mt-0.5" />
+                                                    <View className="w-2 h-2 bg-[#26C6DA] rounded-md ml-2 mt-0.5" />
                                                 )}
                                             </View>
 

@@ -8,14 +8,14 @@ export default function SuggestionSection({ dishes }: { dishes: Dish[] }) {
             <View className="flex-row items-center justify-between mb-4">
                 <View className="flex-row items-center">
                     <View
-                        className="w-8 h-8 rounded-full items-center justify-center mr-2"
+                        className="w-8 h-8 rounded-md items-center justify-center mr-2"
                         style={{ backgroundColor: "#E0F7FA" }}
                     >
                         <Ionicons name="sparkles" size={18} color="#26C6DA" />
                     </View>
                     <Text className="font-bold text-lg text-[#0F172A]">Có thể bạn cũng thích</Text>
                 </View>
-                <Pressable className="px-3 py-1.5 rounded-full bg-[#F2FBFD] border border-[#D3F3F7]">
+                <Pressable className="px-3 py-1.5 rounded-md bg-[#F2FBFD] border border-[#D3F3F7]">
                     <Text className="text-xs text-[#26C6DA] font-semibold">Xem tất cả</Text>
                 </Pressable>
             </View>
@@ -34,7 +34,7 @@ export default function SuggestionSection({ dishes }: { dishes: Dish[] }) {
 function SuggestionCard({ item }: { item: Dish }) {
     return (
         <Pressable
-            className="bg-white rounded-2xl overflow-hidden border border-[#E6F6F9]"
+            className="bg-white rounded-md overflow-hidden border border-[#E6F6F9]"
             style={{
                 shadowColor: "#000",
                 shadowOffset: { width: 0, height: 2 },
@@ -50,7 +50,7 @@ function SuggestionCard({ item }: { item: Dish }) {
                     resizeMode="cover"
                 />
                 <View
-                    className="absolute top-2 left-2 px-2 py-1 rounded-lg flex-row items-center"
+                    className="absolute top-2 left-2 px-2 py-1 rounded-md flex-row items-center"
                     style={{ backgroundColor: "rgba(38, 198, 218, 0.9)" }}
                 >
                     <Ionicons name="star" size={12} color="#FFFFFF" />
@@ -70,7 +70,7 @@ function SuggestionCard({ item }: { item: Dish }) {
                         {item.price.toLocaleString()}đ
                     </Text>
                     <Pressable
-                        className="flex-row items-center px-3 py-1.5 rounded-full"
+                        className="flex-row items-center px-3 py-1.5 rounded-md"
                         style={{ backgroundColor: "#E0F7FA" }}
                     >
                         <Ionicons name="add" size={14} color="#26C6DA" />
