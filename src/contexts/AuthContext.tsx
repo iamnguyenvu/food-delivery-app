@@ -132,7 +132,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         provider: "google",
         options: {
           redirectTo: redirectUrl,
-          skipBrowserRedirect: false, // Let Supabase handle the redirect
+          skipBrowserRedirect: true, // We handle browser manually
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
@@ -158,7 +158,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         provider: "github",
         options: {
           redirectTo: redirectUrl,
-          skipBrowserRedirect: false, // Let Supabase handle the redirect
+          skipBrowserRedirect: true, // We handle browser manually
         },
       });
 

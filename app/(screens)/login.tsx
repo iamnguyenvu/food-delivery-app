@@ -72,8 +72,28 @@ export default function LoginScreen() {
   const handleGoogleLogin = async () => {
     try {
       setIsLoading(true);
-      await signInWithGoogle();
-      // OAuth flow will handle navigation via callback
+      const { url } = await signInWithGoogle();
+      
+      if (!url) {
+        throw new Error("No URL returned from OAuth");
+      }
+
+      const redirectUrl = getAuthRedirectUrl();
+      console.log("Opening Google OAuth:", url);
+
+      // Open OAuth URL in browser
+      const result = await WebBrowser.openAuthSessionAsync(url, redirectUrl);
+
+      console.log("OAuth result:", result);
+
+      if (result.type === "success") {
+        // Wait for auth state to update
+        setTimeout(() => {
+          router.replace("/(tabs)");
+        }, 1000);
+      } else if (result.type === "cancel") {
+        Alert.alert("Đã hủy", "Bạn đã hủy đăng nhập");
+      }
     } catch (error: any) {
       console.error("Google login error:", error);
       Alert.alert(
@@ -88,8 +108,28 @@ export default function LoginScreen() {
   const handleGithubLogin = async () => {
     try {
       setIsLoading(true);
-      await signInWithGithub();
-      // OAuth flow will handle navigation via callback
+      const { url } = await signInWithGithub();
+      
+      if (!url) {
+        throw new Error("No URL returned from OAuth");
+      }
+
+      const redirectUrl = getAuthRedirectUrl();
+      console.log("Opening Github OAuth:", url);
+
+      // Open OAuth URL in browser
+      const result = await WebBrowser.openAuthSessionAsync(url, redirectUrl);
+
+      console.log("OAuth result:", result);
+
+      if (result.type === "success") {
+        // Wait for auth state to update
+        setTimeout(() => {
+          router.replace("/(tabs)");
+        }, 1000);
+      } else if (result.type === "cancel") {
+        Alert.alert("Đã hủy", "Bạn đã hủy đăng nhập");
+      }
     } catch (error: any) {
       console.error("Github login error:", error);
       Alert.alert(
