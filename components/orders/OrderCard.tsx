@@ -108,7 +108,7 @@ export default function OrderCard({
     return (
         <Pressable
             onPress={onPress}
-            className="bg-white rounded-2xl mb-3 overflow-hidden border border-[#E6F6F9]"
+            className="bg-white rounded-md mb-3 overflow-hidden border border-[#E6F6F9]"
             style={{
                 shadowColor: "#000",
                 shadowOffset: { width: 0, height: 2 },
@@ -121,7 +121,7 @@ export default function OrderCard({
             <View className="flex-row items-center justify-between px-4 pt-4 pb-2">
                 <View className="flex-row items-center">
                     <View
-                        className="w-8 h-8 rounded-full items-center justify-center mr-2"
+                        className="w-8 h-8 rounded-md items-center justify-center mr-2"
                         style={{ backgroundColor: "#E0F7FA" }}
                     >
                         <Ionicons name="receipt" size={16} color="#26C6DA" />
@@ -140,7 +140,7 @@ export default function OrderCard({
                 <View className="flex-row items-center">
                     <Image
                         source={{ uri: order.restaurant_thumbnail }}
-                        className="w-16 h-16 rounded-xl mr-3"
+                        className="w-16 h-16 rounded-md mr-3"
                         resizeMode="cover"
                     />
                     <View className="flex-1">
@@ -152,7 +152,7 @@ export default function OrderCard({
                         </Text>
                         <View className="flex-row items-center mt-1">
                             <View
-                                className="px-2.5 py-1 rounded-full flex-row items-center"
+                                className="px-2.5 py-1 rounded-md flex-row items-center"
                                 style={{ backgroundColor: statusMeta.bg }}
                             >
                                 <Ionicons
@@ -178,7 +178,7 @@ export default function OrderCard({
                     {firstItem.thumbnail && (
                         <Image
                             source={{ uri: firstItem.thumbnail }}
-                            className="w-14 h-14 rounded-lg mr-3"
+                            className="w-14 h-14 rounded-md mr-3"
                             resizeMode="cover"
                         />
                     )}
@@ -212,7 +212,7 @@ export default function OrderCard({
             {/* Delivery Progress */}
             {order.status === "delivering" && (
                 <View className="px-4 pb-3">
-                    <View className="bg-[#F2FBFD] rounded-xl p-3 border border-[#D3F3F7]">
+                    <View className="bg-[#F2FBFD] rounded-md p-3 border border-[#D3F3F7]">
                         <View className="flex-row items-center justify-between mb-2">
                             <View className="flex-row items-center">
                                 <Ionicons name="bicycle" size={16} color="#26C6DA" />
@@ -222,9 +222,9 @@ export default function OrderCard({
                             </View>
                             <Text className="text-[11px] text-gray-500">{progressPct}%</Text>
                         </View>
-                        <View className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <View className="h-2 bg-gray-200 rounded-md overflow-hidden">
                             <View
-                                className="h-2 bg-[#26C6DA] rounded-full"
+                                className="h-2 bg-[#26C6DA] rounded-md"
                                 style={{ width: `${progressPct}%` }}
                             />
                         </View>
@@ -243,7 +243,7 @@ export default function OrderCard({
                 !order.rating && (
                     <View className="px-4 pb-4 pt-2 border-t border-[#F0F9FA]">
                         <Pressable
-                            className="bg-[#26C6DA] px-4 py-2.5 rounded-xl items-center active:bg-[#00BCD4]"
+                            className="bg-[#26C6DA] px-4 py-2.5 rounded-md items-center active:bg-[#00BCD4]"
                             onPress={() => onReviewPress && onReviewPress(order)}
                             style={{
                                 shadowColor: "#26C6DA",

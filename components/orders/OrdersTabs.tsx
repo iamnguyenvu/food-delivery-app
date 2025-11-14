@@ -93,11 +93,11 @@ function CustomDatePicker({
             onRequestClose={onClose}
         >
             <View className="flex-1 bg-black/50 justify-end">
-                <View className="bg-white rounded-t-3xl p-5" style={{ maxHeight: "60%" }}>
+                <View className="bg-white rounded-md p-5" style={{ maxHeight: "60%" }}>
                     <View className="flex-row items-center justify-between mb-4">
                         <Text className="text-lg font-bold text-[#0F172A]">Chọn ngày</Text>
                         <Pressable onPress={onClose}>
-                            <View className="w-8 h-8 rounded-full items-center justify-center" style={{ backgroundColor: "#F2FBFD" }}>
+                            <View className="w-8 h-8 rounded-md items-center justify-center" style={{ backgroundColor: "#F2FBFD" }}>
                                 <Ionicons name="close" size={20} color="#26C6DA" />
                             </View>
                         </Pressable>
@@ -109,7 +109,7 @@ function CustomDatePicker({
                             <Text className="text-xs text-gray-600 mb-2 text-center font-medium">Ngày</Text>
                             <ScrollView 
                                 ref={dayScrollRef}
-                                className="border border-[#D3F3F7] rounded-xl bg-[#F8FDFE]"
+                                className="border border-[#D3F3F7] rounded-md bg-[#F8FDFE]"
                                 showsVerticalScrollIndicator={false}
                             >
                                 {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => {
@@ -136,7 +136,7 @@ function CustomDatePicker({
                             <Text className="text-xs text-gray-600 mb-2 text-center font-medium">Tháng</Text>
                             <ScrollView 
                                 ref={monthScrollRef}
-                                className="border border-[#D3F3F7] rounded-xl bg-[#F8FDFE]"
+                                className="border border-[#D3F3F7] rounded-md bg-[#F8FDFE]"
                                 showsVerticalScrollIndicator={false}
                             >
                                 {months.map((month, index) => {
@@ -161,7 +161,7 @@ function CustomDatePicker({
                             <Text className="text-xs text-gray-600 mb-2 text-center font-medium">Năm</Text>
                             <ScrollView 
                                 ref={yearScrollRef}
-                                className="border border-[#D3F3F7] rounded-xl bg-[#F8FDFE]"
+                                className="border border-[#D3F3F7] rounded-md bg-[#F8FDFE]"
                                 showsVerticalScrollIndicator={false}
                             >
                                 {years.map((year) => {
@@ -185,13 +185,13 @@ function CustomDatePicker({
                     <View className="flex-row mt-4">
                         <Pressable
                             onPress={onClose}
-                            className="px-4 py-3 rounded-xl border border-[#D3F3F7] bg-white mr-2 flex-1"
+                            className="px-4 py-3 rounded-md border border-[#D3F3F7] bg-white mr-2 flex-1"
                         >
                             <Text className="text-sm font-semibold text-[#177C8A] text-center">Huỷ</Text>
                         </Pressable>
                         <Pressable
                             onPress={handleConfirm}
-                            className="px-4 py-3 rounded-xl bg-[#26C6DA] flex-1"
+                            className="px-4 py-3 rounded-md bg-[#26C6DA] flex-1"
                             style={{
                                 shadowColor: "#26C6DA",
                                 shadowOffset: { width: 0, height: 2 },
@@ -355,7 +355,7 @@ export default function OrdersTabs({ activeTab }: { activeTab: string }) {
             ) : (
                 <>
                     {/* Search Bar */}
-                    <View className="mb-4 flex-row items-center bg-white border border-[#D3F3F7] rounded-xl px-4 py-3 shadow-sm">
+                    <View className="mb-4 flex-row items-center bg-white border border-[#D3F3F7] rounded-md px-4 py-3 shadow-sm">
                         <Ionicons name="search" size={18} color="#26C6DA" />
                         <TextInput
                             placeholder="Tìm theo mã đơn, nhà hàng, món..."
@@ -371,9 +371,9 @@ export default function OrdersTabs({ activeTab }: { activeTab: string }) {
                         )}
                     </View>
                     {activeTab === "Lịch sử" && (
-                        <View className="mb-4 bg-white rounded-2xl p-4 border border-[#E6F6F9] shadow-sm">
+                        <View className="mb-4 bg-white rounded-md p-4 border border-[#E6F6F9] shadow-sm">
                             <View className="flex-row items-center mb-3">
-                                <View className="w-8 h-8 rounded-full items-center justify-center mr-2" style={{ backgroundColor: "#E0F7FA" }}>
+                                <View className="w-8 h-8 rounded-md items-center justify-center mr-2" style={{ backgroundColor: "#E0F7FA" }}>
                                     <Ionicons name="calendar" size={16} color="#26C6DA" />
                                 </View>
                                 <Text className="text-[15px] font-bold text-[#0F172A]">Lọc theo khoảng thời gian</Text>
@@ -388,7 +388,7 @@ export default function OrdersTabs({ activeTab }: { activeTab: string }) {
                                         setFromDateApplied(from);
                                         setToDateApplied(now);
                                     }}
-                                    className="px-4 py-2 rounded-full bg-[#F2FBFD] border border-[#D3F3F7] mr-2"
+                                    className="px-4 py-2 rounded-md bg-[#F2FBFD] border border-[#D3F3F7] mr-2"
                                 >
                                     <Text className="text-xs font-semibold text-[#26C6DA]">7 ngày</Text>
                                 </Pressable>
@@ -401,7 +401,7 @@ export default function OrdersTabs({ activeTab }: { activeTab: string }) {
                                         setFromDateApplied(from);
                                         setToDateApplied(now);
                                     }}
-                                    className="px-4 py-2 rounded-full bg-[#F2FBFD] border border-[#D3F3F7]"
+                                    className="px-4 py-2 rounded-md bg-[#F2FBFD] border border-[#D3F3F7]"
                                 >
                                     <Text className="text-xs font-semibold text-[#26C6DA]">30 ngày</Text>
                                 </Pressable>
@@ -424,13 +424,13 @@ export default function OrdersTabs({ activeTab }: { activeTab: string }) {
                                                 setFromDateSel(next);
                                             }
                                         }}
-                                        className="border border-[#D3F3F7] rounded-xl px-4 py-2.5 text-black bg-[#F8FDFE]"
+                                        className="border border-[#D3F3F7] rounded-md px-4 py-2.5 text-black bg-[#F8FDFE]"
                                     />
                                 ) : (
                                     <>
                                         <Pressable
                                             onPress={() => setShowFromPicker(true)}
-                                            className="border border-[#D3F3F7] rounded-xl px-4 py-2.5 bg-[#F8FDFE]"
+                                            className="border border-[#D3F3F7] rounded-md px-4 py-2.5 bg-[#F8FDFE]"
                                         >
                                             <Text className="text-sm text-black">{fromDateSel.toLocaleDateString("vi-VN")}</Text>
                                         </Pressable>
@@ -469,13 +469,13 @@ export default function OrdersTabs({ activeTab }: { activeTab: string }) {
                                                 setToDateSel(next);
                                             }
                                         }}
-                                        className="border border-[#D3F3F7] rounded-xl px-4 py-2.5 text-black bg-[#F8FDFE]"
+                                        className="border border-[#D3F3F7] rounded-md px-4 py-2.5 text-black bg-[#F8FDFE]"
                                     />
                                 ) : (
                                     <>
                                         <Pressable
                                             onPress={() => setShowToPicker(true)}
-                                            className="border border-[#D3F3F7] rounded-xl px-4 py-2.5 bg-[#F8FDFE]"
+                                            className="border border-[#D3F3F7] rounded-md px-4 py-2.5 bg-[#F8FDFE]"
                                         >
                                             <Text className="text-sm text-black">{toDateSel.toLocaleDateString("vi-VN")}</Text>
                                         </Pressable>
@@ -505,7 +505,7 @@ export default function OrdersTabs({ activeTab }: { activeTab: string }) {
                                         setFromDateApplied(defaultFrom);
                                         setToDateApplied(defaultTo);
                                     }}
-                                    className="px-4 py-2.5 rounded-xl border border-[#D3F3F7] bg-white mr-2 flex-1"
+                                    className="px-4 py-2.5 rounded-md border border-[#D3F3F7] bg-white mr-2 flex-1"
                                 >
                                     <Text className="text-xs font-semibold text-[#177C8A] text-center">Đặt lại</Text>
                                 </Pressable>
@@ -514,7 +514,7 @@ export default function OrdersTabs({ activeTab }: { activeTab: string }) {
                                         setFromDateApplied(fromDateSel);
                                         setToDateApplied(toDateSel);
                                     }}
-                                    className="px-4 py-2.5 rounded-xl bg-[#26C6DA] flex-1"
+                                    className="px-4 py-2.5 rounded-md bg-[#26C6DA] flex-1"
                                     style={{
                                         shadowColor: "#26C6DA",
                                         shadowOffset: { width: 0, height: 2 },
@@ -603,7 +603,7 @@ export default function OrdersTabs({ activeTab }: { activeTab: string }) {
                 onRequestClose={() => setShowReviewModal(false)}
             >
                 <View className="flex-1 bg-black/50 justify-end">
-                    <View className="bg-white rounded-t-3xl p-5" style={{ maxHeight: "80%" }}>
+                    <View className="bg-white rounded-md p-5" style={{ maxHeight: "80%" }}>
                         <View className="flex-row items-center justify-between mb-4">
                             <View>
                                 <Text className="text-[20px] font-bold text-[#0F172A]">Đánh giá đơn hàng</Text>
@@ -614,7 +614,7 @@ export default function OrdersTabs({ activeTab }: { activeTab: string }) {
                                 )}
                             </View>
                             <Pressable onPress={() => setShowReviewModal(false)}>
-                                <View className="w-8 h-8 rounded-full items-center justify-center" style={{ backgroundColor: "#F2FBFD" }}>
+                                <View className="w-8 h-8 rounded-md items-center justify-center" style={{ backgroundColor: "#F2FBFD" }}>
                                     <Ionicons name="close" size={20} color="#26C6DA" />
                                 </View>
                             </Pressable>
@@ -647,14 +647,14 @@ export default function OrdersTabs({ activeTab }: { activeTab: string }) {
                             value={reviewText}
                             onChangeText={setReviewText}
                             multiline
-                            className="border border-[#D3F3F7] rounded-xl px-4 py-3 text-black min-h-[100px] bg-[#F8FDFE] mb-4"
+                            className="border border-[#D3F3F7] rounded-md px-4 py-3 text-black min-h-[100px] bg-[#F8FDFE] mb-4"
                             textAlignVertical="top"
                         />
 
                         <View className="flex-row">
                             <Pressable
                                 onPress={() => setShowReviewModal(false)}
-                                className="px-4 py-3 rounded-xl border border-[#D3F3F7] bg-white mr-2 flex-1"
+                                className="px-4 py-3 rounded-md border border-[#D3F3F7] bg-white mr-2 flex-1"
                             >
                                 <Text className="text-sm font-semibold text-[#177C8A] text-center">Huỷ</Text>
                             </Pressable>
@@ -695,7 +695,7 @@ export default function OrdersTabs({ activeTab }: { activeTab: string }) {
                                     setShowReviewModal(false);
                                     setReviewingOrder(null);
                                 }}
-                                className={`px-4 py-3 rounded-xl flex-1 ${
+                                className={`px-4 py-3 rounded-md flex-1 ${
                                     reviewRating > 0 ? "bg-[#26C6DA]" : "bg-gray-300"
                                 }`}
                                 disabled={reviewRating === 0}
