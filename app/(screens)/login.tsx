@@ -1,4 +1,6 @@
 import { useAuth } from "@/src/contexts/AuthContext";
+import { getAuthRedirectUrl } from "@/src/lib/authRedirect";
+import { supabase } from "@/src/lib/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
@@ -20,55 +22,99 @@ import { SafeAreaView } from "react-native-safe-area-context";
 WebBrowser.maybeCompleteAuthSession();
 
 export default function LoginScreen() {
-  const { signInWithGoogle, signInWithGithub } = useAuth();
+  const { signInWithGoogle, signInWithGithub, sendOtpToPhone, signInWithPhonePassword } = useAuth();
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [showPasswordInput, setShowPasswordInput] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const isValidVietnamPhone = (p: string) => {
+    // 10 digits, starts with 0, and next digit in 3/5/7/8/9
+    return /^0[35789]\d{8}$/.test(p);
+  };
 
-  const isPhoneValid = phone.length === 10 && /^\d+$/.test(phone);
+  const isPhoneValid = isValidVietnamPhone(phone);
   const canContinue = showPasswordInput
     ? isPhoneValid && password.length >= 6
     : isPhoneValid;
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (!canContinue) return;
 
     if (showPasswordInput) {
       // Login with password
-      handleLoginWithPassword();
+      await handleLoginWithPassword();
     } else {
-      // Send OTP
-      router.push({
-        pathname: "/verify-otp",
-        params: { phone },
-      } as any);
+      try {
+        setIsLoading(true);
+        await sendOtpToPhone(phone);
+        router.push({ pathname: "/verify-otp", params: { phone } } as any);
+      } catch (error: any) {
+        console.error("Send OTP error:", error);
+        Alert.alert("Lỗi", error.message || "Không thể gửi mã OTP");
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
   const handleLoginWithPassword = async () => {
-    // Implement later password login
-    console.log("Login with password:", { phone, password });
+    try {
+      setIsLoading(true);
+      await signInWithPhonePassword(phone, password);
+      router.replace("/(tabs)");
+    } catch (error: any) {
+      console.error("Password login error:", error);
+      Alert.alert("Lỗi đăng nhập", error.message || "Sai số điện thoại hoặc mật khẩu");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleGoogleLogin = async () => {
     try {
       setIsLoading(true);
       const { url } = await signInWithGoogle();
+      if (!url) throw new Error("No OAuth URL returned");
+      const redirectUrl = getAuthRedirectUrl();
       
-      if (!url) {
-        throw new Error("No URL returned from OAuth");
-      }
-
-      // Open OAuth URL in browser
-      const result = await WebBrowser.openAuthSessionAsync(
-        url,
-        "fooddelivery://auth/callback"
-      );
-
-      if (result.type === "success") {
-        // Session will be handled by AuthContext listener
-        router.replace("/(tabs)");
+      console.log("Opening OAuth URL:", url);
+      
+      // Open browser for OAuth
+      const result = await WebBrowser.openAuthSessionAsync(url, redirectUrl);
+      
+      console.log("OAuth result:", result);
+      
+      // Poll for session instead of relying on deep link callback
+      // This works around Expo Go not handling custom schemes properly
+      let attempts = 0;
+      const maxAttempts = 30; // 30 seconds timeout
+      
+      const pollSession = async () => {
+        while (attempts < maxAttempts) {
+          attempts++;
+          console.log(`Polling session attempt ${attempts}/${maxAttempts}`);
+          
+          const { data: { session } } = await supabase.auth.getSession();
+          
+          if (session) {
+            console.log("Session found!", session.user.id);
+            router.replace("/(tabs)");
+            return true;
+          }
+          
+          // Wait 1 second before next attempt
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+        return false;
+      };
+      
+      const success = await pollSession();
+      
+      if (!success) {
+        Alert.alert(
+          "Timeout",
+          "Không thể xác thực sau khi đăng nhập. Vui lòng thử lại."
+        );
       }
     } catch (error: any) {
       console.error("Google login error:", error);
@@ -85,20 +131,45 @@ export default function LoginScreen() {
     try {
       setIsLoading(true);
       const { url } = await signInWithGithub();
+      if (!url) throw new Error("No OAuth URL returned");
+      const redirectUrl = getAuthRedirectUrl();
       
-      if (!url) {
-        throw new Error("No URL returned from OAuth");
-      }
-
-      // Open OAuth URL in browser
-      const result = await WebBrowser.openAuthSessionAsync(
-        url,
-        "fooddelivery://auth/callback"
-      );
-
-      if (result.type === "success") {
-        // Session will be handled by AuthContext listener
-        router.replace("/(tabs)");
+      console.log("Opening OAuth URL:", url);
+      
+      // Open browser for OAuth
+      const result = await WebBrowser.openAuthSessionAsync(url, redirectUrl);
+      
+      console.log("OAuth result:", result);
+      
+      // Poll for session instead of relying on deep link callback
+      let attempts = 0;
+      const maxAttempts = 30;
+      
+      const pollSession = async () => {
+        while (attempts < maxAttempts) {
+          attempts++;
+          console.log(`Polling session attempt ${attempts}/${maxAttempts}`);
+          
+          const { data: { session } } = await supabase.auth.getSession();
+          
+          if (session) {
+            console.log("Session found!", session.user.id);
+            router.replace("/(tabs)");
+            return true;
+          }
+          
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+        return false;
+      };
+      
+      const success = await pollSession();
+      
+      if (!success) {
+        Alert.alert(
+          "Timeout",
+          "Không thể xác thực sau khi đăng nhập. Vui lòng thử lại."
+        );
       }
     } catch (error: any) {
       console.error("Github login error:", error);
