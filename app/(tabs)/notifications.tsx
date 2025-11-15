@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback, useEffect, useState } from "react";
 import { Image, Platform, Pressable, ScrollView, StatusBar, Text, View } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -103,13 +104,29 @@ export default function NotificationsScreen() {
         fetchData();
     }, []);
 
+    // Reset StatusBar when screen loses focus (navigating away)
+    useFocusEffect(
+        useCallback(() => {
+            // Set StatusBar for this screen when focused
+            StatusBar.setBarStyle("dark-content");
+            if (Platform.OS === "android") {
+                StatusBar.setBackgroundColor("#FFFFFF");
+                StatusBar.setTranslucent(false);
+            }
+
+            // Reset StatusBar when screen loses focus
+            return () => {
+                StatusBar.setBarStyle("light-content");
+                if (Platform.OS === "android") {
+                    StatusBar.setBackgroundColor("#26C6DA");
+                    StatusBar.setTranslucent(false);
+                }
+            };
+        }, [])
+    );
+
     return (
         <SafeAreaView className="flex-1 bg-[#F8FDFE]" edges={["top", "left", "right"]}>
-            <StatusBar
-                translucent={false}
-                backgroundColor="#FFFFFF"
-                barStyle={Platform.OS === "ios" ? "dark-content" : "dark-content"}
-            />
 
             {/* Header */}
             <View className="bg-white px-5 pt-4 pb-4 border-b border-[#E0F7FA] mb-2">

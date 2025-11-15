@@ -4,7 +4,8 @@ import {
     favoritesMockData,
 } from "@/components/favorites/favoritesMockData";
 import { Ionicons } from "@expo/vector-icons";
-import { useEffect, useMemo, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
     Image,
     LayoutAnimation,
@@ -43,6 +44,27 @@ export default function FavoritesScreen() {
     useEffect(() => {
         fetchData();
     }, []);
+
+    // Reset StatusBar when screen loses focus (navigating away)
+    useFocusEffect(
+        useCallback(() => {
+            // Set StatusBar for this screen when focused
+            StatusBar.setBarStyle("dark-content");
+            if (Platform.OS === "android") {
+                StatusBar.setBackgroundColor("#FFFFFF");
+                StatusBar.setTranslucent(false);
+            }
+
+            // Reset StatusBar when screen loses focus
+            return () => {
+                StatusBar.setBarStyle("light-content");
+                if (Platform.OS === "android") {
+                    StatusBar.setBackgroundColor("#26C6DA");
+                    StatusBar.setTranslucent(false);
+                }
+            };
+        }, [])
+    );
 
     // sort + search
     const filteredAndSorted = useMemo(() => {
@@ -95,11 +117,6 @@ export default function FavoritesScreen() {
 
     return (
         <SafeAreaView className="flex-1 bg-[#F8FDFE]" edges={["top", "left", "right"]}>
-            <StatusBar
-                translucent={false}
-                backgroundColor="#FFFFFF"
-                barStyle={Platform.OS === "ios" ? "dark-content" : "dark-content"}
-            />
 
             <ScrollView
                 className="flex-1 px-4"
