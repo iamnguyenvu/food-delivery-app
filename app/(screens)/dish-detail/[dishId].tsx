@@ -1,4 +1,6 @@
+import DishOptionsModal from "@/components/common/DishOptionsModal";
 import { useDish } from "@/src/hooks";
+import { useCartStore } from "@/src/store/cartStore";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
@@ -11,10 +13,50 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+// Mock reviews data
+const MOCK_REVIEWS = [
+  {
+    id: "1",
+    userName: "Nguyễn Văn A",
+    avatar: "https://i.pravatar.cc/150?img=1",
+    rating: 5,
+    comment: "Món ăn rất ngon, phục vụ nhanh chóng. Sẽ quay lại!",
+    date: "2 ngày trước",
+    images: ["https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=200"],
+  },
+  {
+    id: "2",
+    userName: "Trần Thị B",
+    avatar: "https://i.pravatar.cc/150?img=2",
+    rating: 4,
+    comment: "Món ăn khá ổn, giá hợp lý. Có thể thêm ít nước mắm.",
+    date: "1 tuần trước",
+    images: [],
+  },
+  {
+    id: "3",
+    userName: "Lê Văn C",
+    avatar: "https://i.pravatar.cc/150?img=3",
+    rating: 5,
+    comment: "Tuyệt vời! Đúng gu của tôi",
+    date: "2 tuần trước",
+    images: [],
+  },
+];
+
 export default function DishDetailScreen() {
   const { dishId } = useLocalSearchParams<{ dishId: string }>();
-  const [quantity, setQuantity] = useState(1);
-  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
+  const [showOptionsModal, setShowOptionsModal] = useState(false);
+  const { addItem } = useCartStore();
+
+  // Mock flash sale data
+  const isFlashSale = false; // Set to true to test flash sale UI
+  const flashSaleData = {
+    endTime: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
+    sold: 45,
+    total: 100,
+    flashPrice: 35000,
+  };
 
   // Fetch dish data based on dishId
   const { data: dish, isLoading } = useDish(dishId || '');
@@ -39,252 +81,255 @@ export default function DishDetailScreen() {
     router.back();
   };
 
-  const handleQuantityChange = (change: number) => {
-    const newQuantity = Math.max(1, quantity + change);
-    setQuantity(newQuantity);
+  const handleAddToCart = (
+    dishData: any,
+    quantity: number,
+    selectedOptions: any,
+    notes: string
+  ) => {
+    addItem(dishData, quantity);
+    // In production, handle options and notes
+    console.log("Added with options:", selectedOptions, notes);
   };
 
-  const handleAddToCart = () => {
-    // In real app, would add to cart with selected options
-    console.log("Add to cart:", {
-      dish: dish.name,
-      quantity,
-      options: selectedOptions,
-      total: dish.price * quantity,
-    });
-    router.back();
+  const handleQuickAdd = () => {
+    // Check if dish has options (mock - in production check dish.hasOptions)
+    const hasOptions = false;
+
+    if (hasOptions) {
+      setShowOptionsModal(true);
+    } else {
+      addItem(dish, 1);
+    }
   };
 
-  const handleCustomizePress = () => {
-    // Show customization modal
-    console.log("Show customization modal for:", dish.name);
-  };
-
-  const finalPrice = dish.discountPercent && dish.originalPrice 
-    ? dish.price 
-    : dish.price;
-  const totalPrice = finalPrice * quantity;
+  const averageRating = 4.7;
+  const totalReviews = MOCK_REVIEWS.length;
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      {/* Header */}
-      <View className="flex-row items-center justify-between px-4 py-3 bg-white border-b border-gray-100">
-        <Pressable
-          onPress={handleBack}
-          className="p-2 -ml-2 active:opacity-70"
-        >
-          <Ionicons name="arrow-back" size={24} color="#374151" />
-        </Pressable>
-
-        <Text className="text-lg font-semibold text-gray-900" numberOfLines={1}>
-          Chi tiết món ăn
-        </Text>
-
-        <View className="w-10" />
-      </View>
-
+    <View className="flex-1 bg-white">
       <ScrollView className="flex-1">
-        {/* Dish Image */}
-        <View className="h-64 bg-gray-200">
+        {/* Banner Image with Transparent Header */}
+        <View className="relative">
           <Image
-            source={{ uri: dish.image }}
-            className="w-full h-full"
+            source={{ uri: dish.image || "https://via.placeholder.com/400x300" }}
+            className="w-full h-80"
             resizeMode="cover"
           />
 
-          {/* Discount Badge */}
-          {dish.discountPercent && dish.discountPercent > 0 && (
-            <View className="absolute top-4 right-4 bg-red-500 rounded-full px-3 py-1">
-              <Text className="text-white text-sm font-bold">
-                -{dish.discountPercent}% OFF
-              </Text>
-            </View>
-          )}
-
-          {/* Popular/Bestseller Badges */}
-          <View className="absolute top-4 left-4 flex-row gap-2">
-            {dish.isPopular && (
-              <View className="bg-orange-500 rounded-full px-2 py-1">
-                <Text className="text-white text-xs font-bold">Phổ biến</Text>
-              </View>
-            )}
-            {dish.isBestSeller && (
-              <View className="bg-green-500 rounded-full px-2 py-1">
-                <Text className="text-white text-xs font-bold">Bán chạy</Text>
-              </View>
-            )}
+          {/* Transparent Header with Back Button */}
+          <View className="absolute top-0 left-0 right-0 pt-12 px-4 pb-4">
+            <Pressable
+              onPress={handleBack}
+              className="w-10 h-10 bg-black/40 rounded-full items-center justify-center active:opacity-70"
+            >
+              <Ionicons name="arrow-back" size={24} color="white" />
+            </Pressable>
           </View>
         </View>
 
-        {/* Dish Info */}
-        <View className="p-4">
-          {/* Name & Rating */}
-          <View className="flex-row items-start justify-between mb-2">
-            <Text className="text-xl font-bold text-gray-900 flex-1 mr-4">
-              {dish.name}
-            </Text>
-            {dish.rating && (
-              <View className="flex-row items-center">
-                <Ionicons name="star" size={16} color="#F59E0B" />
-                <Text className="text-sm font-semibold text-gray-900 ml-1">
-                  {dish.rating.toFixed(1)}
-                </Text>
+        {/* Content */}
+        <View className="px-4 py-4">
+          {/* Flash Sale Info Row (if applicable) */}
+          {isFlashSale && (
+            <View className="bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 rounded-lg p-3 mb-4">
+              <View className="flex-row items-center justify-between">
+                <View className="flex-row items-center flex-1">
+                  <View className="bg-red-500 rounded-full p-1 mr-2">
+                    <Ionicons name="flash" size={16} color="white" />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-red-600 font-bold text-lg">
+                      ₫{flashSaleData.flashPrice.toLocaleString()}
+                    </Text>
+                    <Text className="text-gray-500 text-xs">
+                      Đã bán {flashSaleData.sold}/{flashSaleData.total}
+                    </Text>
+                  </View>
+                </View>
+                <View className="items-end">
+                  <Text className="text-xs text-gray-500 mb-1">Kết thúc sau</Text>
+                  <View className="flex-row gap-1">
+                    <View className="bg-red-500 px-2 py-1 rounded">
+                      <Text className="text-white text-xs font-bold">02</Text>
+                    </View>
+                    <Text className="text-red-600 font-bold">:</Text>
+                    <View className="bg-red-500 px-2 py-1 rounded">
+                      <Text className="text-white text-xs font-bold">45</Text>
+                    </View>
+                    <Text className="text-red-600 font-bold">:</Text>
+                    <View className="bg-red-500 px-2 py-1 rounded">
+                      <Text className="text-white text-xs font-bold">30</Text>
+                    </View>
+                  </View>
+                </View>
               </View>
-            )}
-          </View>
+            </View>
+          )}
 
-          {/* Description */}
-          <Text className="text-base text-gray-600 leading-relaxed mb-4">
+          {/* Title & Description */}
+          <Text className="text-2xl font-bold text-gray-800 mb-2">
+            {dish.name}
+          </Text>
+          <Text className="text-base text-gray-600 leading-relaxed" numberOfLines={3}>
             {dish.description}
           </Text>
 
-          {/* Price */}
-          <View className="flex-row items-center mb-6">
-            <Text className="text-2xl font-bold text-primary-500">
-              {dish.price.toLocaleString()}đ
-            </Text>
-            {dish.discountPercent && dish.originalPrice && (
-              <Text className="text-lg text-gray-400 line-through ml-3">
-                {dish.originalPrice.toLocaleString()}đ
-              </Text>
-            )}
+          {/* Stats Row */}
+          <View className="flex-row items-center mt-4 mb-4">
+            <View className="flex-row items-center mr-4">
+              <Ionicons name="flame" size={16} color="#EF4444" />
+              <Text className="text-sm text-gray-700 ml-1">Đã bán 234</Text>
+            </View>
+            <View className="flex-row items-center mr-4">
+              <Ionicons name="heart" size={16} color="#F59E0B" />
+              <Text className="text-sm text-gray-700 ml-1">1.2k yêu thích</Text>
+            </View>
+            <View className="flex-row items-center">
+              <Ionicons name="restaurant" size={16} color="#10B981" />
+              <Text className="text-sm text-gray-700 ml-1">Còn 45 phần</Text>
+            </View>
           </View>
 
-          {/* Spice Level */}
-          {dish.spiceLevel && (
-            <View className="mb-4">
-              <Text className="text-base font-semibold text-gray-900 mb-2">
-                Độ cay
-              </Text>
-              <View className="flex-row items-center">
-                {[1, 2, 3, 4].map((level) => (
-                  <Ionicons
-                    key={level}
-                    name="flame"
-                    size={16}
-                    color={getSpiceLevelColor(dish.spiceLevel!, level)}
-                    style={{ marginRight: 4 }}
-                  />
-                ))}
-                <Text className="text-sm text-gray-600 ml-2 capitalize">
-                  {getSpiceLevelText(dish.spiceLevel)}
-                </Text>
+          {/* Price Row with Add Button (if not flash sale) */}
+          {!isFlashSale && (
+            <View className="flex-row items-center justify-between py-4 border-t border-b border-gray-200 mb-4">
+              <View>
+                {dish.originalPrice && dish.discountPercent ? (
+                  <>
+                    <Text className="text-2xl font-bold text-primary-400">
+                      ₫{dish.price.toLocaleString()}
+                    </Text>
+                    <Text className="text-sm text-gray-400 line-through">
+                      ₫{dish.originalPrice.toLocaleString()}
+                    </Text>
+                  </>
+                ) : (
+                  <Text className="text-2xl font-bold text-gray-800">
+                    ₫{dish.price.toLocaleString()}
+                  </Text>
+                )}
               </View>
+              <Pressable
+                onPress={handleQuickAdd}
+                className="w-10 h-10 bg-primary-400 rounded-full items-center justify-center active:opacity-70"
+              >
+                <Ionicons name="add" size={24} color="white" />
+              </Pressable>
             </View>
           )}
 
-          {/* Ingredients */}
-          {dish.ingredients && dish.ingredients.length > 0 && (
-            <View className="mb-4">
-              <Text className="text-base font-semibold text-gray-900 mb-2">
-                Thành phần
-              </Text>
-              <Text className="text-sm text-gray-600">
-                {dish.ingredients.join(", ")}
-              </Text>
-            </View>
-          )}
-
-          {/* Allergens */}
-          {dish.allergens && dish.allergens.length > 0 && (
-            <View className="mb-6">
-              <Text className="text-base font-semibold text-gray-900 mb-2">
-                Chất gây dị ứng
-              </Text>
-              <View className="flex-row flex-wrap gap-2">
-                {dish.allergens.map((allergen: string, index: number) => (
-                  <View key={index} className="bg-red-50 border border-red-200 rounded-full px-3 py-1">
-                    <Text className="text-sm text-red-600">{allergen}</Text>
-                  </View>
-                ))}
-              </View>
-            </View>
-          )}
-
-          {/* Customization Section */}
+          {/* Reviews/Ratings Section */}
           <View className="mb-6">
-            <Text className="text-base font-semibold text-gray-900 mb-3">
-              Tùy chỉnh món ăn
-            </Text>
-            <Pressable
-              onPress={handleCustomizePress}
-              className="flex-row items-center justify-between p-4 bg-gray-50 rounded-lg active:bg-gray-100"
-            >
-              <View className="flex-row items-center">
-                <Ionicons name="options-outline" size={20} color="#6B7280" />
-                <Text className="text-base text-gray-700 ml-3">
-                  Tùy chọn thêm
+            <View className="flex-row items-center justify-between mb-4">
+              <Text className="text-xl font-bold text-gray-800">
+                Đánh giá từ khách hàng
+              </Text>
+              <Pressable>
+                <Text className="text-sm text-primary-400 font-semibold">
+                  Xem tất cả
                 </Text>
+              </Pressable>
+            </View>
+
+            {/* Rating Summary */}
+            <View className="bg-gray-50 rounded-lg p-4 mb-4">
+              <View className="flex-row items-center">
+                <View className="items-center mr-6">
+                  <Text className="text-4xl font-bold text-gray-800">
+                    {averageRating}
+                  </Text>
+                  <View className="flex-row mt-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Ionicons
+                        key={star}
+                        name={star <= averageRating ? "star" : "star-outline"}
+                        size={14}
+                        color="#F59E0B"
+                      />
+                    ))}
+                  </View>
+                  <Text className="text-xs text-gray-500 mt-1">
+                    {totalReviews} đánh giá
+                  </Text>
+                </View>
+
+                <View className="flex-1">
+                  {[5, 4, 3, 2, 1].map((star) => (
+                    <View key={star} className="flex-row items-center mb-1">
+                      <Text className="text-xs text-gray-600 w-3">{star}</Text>
+                      <Ionicons name="star" size={10} color="#F59E0B" />
+                      <View className="flex-1 bg-gray-200 h-1.5 rounded-full mx-2">
+                        <View
+                          className="bg-yellow-400 h-full rounded-full"
+                          style={{
+                            width: `${star === 5 ? 80 : star === 4 ? 15 : 5}%`,
+                          }}
+                        />
+                      </View>
+                      <Text className="text-xs text-gray-500 w-6 text-right">
+                        {star === 5 ? "80%" : star === 4 ? "15%" : "5%"}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
               </View>
-              <Ionicons name="chevron-forward" size={20} color="#6B7280" />
-            </Pressable>
+            </View>
+
+            {/* Recent Reviews */}
+            {MOCK_REVIEWS.slice(0, 2).map((review) => (
+              <View key={review.id} className="mb-4 pb-4 border-b border-gray-100">
+                <View className="flex-row items-start">
+                  <Image
+                    source={{ uri: review.avatar }}
+                    className="w-10 h-10 rounded-full"
+                  />
+                  <View className="flex-1 ml-3">
+                    <View className="flex-row items-center justify-between mb-1">
+                      <Text className="font-semibold text-gray-800">
+                        {review.userName}
+                      </Text>
+                      <Text className="text-xs text-gray-400">{review.date}</Text>
+                    </View>
+                    <View className="flex-row mb-2">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Ionicons
+                          key={star}
+                          name={star <= review.rating ? "star" : "star-outline"}
+                          size={12}
+                          color="#F59E0B"
+                        />
+                      ))}
+                    </View>
+                    <Text className="text-sm text-gray-600 leading-relaxed">
+                      {review.comment}
+                    </Text>
+                    {review.images.length > 0 && (
+                      <View className="flex-row mt-2 gap-2">
+                        {review.images.map((img, idx) => (
+                          <Image
+                            key={idx}
+                            source={{ uri: img }}
+                            className="w-16 h-16 rounded-lg"
+                          />
+                        ))}
+                      </View>
+                    )}
+                  </View>
+                </View>
+              </View>
+            ))}
           </View>
         </View>
       </ScrollView>
 
-      {/* Bottom Cart Section */}
-      <View className="bg-white border-t border-gray-200 px-4 py-3">
-        {/* Quantity Selector */}
-        <View className="flex-row items-center justify-between mb-3">
-          <Text className="text-base font-semibold text-gray-900">
-            Số lượng
-          </Text>
-          <View className="flex-row items-center">
-            <Pressable
-              onPress={() => handleQuantityChange(-1)}
-              className="w-10 h-10 bg-gray-100 rounded-full items-center justify-center active:bg-gray-200"
-            >
-              <Ionicons name="remove" size={20} color="#374151" />
-            </Pressable>
-            <Text className="text-lg font-semibold text-gray-900 mx-4 min-w-8 text-center">
-              {quantity}
-            </Text>
-            <Pressable
-              onPress={() => handleQuantityChange(1)}
-              className="w-10 h-10 bg-gray-100 rounded-full items-center justify-center active:bg-gray-200"
-            >
-              <Ionicons name="add" size={20} color="#374151" />
-            </Pressable>
-          </View>
-        </View>
-
-        {/* Add to Cart Button */}
-        <Pressable
-          onPress={handleAddToCart}
-          className="bg-primary-500 rounded-lg py-4 active:opacity-80"
-        >
-          <View className="flex-row items-center justify-center">
-            <Ionicons name="bag-add-outline" size={20} color="white" />
-            <Text className="text-white text-lg font-semibold ml-2">
-              Thêm vào giỏ - {totalPrice.toLocaleString()}đ
-            </Text>
-          </View>
-        </Pressable>
-      </View>
-    </SafeAreaView>
+      {/* Options Modal */}
+      <DishOptionsModal
+        visible={showOptionsModal}
+        dish={dish}
+        onClose={() => setShowOptionsModal(false)}
+        onAddToCart={handleAddToCart}
+      />
+    </View>
   );
-}
-
-// Helper functions
-function getSpiceLevelColor(spiceLevel: string, level: number): string {
-  const levels = {
-    mild: 1,
-    medium: 2,
-    hot: 3,
-    very_hot: 4,
-  };
-  
-  const currentLevel = levels[spiceLevel as keyof typeof levels] || 0;
-  return level <= currentLevel ? "#EF4444" : "#E5E7EB";
-}
-
-function getSpiceLevelText(spiceLevel: string): string {
-  const texts = {
-    mild: "Nhẹ",
-    medium: "Vừa",
-    hot: "Cay",
-    very_hot: "Rất cay",
-  };
-  
-  return texts[spiceLevel as keyof typeof texts] || "Không cay";
 }
