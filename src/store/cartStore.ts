@@ -9,6 +9,7 @@ interface CartStore {
   clearCart: () => void;
   getTotalPrice: () => number;
   getTotalItems: () => number;
+  getTotalDiscount: () => number;
 }
 
 export const useCartStore = create<CartStore>((set, get) => ({
@@ -65,5 +66,14 @@ export const useCartStore = create<CartStore>((set, get) => ({
 
   getTotalItems: () => {
     return get().items.reduce((total, item) => total + item.quantity, 0);
+  },
+
+  getTotalDiscount: () => {
+    // Calculate total discount from originalPrice
+    return get().items.reduce((total, item) => {
+      const discount = item.dish.originalPrice ? 
+        (item.dish.originalPrice - item.dish.price) * item.quantity : 0;
+      return total + discount;
+    }, 0);
   },
 }));
