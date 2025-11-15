@@ -45,7 +45,7 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     storage: customStorage,
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true, // Enable for deep link OAuth handling
+    detectSessionInUrl: false,
     flowType: 'pkce',
   },
 });
