@@ -11,6 +11,7 @@ interface RecentlyViewedItem {
   viewedAt: string;
   discount?: string;
   restaurantName?: string;
+  restaurantId?: string;
 }
 
 interface RecentlyViewedProps {
@@ -97,9 +98,10 @@ const SAMPLE_ITEMS: RecentlyViewedItem[] = [
     id: "1",
     name: "Bún Bò Huế Cô Ba",
     image: "https://images.unsplash.com/photo-1569562211093-4ed0d0758f12?w=400",
-    viewedAt: "2025-11-02T10:00:00.000Z", // Fixed date instead of dynamic
+    viewedAt: "2025-11-02T10:00:00.000Z",
     discount: "Giảm 30.000đ",
     restaurantName: "Cô Ba Restaurant",
+    restaurantId: "rest-1",
   },
   {
     id: "2",
@@ -108,6 +110,7 @@ const SAMPLE_ITEMS: RecentlyViewedItem[] = [
     viewedAt: "2025-11-03T08:00:00.000Z",
     discount: "Freeship 15K",
     restaurantName: "Phở Hà Nội",
+    restaurantId: "rest-2",
   },
   {
     id: "3",
@@ -116,6 +119,7 @@ const SAMPLE_ITEMS: RecentlyViewedItem[] = [
     viewedAt: "2025-11-01T12:00:00.000Z",
     discount: "Giảm 20%",
     restaurantName: "Cơm Tấm Sài Gòn",
+    restaurantId: "rest-3",
   },
   {
     id: "4",
@@ -124,6 +128,7 @@ const SAMPLE_ITEMS: RecentlyViewedItem[] = [
     viewedAt: "2025-11-03T05:00:00.000Z",
     discount: "Mua 1 tặng 1",
     restaurantName: "Bánh Mì Hòa Mã",
+    restaurantId: "rest-4",
   },
 ];
 
@@ -161,7 +166,12 @@ export default function RecentlyViewed({ onSelectItem }: RecentlyViewedProps) {
             <RecentlyViewedItemCard
               key={item.id}
               item={item}
-              onPress={() => onSelectItem?.(item.id)}
+              onPress={() => {
+                // Navigate to restaurant instead of dish detail
+                if (item.restaurantId) {
+                  router.push(`/(screens)/restaurant-detail/${item.restaurantId}` as any);
+                }
+              }}
             />
           ))}
 

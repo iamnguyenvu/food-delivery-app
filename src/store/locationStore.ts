@@ -1,5 +1,6 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
 import type { Address, Location, SavedLocation } from "../types/location";
 
 type State = {
@@ -33,6 +34,7 @@ export const useLocationStore = create<State>()(
         }),
         {
             name: "fd_location_storage", // AsyncStorage key
+            storage: createJSONStorage(() => AsyncStorage),
             partialize: s => ({location: s.location, address: s.address, savedAddresses: s.savedAddresses})
         }
     )

@@ -1,4 +1,6 @@
 import { useAuth } from "@/src/contexts/AuthContext";
+import { getAuthRedirectUrl } from "@/src/lib/authRedirect";
+import { supabase } from "@/src/lib/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
@@ -7,6 +9,7 @@ import {
   Alert,
   Image,
   KeyboardAvoidingView,
+  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -20,55 +23,163 @@ import { SafeAreaView } from "react-native-safe-area-context";
 WebBrowser.maybeCompleteAuthSession();
 
 export default function LoginScreen() {
-  const { signInWithGoogle, signInWithGithub } = useAuth();
+  const { signInWithGoogle, signInWithGithub, sendOtpToPhone, signInWithPhonePassword } = useAuth();
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [showPasswordInput, setShowPasswordInput] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const isValidVietnamPhone = (p: string) => {
+    // 10 digits, starts with 0, and next digit in 3/5/7/8/9
+    return /^0[35789]\d{8}$/.test(p);
+  };
 
-  const isPhoneValid = phone.length === 10 && /^\d+$/.test(phone);
+  const isPhoneValid = isValidVietnamPhone(phone);
   const canContinue = showPasswordInput
     ? isPhoneValid && password.length >= 6
     : isPhoneValid;
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (!canContinue) return;
 
     if (showPasswordInput) {
       // Login with password
-      handleLoginWithPassword();
+      await handleLoginWithPassword();
     } else {
-      // Send OTP
-      router.push({
-        pathname: "/verify-otp",
-        params: { phone },
-      } as any);
+      try {
+        setIsLoading(true);
+        await sendOtpToPhone(phone);
+        router.push({ pathname: "/verify-otp", params: { phone } } as any);
+      } catch (error: any) {
+        console.error("Send OTP error:", error);
+        Alert.alert("Lỗi", error.message || "Không thể gửi mã OTP");
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
   const handleLoginWithPassword = async () => {
-    // Implement later password login
-    console.log("Login with password:", { phone, password });
+    try {
+      setIsLoading(true);
+      await signInWithPhonePassword(phone, password);
+      router.replace("/(tabs)");
+    } catch (error: any) {
+      console.error("Password login error:", error);
+      Alert.alert("Lỗi đăng nhập", error.message || "Sai số điện thoại hoặc mật khẩu") ;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleGoogleLogin = async () => {
     try {
       setIsLoading(true);
       const { url } = await signInWithGoogle();
+      if (!url) throw new Error("No OAuth URL returned");
+      const redirectUrl = getAuthRedirectUrl();
       
-      if (!url) {
-        throw new Error("No URL returned from OAuth");
-      }
-
-      // Open OAuth URL in browser
-      const result = await WebBrowser.openAuthSessionAsync(
-        url,
-        "fooddelivery://auth/callback"
-      );
-
-      if (result.type === "success") {
-        // Session will be handled by AuthContext listener
-        router.replace("/(tabs)");
+      console.log("Opening OAuth URL:", url);
+      console.log("Redirect URL:", redirectUrl);
+      
+      // Set up deep link listener before opening browser
+      let deepLinkSubscription: any = null;
+      let sessionFound = false;
+      
+      const handleDeepLink = async (event: { url: string }) => {
+        console.log("Deep link received:", event.url);
+        
+        if (event.url.includes("auth/callback") && !sessionFound) {
+          sessionFound = true;
+          
+          // Unsubscribe immediately to prevent multiple calls
+          if (deepLinkSubscription) {
+            deepLinkSubscription.remove();
+            deepLinkSubscription = null;
+          }
+          
+          try {
+            await WebBrowser.dismissBrowser();
+          } catch (e) {
+            // Ignore if browser already closed
+          }
+          
+          // Extract tokens from the deep link URL
+          await handleOAuthCallback(event.url);
+        }
+      };
+      
+      // Listen for deep links
+      deepLinkSubscription = Linking.addEventListener("url", handleDeepLink);
+      
+      // Use openAuthSessionAsync with Site URL (https://example.com)
+      // Supabase will redirect there, and we can extract tokens from the result
+      const supabaseRedirectUrl = "https://example.com";
+      const result = await WebBrowser.openAuthSessionAsync(url, supabaseRedirectUrl);
+      
+      console.log("OAuth result:", result);
+      
+      // Check if we got a redirect with tokens
+      if (result.type === "success" && result.url) {
+        console.log("OAuth redirect successful, URL:", result.url);
+        // Extract tokens from the redirect URL
+        await handleOAuthCallback(result.url);
+        if (deepLinkSubscription) {
+          deepLinkSubscription.remove();
+        }
+        return;
+      } else if (result.type === "cancel") {
+        console.log("OAuth cancelled by user");
+        if (deepLinkSubscription) {
+          deepLinkSubscription.remove();
+        }
+        return;
+      } else if (result.type === "dismiss") {
+        console.log("Browser dismissed, polling for session...");
+        // Browser was dismissed, poll for session as fallback
+        let attempts = 0;
+        const maxAttempts = 30; // 30 seconds timeout
+        
+        const pollSession = async () => {
+          while (attempts < maxAttempts && !sessionFound) {
+            attempts++;
+            console.log(`Polling session attempt ${attempts}/${maxAttempts}`);
+            
+            const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+            
+            if (sessionError) {
+              console.error("Session error:", sessionError);
+            }
+            
+            if (session) {
+              console.log("Session found!", session.user.id);
+              sessionFound = true;
+              if (deepLinkSubscription) {
+                deepLinkSubscription.remove();
+              }
+              router.replace("/(tabs)");
+              return true;
+            }
+            
+            // Wait 1 second before next attempt
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+          
+          // Clean up
+          if (deepLinkSubscription) {
+            deepLinkSubscription.remove();
+          }
+          
+          return false;
+        };
+        
+        const success = await pollSession();
+        
+        if (!success && !sessionFound) {
+          Alert.alert(
+            "Timeout",
+            "Không thể xác thực sau khi đăng nhập. Vui lòng thử lại."
+          );
+        }
       }
     } catch (error: any) {
       console.error("Google login error:", error);
@@ -80,25 +191,184 @@ export default function LoginScreen() {
       setIsLoading(false);
     }
   };
+  
+  const handleOAuthCallback = async (callbackUrl: string) => {
+    try {
+      console.log("Processing OAuth callback URL:", callbackUrl);
+      
+      // Extract tokens from the callback URL
+      // Handle exp://, fooddelivery://, and https:// URLs
+      let urlObj: URL;
+      try {
+        // Try parsing as standard URL first
+        urlObj = new URL(callbackUrl);
+      } catch {
+        // If that fails, it might be a custom scheme, convert it
+        const normalizedUrl = callbackUrl
+          .replace(/^fooddelivery:\/\//, "https://")
+          .replace(/^exp:\/\//, "https://");
+        urlObj = new URL(normalizedUrl);
+      }
+      
+      const hash = urlObj.hash.substring(1); // Remove #
+      const search = urlObj.search.substring(1); // Remove ?
+      
+      // Also check if tokens are in the path for custom schemes
+      const pathParts = urlObj.pathname.split("?");
+      const pathQuery = pathParts.length > 1 ? pathParts[1] : "";
+      
+      const params = new URLSearchParams(hash || search || pathQuery);
+      const accessToken = params.get("access_token");
+      const refreshToken = params.get("refresh_token");
+      const error = params.get("error");
+      
+      if (error) {
+        const errorDescription = params.get("error_description");
+        throw new Error(errorDescription || error);
+      }
+      
+      // If we have tokens, set the session directly
+      if (accessToken && refreshToken) {
+        console.log("Setting session from callback URL");
+        const { data, error: setSessionError } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+        
+        if (setSessionError) throw setSessionError;
+        
+        if (data.session) {
+          console.log("Session set successfully!");
+          router.replace("/(tabs)");
+          return;
+        }
+      } else {
+        // If no tokens in URL, Supabase might have handled it via detectSessionInUrl
+        // Wait a bit and check session
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          console.log("Session found after callback!");
+          router.replace("/(tabs)");
+          return;
+        }
+      }
+    } catch (error: any) {
+      console.error("OAuth callback error:", error);
+      Alert.alert(
+        "Lỗi xác thực",
+        error.message || "Không thể xác thực. Vui lòng thử lại."
+      );
+    }
+  };
 
   const handleGithubLogin = async () => {
     try {
       setIsLoading(true);
       const { url } = await signInWithGithub();
+      if (!url) throw new Error("No OAuth URL returned");
+      const redirectUrl = getAuthRedirectUrl();
       
-      if (!url) {
-        throw new Error("No URL returned from OAuth");
-      }
-
-      // Open OAuth URL in browser
-      const result = await WebBrowser.openAuthSessionAsync(
-        url,
-        "fooddelivery://auth/callback"
-      );
-
-      if (result.type === "success") {
-        // Session will be handled by AuthContext listener
-        router.replace("/(tabs)");
+      console.log("Opening OAuth URL:", url);
+      console.log("Redirect URL:", redirectUrl);
+      
+      // Set up deep link listener before opening browser
+      let deepLinkSubscription: any = null;
+      let sessionFound = false;
+      
+      const handleDeepLink = async (event: { url: string }) => {
+        console.log("Deep link received:", event.url);
+        
+        if (event.url.includes("auth/callback") && !sessionFound) {
+          sessionFound = true;
+          
+          // Unsubscribe immediately to prevent multiple calls
+          if (deepLinkSubscription) {
+            deepLinkSubscription.remove();
+            deepLinkSubscription = null;
+          }
+          
+          try {
+            await WebBrowser.dismissBrowser();
+          } catch (e) {
+            // Ignore if browser already closed
+          }
+          
+          // Extract tokens from the deep link URL
+          await handleOAuthCallback(event.url);
+        }
+      };
+      
+      // Listen for deep links
+      deepLinkSubscription = Linking.addEventListener("url", handleDeepLink);
+      
+      // Use openAuthSessionAsync with Site URL (https://example.com)
+      const supabaseRedirectUrl = "https://example.com";
+      const result = await WebBrowser.openAuthSessionAsync(url, supabaseRedirectUrl);
+      
+      console.log("OAuth result:", result);
+      
+      // Check if we got a redirect with tokens
+      if (result.type === "success" && result.url) {
+        console.log("OAuth redirect successful, URL:", result.url);
+        // Extract tokens from the redirect URL
+        await handleOAuthCallback(result.url);
+        if (deepLinkSubscription) {
+          deepLinkSubscription.remove();
+        }
+        return;
+      } else if (result.type === "cancel") {
+        console.log("OAuth cancelled by user");
+        if (deepLinkSubscription) {
+          deepLinkSubscription.remove();
+        }
+        return;
+      } else if (result.type === "dismiss") {
+        console.log("Browser dismissed, polling for session...");
+        // Browser was dismissed, poll for session as fallback
+        let attempts = 0;
+        const maxAttempts = 30; // 30 seconds timeout
+        
+        const pollSession = async () => {
+          while (attempts < maxAttempts && !sessionFound) {
+            attempts++;
+            console.log(`Polling session attempt ${attempts}/${maxAttempts}`);
+            
+            const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+            
+            if (sessionError) {
+              console.error("Session error:", sessionError);
+            }
+            
+            if (session) {
+              console.log("Session found!", session.user.id);
+              sessionFound = true;
+              if (deepLinkSubscription) {
+                deepLinkSubscription.remove();
+              }
+              router.replace("/(tabs)");
+              return true;
+            }
+            
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+          
+          // Clean up
+          if (deepLinkSubscription) {
+            deepLinkSubscription.remove();
+          }
+          
+          return false;
+        };
+        
+        const success = await pollSession();
+        
+        if (!success && !sessionFound) {
+          Alert.alert(
+            "Timeout",
+            "Không thể xác thực sau khi đăng nhập. Vui lòng thử lại."
+          );
+        }
       }
     } catch (error: any) {
       console.error("Github login error:", error);

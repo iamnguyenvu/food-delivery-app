@@ -121,10 +121,8 @@ export default function HomeScreen() {
   };
 
   const handleDealSelect = (id: string) => {
-    // Deals navigate to dish detail
-    const dealMapping = getDealToDishMapping();
-    const dishId = dealMapping[id] || 'dish-1';
-    router.push(`/(screens)/dish-detail/${dishId}` as any);
+    // Navigate to deals list page instead of dish detail
+    router.push("/(screens)/deals" as any);
   };
 
   return (
