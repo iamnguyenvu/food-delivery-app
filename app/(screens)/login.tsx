@@ -9,6 +9,7 @@ import {
   Alert,
   Image,
   KeyboardAvoidingView,
+  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -64,7 +65,7 @@ export default function LoginScreen() {
       router.replace("/(tabs)");
     } catch (error: any) {
       console.error("Password login error:", error);
-      Alert.alert("Lỗi đăng nhập", error.message || "Sai số điện thoại hoặc mật khẩu");
+      Alert.alert("Lỗi đăng nhập", error.message || "Sai số điện thoại hoặc mật khẩu") ;
     } finally {
       setIsLoading(false);
     }
@@ -78,43 +79,107 @@ export default function LoginScreen() {
       const redirectUrl = getAuthRedirectUrl();
       
       console.log("Opening OAuth URL:", url);
+      console.log("Redirect URL:", redirectUrl);
       
-      // Open browser for OAuth
-      const result = await WebBrowser.openAuthSessionAsync(url, redirectUrl);
+      // Set up deep link listener before opening browser
+      let deepLinkSubscription: any = null;
+      let sessionFound = false;
+      
+      const handleDeepLink = async (event: { url: string }) => {
+        console.log("Deep link received:", event.url);
+        
+        if (event.url.includes("auth/callback") && !sessionFound) {
+          sessionFound = true;
+          
+          // Unsubscribe immediately to prevent multiple calls
+          if (deepLinkSubscription) {
+            deepLinkSubscription.remove();
+            deepLinkSubscription = null;
+          }
+          
+          try {
+            await WebBrowser.dismissBrowser();
+          } catch (e) {
+            // Ignore if browser already closed
+          }
+          
+          // Extract tokens from the deep link URL
+          await handleOAuthCallback(event.url);
+        }
+      };
+      
+      // Listen for deep links
+      deepLinkSubscription = Linking.addEventListener("url", handleDeepLink);
+      
+      // Use openAuthSessionAsync with Site URL (https://example.com)
+      // Supabase will redirect there, and we can extract tokens from the result
+      const supabaseRedirectUrl = "https://example.com";
+      const result = await WebBrowser.openAuthSessionAsync(url, supabaseRedirectUrl);
       
       console.log("OAuth result:", result);
       
-      // Poll for session instead of relying on deep link callback
-      // This works around Expo Go not handling custom schemes properly
-      let attempts = 0;
-      const maxAttempts = 30; // 30 seconds timeout
-      
-      const pollSession = async () => {
-        while (attempts < maxAttempts) {
-          attempts++;
-          console.log(`Polling session attempt ${attempts}/${maxAttempts}`);
-          
-          const { data: { session } } = await supabase.auth.getSession();
-          
-          if (session) {
-            console.log("Session found!", session.user.id);
-            router.replace("/(tabs)");
-            return true;
+      // Check if we got a redirect with tokens
+      if (result.type === "success" && result.url) {
+        console.log("OAuth redirect successful, URL:", result.url);
+        // Extract tokens from the redirect URL
+        await handleOAuthCallback(result.url);
+        if (deepLinkSubscription) {
+          deepLinkSubscription.remove();
+        }
+        return;
+      } else if (result.type === "cancel") {
+        console.log("OAuth cancelled by user");
+        if (deepLinkSubscription) {
+          deepLinkSubscription.remove();
+        }
+        return;
+      } else if (result.type === "dismiss") {
+        console.log("Browser dismissed, polling for session...");
+        // Browser was dismissed, poll for session as fallback
+        let attempts = 0;
+        const maxAttempts = 30; // 30 seconds timeout
+        
+        const pollSession = async () => {
+          while (attempts < maxAttempts && !sessionFound) {
+            attempts++;
+            console.log(`Polling session attempt ${attempts}/${maxAttempts}`);
+            
+            const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+            
+            if (sessionError) {
+              console.error("Session error:", sessionError);
+            }
+            
+            if (session) {
+              console.log("Session found!", session.user.id);
+              sessionFound = true;
+              if (deepLinkSubscription) {
+                deepLinkSubscription.remove();
+              }
+              router.replace("/(tabs)");
+              return true;
+            }
+            
+            // Wait 1 second before next attempt
+            await new Promise(resolve => setTimeout(resolve, 1000));
           }
           
-          // Wait 1 second before next attempt
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          // Clean up
+          if (deepLinkSubscription) {
+            deepLinkSubscription.remove();
+          }
+          
+          return false;
+        };
+        
+        const success = await pollSession();
+        
+        if (!success && !sessionFound) {
+          Alert.alert(
+            "Timeout",
+            "Không thể xác thực sau khi đăng nhập. Vui lòng thử lại."
+          );
         }
-        return false;
-      };
-      
-      const success = await pollSession();
-      
-      if (!success) {
-        Alert.alert(
-          "Timeout",
-          "Không thể xác thực sau khi đăng nhập. Vui lòng thử lại."
-        );
       }
     } catch (error: any) {
       console.error("Google login error:", error);
@@ -126,6 +191,76 @@ export default function LoginScreen() {
       setIsLoading(false);
     }
   };
+  
+  const handleOAuthCallback = async (callbackUrl: string) => {
+    try {
+      console.log("Processing OAuth callback URL:", callbackUrl);
+      
+      // Extract tokens from the callback URL
+      // Handle exp://, fooddelivery://, and https:// URLs
+      let urlObj: URL;
+      try {
+        // Try parsing as standard URL first
+        urlObj = new URL(callbackUrl);
+      } catch {
+        // If that fails, it might be a custom scheme, convert it
+        const normalizedUrl = callbackUrl
+          .replace(/^fooddelivery:\/\//, "https://")
+          .replace(/^exp:\/\//, "https://");
+        urlObj = new URL(normalizedUrl);
+      }
+      
+      const hash = urlObj.hash.substring(1); // Remove #
+      const search = urlObj.search.substring(1); // Remove ?
+      
+      // Also check if tokens are in the path for custom schemes
+      const pathParts = urlObj.pathname.split("?");
+      const pathQuery = pathParts.length > 1 ? pathParts[1] : "";
+      
+      const params = new URLSearchParams(hash || search || pathQuery);
+      const accessToken = params.get("access_token");
+      const refreshToken = params.get("refresh_token");
+      const error = params.get("error");
+      
+      if (error) {
+        const errorDescription = params.get("error_description");
+        throw new Error(errorDescription || error);
+      }
+      
+      // If we have tokens, set the session directly
+      if (accessToken && refreshToken) {
+        console.log("Setting session from callback URL");
+        const { data, error: setSessionError } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+        
+        if (setSessionError) throw setSessionError;
+        
+        if (data.session) {
+          console.log("Session set successfully!");
+          router.replace("/(tabs)");
+          return;
+        }
+      } else {
+        // If no tokens in URL, Supabase might have handled it via detectSessionInUrl
+        // Wait a bit and check session
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          console.log("Session found after callback!");
+          router.replace("/(tabs)");
+          return;
+        }
+      }
+    } catch (error: any) {
+      console.error("OAuth callback error:", error);
+      Alert.alert(
+        "Lỗi xác thực",
+        error.message || "Không thể xác thực. Vui lòng thử lại."
+      );
+    }
+  };
 
   const handleGithubLogin = async () => {
     try {
@@ -135,41 +270,105 @@ export default function LoginScreen() {
       const redirectUrl = getAuthRedirectUrl();
       
       console.log("Opening OAuth URL:", url);
+      console.log("Redirect URL:", redirectUrl);
       
-      // Open browser for OAuth
-      const result = await WebBrowser.openAuthSessionAsync(url, redirectUrl);
+      // Set up deep link listener before opening browser
+      let deepLinkSubscription: any = null;
+      let sessionFound = false;
+      
+      const handleDeepLink = async (event: { url: string }) => {
+        console.log("Deep link received:", event.url);
+        
+        if (event.url.includes("auth/callback") && !sessionFound) {
+          sessionFound = true;
+          
+          // Unsubscribe immediately to prevent multiple calls
+          if (deepLinkSubscription) {
+            deepLinkSubscription.remove();
+            deepLinkSubscription = null;
+          }
+          
+          try {
+            await WebBrowser.dismissBrowser();
+          } catch (e) {
+            // Ignore if browser already closed
+          }
+          
+          // Extract tokens from the deep link URL
+          await handleOAuthCallback(event.url);
+        }
+      };
+      
+      // Listen for deep links
+      deepLinkSubscription = Linking.addEventListener("url", handleDeepLink);
+      
+      // Use openAuthSessionAsync with Site URL (https://example.com)
+      const supabaseRedirectUrl = "https://example.com";
+      const result = await WebBrowser.openAuthSessionAsync(url, supabaseRedirectUrl);
       
       console.log("OAuth result:", result);
       
-      // Poll for session instead of relying on deep link callback
-      let attempts = 0;
-      const maxAttempts = 30;
-      
-      const pollSession = async () => {
-        while (attempts < maxAttempts) {
-          attempts++;
-          console.log(`Polling session attempt ${attempts}/${maxAttempts}`);
-          
-          const { data: { session } } = await supabase.auth.getSession();
-          
-          if (session) {
-            console.log("Session found!", session.user.id);
-            router.replace("/(tabs)");
-            return true;
+      // Check if we got a redirect with tokens
+      if (result.type === "success" && result.url) {
+        console.log("OAuth redirect successful, URL:", result.url);
+        // Extract tokens from the redirect URL
+        await handleOAuthCallback(result.url);
+        if (deepLinkSubscription) {
+          deepLinkSubscription.remove();
+        }
+        return;
+      } else if (result.type === "cancel") {
+        console.log("OAuth cancelled by user");
+        if (deepLinkSubscription) {
+          deepLinkSubscription.remove();
+        }
+        return;
+      } else if (result.type === "dismiss") {
+        console.log("Browser dismissed, polling for session...");
+        // Browser was dismissed, poll for session as fallback
+        let attempts = 0;
+        const maxAttempts = 30; // 30 seconds timeout
+        
+        const pollSession = async () => {
+          while (attempts < maxAttempts && !sessionFound) {
+            attempts++;
+            console.log(`Polling session attempt ${attempts}/${maxAttempts}`);
+            
+            const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+            
+            if (sessionError) {
+              console.error("Session error:", sessionError);
+            }
+            
+            if (session) {
+              console.log("Session found!", session.user.id);
+              sessionFound = true;
+              if (deepLinkSubscription) {
+                deepLinkSubscription.remove();
+              }
+              router.replace("/(tabs)");
+              return true;
+            }
+            
+            await new Promise(resolve => setTimeout(resolve, 1000));
           }
           
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          // Clean up
+          if (deepLinkSubscription) {
+            deepLinkSubscription.remove();
+          }
+          
+          return false;
+        };
+        
+        const success = await pollSession();
+        
+        if (!success && !sessionFound) {
+          Alert.alert(
+            "Timeout",
+            "Không thể xác thực sau khi đăng nhập. Vui lòng thử lại."
+          );
         }
-        return false;
-      };
-      
-      const success = await pollSession();
-      
-      if (!success) {
-        Alert.alert(
-          "Timeout",
-          "Không thể xác thực sau khi đăng nhập. Vui lòng thử lại."
-        );
       }
     } catch (error: any) {
       console.error("Github login error:", error);

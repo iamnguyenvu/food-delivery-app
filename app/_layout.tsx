@@ -15,6 +15,8 @@ import "../global.css";
 import { useColorScheme } from "@/components/useColorScheme";
 import { AuthProvider } from "@/src/contexts/AuthContext";
 import { initialWindowMetrics, SafeAreaProvider } from "react-native-safe-area-context";
+import FloatingCartBar from "@/components/common/FloatingCartBar";
+import { View } from "react-native";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -72,10 +74,13 @@ function RootLayoutNav() {
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme} >
-            <Stack>
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="(screens)" options={{ headerShown: false }} />
-            </Stack>
+            <View style={{ flex: 1 }}>
+              <Stack>
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="(screens)" options={{ headerShown: false }} />
+              </Stack>
+              <FloatingCartBar />
+            </View>
           </ThemeProvider>
         </AuthProvider>
       </QueryClientProvider>

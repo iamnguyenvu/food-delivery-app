@@ -81,6 +81,3 @@ function SuggestionCard({ item }: { item: Dish }) {
         </Pressable>
     );
 }
-
-
-

@@ -6,7 +6,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { getAuthRedirectUrl } from "../lib/authRedirect";
+import { getAuthRedirectUrl, getSupabaseRedirectUrl } from "../lib/authRedirect";
 import { supabase } from "../lib/supabase";
 
 type OAuthResponse = Awaited<ReturnType<typeof supabase.auth.signInWithOAuth>>;
@@ -21,7 +21,7 @@ type AuthContextType = {
   signOut: () => Promise<void>;
   signInWithGoogle: () => Promise<OAuthData>;
   signInWithGithub: () => Promise<OAuthData>;
-  sendOtpToPhone: (phone: string) => Promise<void>;
+  sendOtpToPhone: (phone: string) => Promise<{ user: null; session: null; messageId?: string | null; }>;
   verifyOtp: (phone: string, token: string) => Promise<void>;
   signInWithPhonePassword: (phone: string, password: string) => Promise<void>;
   updatePassword: (newPassword: string) => Promise<void>;
@@ -101,7 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return new Error(
         [
           "Supabase project chưa cấu hình SMS provider nên không thể gửi OTP.",
-          "Mở Supabase Dashboard → Authentication → Phone và làm theo docs/PHONE_AUTH_SETUP.md.",
+          // "Mở Supabase Dashboard → Authentication → Phone và làm theo docs/PHONE_AUTH_SETUP.md.",
         ].join(" ")
       );
     }
@@ -131,13 +131,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithGoogle = async () => {
     try {
-      const redirectUrl = getAuthRedirectUrl();
-      console.log("Google OAuth redirect URL:", redirectUrl);
+      // Use Site URL for redirect - Supabase will accept this
+      // Then we'll extract tokens from the redirect result
+      const redirectUrl = getSupabaseRedirectUrl();
+      console.log("Google OAuth redirect URL (for Supabase):", redirectUrl);
+      console.log("App deep link URL:", getAuthRedirectUrl());
 
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: redirectUrl,
+          skipBrowserRedirect: false,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
@@ -145,7 +149,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("OAuth error:", error);
+        throw error;
+      }
+      
+      console.log("OAuth data:", data);
       return data;
     } catch (error) {
       console.error("Google sign in error:", error);
@@ -155,8 +164,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithGithub = async () => {
     try {
-      const redirectUrl = getAuthRedirectUrl();
-      console.log("Github OAuth redirect URL:", redirectUrl);
+      // Use Site URL for redirect - Supabase will accept this
+      const redirectUrl = getSupabaseRedirectUrl();
+      console.log("Github OAuth redirect URL (for Supabase):", redirectUrl);
+      console.log("App deep link URL:", getAuthRedirectUrl());
 
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "github",
@@ -176,11 +187,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const sendOtpToPhone = async (phone: string) => {
     const normalized = formatPhoneE164(phone);
     if (!normalized) throw new Error("Invalid phone number");
-    const { error } = await supabase.auth.signInWithOtp({
+    
+    console.log("Sending OTP to phone:", normalized);
+    
+    const { data, error } = await supabase.auth.signInWithOtp({
       phone: normalized,
       options: { channel: "sms" },
     });
-    if (error) throw mapPhoneAuthError(error);
+    
+    if (error) {
+      console.error("OTP send error:", error);
+      console.error("Error details:", JSON.stringify(error, null, 2));
+      throw mapPhoneAuthError(error);
+    }
+    
+    console.log("OTP sent successfully. Response:", data);
+    return data;
   };
 
   const verifyOtp = async (phone: string, token: string) => {

@@ -1,7 +1,26 @@
 import { supabase } from "@/src/lib/supabase";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { Platform } from "react-native";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
+
+// Helper to extract URL parameters from hash or query string
+const extractUrlParams = (): URLSearchParams => {
+  if (Platform.OS === "web" && typeof window !== "undefined") {
+    // On web, check both hash and query string
+    const hash = window.location.hash.substring(1); // Remove #
+    const search = window.location.search.substring(1); // Remove ?
+    
+    // Supabase PKCE flow typically uses hash fragments
+    if (hash) {
+      return new URLSearchParams(hash);
+    }
+    if (search) {
+      return new URLSearchParams(search);
+    }
+  }
+  return new URLSearchParams();
+};
 
 export default function AuthCallback() {
   const router = useRouter();
@@ -11,32 +30,68 @@ export default function AuthCallback() {
   useEffect(() => {
     let mounted = true;
     let subscription: any = null;
+    let timeoutId: NodeJS.Timeout | null = null;
 
     const handleAuthCallback = async () => {
       try {
         console.log("Auth callback params:", params);
 
-        // If we have access_token or code in URL, let Supabase handle it
-        const urlParams = new URLSearchParams(params as any);
-        const accessToken = urlParams.get("access_token");
-        const refreshToken = urlParams.get("refresh_token");
-        const code = urlParams.get("code");
+        // Extract parameters from URL (handles both hash and query params)
+        const urlParams = extractUrlParams();
+        
+        // Also check params from expo-router
+        const allParams = new URLSearchParams();
+        Object.entries(params).forEach(([key, value]) => {
+          if (typeof value === "string") {
+            allParams.set(key, value);
+          }
+        });
+        
+        // Merge URL params (priority) with router params
+        urlParams.forEach((value, key) => {
+          allParams.set(key, value);
+        });
 
+        const accessToken = allParams.get("access_token") || urlParams.get("access_token");
+        const refreshToken = allParams.get("refresh_token") || urlParams.get("refresh_token");
+        const code = allParams.get("code") || urlParams.get("code");
+        const errorParam = allParams.get("error") || urlParams.get("error");
+        const errorDescription = allParams.get("error_description") || urlParams.get("error_description");
+
+        // Check for OAuth errors
+        if (errorParam) {
+          throw new Error(errorDescription || errorParam || "OAuth authentication failed");
+        }
+
+        // If we have access_token and refresh_token, set session directly
         if (accessToken && refreshToken) {
-          // Set session from URL tokens
+          console.log("Setting session from URL tokens");
           const { data, error: setSessionError } = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken,
           });
 
-          if (setSessionError) throw setSessionError;
+          if (setSessionError) {
+            console.error("Error setting session:", setSessionError);
+            throw setSessionError;
+          }
 
           if (data.session && mounted) {
-            console.log("Session set from tokens, redirecting to home");
+            console.log("Session set successfully, redirecting to home");
             router.replace("/(tabs)");
             return;
           }
         }
+
+        // If we have a code, Supabase should handle it automatically with detectSessionInUrl
+        // But we can also try to exchange it manually if needed
+        if (code) {
+          console.log("OAuth code received, waiting for Supabase to process...");
+        }
+
+        // Let Supabase handle the URL automatically (detectSessionInUrl is enabled)
+        // This should work for PKCE flow
+        await new Promise(resolve => setTimeout(resolve, 500));
 
         // Try to get existing session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
@@ -57,6 +112,7 @@ export default function AuthCallback() {
             console.log("Auth state changed:", event, session?.user?.id);
             
             if (event === "SIGNED_IN" && session && mounted) {
+              console.log("Signed in event received, redirecting to home");
               router.replace("/(tabs)");
             }
           }
@@ -64,23 +120,26 @@ export default function AuthCallback() {
 
         subscription = sub;
 
-        // If no session after 3 seconds, redirect to login
-        setTimeout(() => {
+        // If no session after 5 seconds, redirect to login
+        timeoutId = setTimeout(() => {
           if (mounted) {
             supabase.auth.getSession().then(({ data: { session } }) => {
               if (!session) {
                 console.log("No session found after timeout, redirecting to login");
-                router.replace("/login");
+                setError("Không thể xác thực. Vui lòng thử lại.");
+                setTimeout(() => {
+                  router.replace("/login");
+                }, 2000);
               }
             });
           }
-        }, 3000);
+        }, 5000);
 
       } catch (err: any) {
         console.error("Auth callback error:", err);
         if (mounted) {
           setError(err.message || "Authentication failed");
-          setTimeout(() => {
+          timeoutId = setTimeout(() => {
             router.replace("/login");
           }, 2000);
         }
@@ -94,8 +153,11 @@ export default function AuthCallback() {
       if (subscription) {
         subscription.unsubscribe();
       }
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
     };
-  }, [params]);
+  }, [params, router]);
 
   if (error) {
     return (
