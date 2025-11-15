@@ -297,7 +297,12 @@ export default function FlashSale({
             <FlashSaleItem
               key={item.id}
               item={item}
-              onPress={() => onSelectItem?.(item.id)}
+              onPress={() => {
+                // Navigate to restaurant instead of dish detail
+                if (item.restaurant_id) {
+                  router.push(`/(screens)/restaurant-detail/${item.restaurant_id}` as any);
+                }
+              }}
             />
           ))}
         </ScrollView>
