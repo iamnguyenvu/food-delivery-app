@@ -11,7 +11,7 @@ export default function ProfileScreen() {
     {
       icon: "wallet-outline",
       label: "Ví voucher",
-      onPress: () => router.push("/vouchers" as any),
+      onPress: () => router.push("/voucher/vouchers" as any),
       badge: 3,
     },
     {
