@@ -23,7 +23,7 @@ export default function MapPickerWeb({
       onLocationChange(initialLocation);
     }
     setLoading(false);
-  }, [initialLocation]);
+  }, [initialLocation, onLocationChange]);
 
   return (
     <View style={StyleSheet.absoluteFillObject} className="bg-gray-100 items-center justify-center">
@@ -34,7 +34,7 @@ export default function MapPickerWeb({
           <Ionicons name="map-outline" size={64} color="#9CA3AF" />
           <Text className="mt-4 text-gray-600 text-center px-8">
             Map view not available on web.{"\n"}
-            Use search or "Use My Location" button.
+            Use search or &quot;Use My Location&quot; button.
           </Text>
           <View className="mt-6 p-4 bg-white rounded-lg shadow">
             <Text className="text-sm text-gray-700">

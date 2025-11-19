@@ -30,7 +30,6 @@ export default function CartModal({
                                   }: CartModalProps) {
     const items = useCartStore((s) => s.items);
     const updateQuantity = useCartStore((s) => s.updateQuantity);
-    const removeItem = useCartStore((s) => s.removeItem);
     const clearCart = useCartStore((s) => s.clearCart);
     const getTotalPrice = useCartStore((s) => s.getTotalPrice);
 

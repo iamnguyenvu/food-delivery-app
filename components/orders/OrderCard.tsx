@@ -32,10 +32,6 @@ export default function OrderCard({
     onReviewPress?: (order: Order) => void;
     onPress?: () => void;
 }) {
-    const createdTime = order.created_at.toLocaleTimeString("vi-VN", {
-        hour: "2-digit",
-        minute: "2-digit",
-    });
 
     const etaTime = order.estimated_delivery.toLocaleTimeString("vi-VN", {
         hour: "2-digit",
@@ -103,7 +99,7 @@ export default function OrderCard({
             setProgressPct(pct);
         }, 1000);
         return () => clearInterval(interval);
-    }, [order.status]);
+    }, [order.status, order.created_at, order.estimated_delivery]);
 
     return (
         <Pressable

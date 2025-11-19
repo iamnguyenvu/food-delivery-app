@@ -14,7 +14,7 @@ import MapPicker from "./MapPicker";
 
 export default function LocationPickerScreen() {
   // Get saved location and address from global store
-  const { location, address, setAll } = useLocationStore();
+  const { location, setAll } = useLocationStore();
   const { user } = useAuth();
   const userId = user?.id;
   
@@ -30,7 +30,6 @@ export default function LocationPickerScreen() {
     loc?.longitude
   );
 
-  const [searchText, setSearchText] = useState("");
   const [locating, setLocating] = useState(false);
 
   // Initialize with saved location or default to HCM center
@@ -41,7 +40,7 @@ export default function LocationPickerScreen() {
       latitude: 10.8231,
       longitude: 106.6297,
     });
-  }, []);
+  }, [loc]);
 
   // Debounce map movements to avoid too many geocode requests
   const debRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -105,24 +104,6 @@ export default function LocationPickerScreen() {
     }
 
     router.push("/");
-  };
-
-  const onSearch = async () => {
-    if (!searchText.trim()) return;
-
-    try {
-      // Forward geocode: convert text address to coordinates
-      const results = await ExpoLocation.geocodeAsync(searchText.trim());
-
-      if (results?.length) {
-        const { latitude, longitude } = results[0];
-        setLoc({ latitude, longitude });
-      } else {
-        Alert.alert("Không tìm thấy", "Không tìm thấy địa chỉ này.");
-      }
-    } catch (e) {
-      Alert.alert("Lỗi tìm kiếm", "Không thể tìm kiếm địa chỉ.");
-    }
   };
 
   const onUseMyLocation = async () => {

@@ -128,7 +128,7 @@ export default function VoucherDetailScreen() {
             }
 
             alert("Thiết bị không hỗ trợ sao chép tự động. Bạn có thể nhấn giữ để copy.");
-        } catch (error) {
+        } catch {
             alert("Không thể sao chép tự động. Hãy copy thủ công.");
         }
     };

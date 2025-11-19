@@ -9,11 +9,10 @@ import TopRatedRestaurants from "@/components/index/TopRatedRestaurants";
 import TrumDealNgon from "@/components/index/TrumDealNgon";
 import LocationPermissionModal from "@/components/location/LocationPermissionModal";
 import {
-  getDealToDishMapping,
-  getDishToRestaurantMapping,
-  getFlashSaleToDishMapping,
-  trackBannerClick,
-  useBanners
+    getDishToRestaurantMapping,
+    getFlashSaleToDishMapping,
+    trackBannerClick,
+    useBanners
 } from "@/src/hooks";
 import { useLocationStore } from "@/src/store/locationStore";
 import { Banner } from "@/src/types";
@@ -26,7 +25,6 @@ export default function HomeScreen() {
   const { address, location, setAll } = useLocationStore();
   const [showPermissionModal, setShowPermissionModal] = useState(false);
   const scrollY = useRef(new Animated.Value(0)).current;
-  const [userDismissedModal, setUserDismissedModal] = useState(false);
 
   const label = useMemo(
     () => address?.formatted || "Chọn vị trí giao hàng",
@@ -35,13 +33,11 @@ export default function HomeScreen() {
 
   const openPicker = () => router.push("/(screens)/address-input" as any);
   const { banners, isLoading } = useBanners();
-  const [selectedCategory, setSelectedCategory] = useState("1");
 
   // Show permission modal whenever location is not set
   useEffect(() => {
     if (!location || !address?.formatted) {
       setShowPermissionModal(true);
-      setUserDismissedModal(false);
     } else {
       setShowPermissionModal(false);
     }
@@ -53,19 +49,12 @@ export default function HomeScreen() {
       address: { formatted: addr, street: addr } 
     });
     setShowPermissionModal(false);
-    setUserDismissedModal(false);
   };
 
   const handleManualInput = () => {
     // Don't hide modal, keep it visible in background
     // User must complete address selection to proceed
     router.push("/(screens)/address-input" as any);
-  };
-
-  const handleModalDismiss = () => {
-    // Don't allow dismissing - location is required
-    // Modal will stay visible
-    return;
   };
 
   const handleBannerPress = (banner: Banner) => {
@@ -90,11 +79,6 @@ export default function HomeScreen() {
       default:
         console.log("Banner clicked:", banner.title);
     }
-  };
-
-  const handleCategorySelect = (id: string) => {
-    setSelectedCategory(id);
-    console.log("Category selected:", id);
   };
 
   const handleSearchPress = () => {
@@ -160,7 +144,7 @@ export default function HomeScreen() {
             onBannerPress={handleBannerPress}
           />
 
-          <CategoryGrid onSelectCategory={handleCategorySelect} />
+          <CategoryGrid />
 
           <TrumDealNgon
             onViewMore={() => console.log("View more deals")}

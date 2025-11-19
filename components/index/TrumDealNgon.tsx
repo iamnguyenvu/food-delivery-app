@@ -72,7 +72,7 @@ export default function TrumDealNgon({
   onViewMore,
   onSelectDeal,
 }: TrumDealNgonProps) {
-  const { deals: dealsFromDB, isLoading, error } = useDeals({ limit: 3, featured: true });
+    const { deals: dealsFromDB, isLoading } = useDeals({ limit: 3, featured: true });
   
   // Use database deals if available, otherwise use sample data
   const deals = !isLoading && dealsFromDB.length === 0 ? SAMPLE_DEALS : dealsFromDB;

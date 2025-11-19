@@ -6,16 +6,16 @@ import { router } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useState } from "react";
 import {
-  Alert,
-  Image,
-  KeyboardAvoidingView,
-  Linking,
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
+    Alert,
+    Image,
+    KeyboardAvoidingView,
+    Linking,
+    Platform,
+    Pressable,
+    ScrollView,
+    Text,
+    TextInput,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -101,7 +101,7 @@ export default function LoginScreen() {
           
           try {
             await WebBrowser.dismissBrowser();
-          } catch (e) {
+          } catch {
             // Ignore if browser already closed
           }
           
@@ -292,7 +292,7 @@ export default function LoginScreen() {
           
           try {
             await WebBrowser.dismissBrowser();
-          } catch (e) {
+          } catch {
             // Ignore if browser already closed
           }
           

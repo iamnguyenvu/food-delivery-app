@@ -175,7 +175,7 @@ function CategoryItem({ category, onPress }: CategoryItemProps) {
         ])
       ).start();
     }
-  }, [category.is_special]);
+  }, [category.is_special, shineAnim]);
 
   return (
     <Pressable
