@@ -21,9 +21,12 @@ type AuthContextType = {
   signOut: () => Promise<void>;
   signInWithGoogle: () => Promise<OAuthData>;
   signInWithGithub: () => Promise<OAuthData>;
-  sendOtpToPhone: (phone: string) => Promise<{ user: null; session: null; messageId?: string | null; }>;
-  verifyOtp: (phone: string, token: string) => Promise<void>;
-  signInWithPhonePassword: (phone: string, password: string) => Promise<void>;
+  // Phone + Password authentication (recommended)
+  signUpWithPhone: (phone: string, password: string, fullName?: string) => Promise<void>;
+  signInWithPhone: (phone: string, password: string) => Promise<void>;
+  // Deprecated: Phone OTP removed (Twilio blocked VN numbers)
+  // sendOtpToPhone: (phone: string) => Promise<{ user: null; session: null; messageId?: string | null; }>;
+  // verifyOtp: (phone: string, token: string) => Promise<void>;
   updatePassword: (newPassword: string) => Promise<void>;
 };
 
@@ -83,31 +86,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) throw error;
   };
 
-  const formatPhoneE164 = (raw: string) => {
-    let digits = (raw || "").replace(/\D/g, "");
-    if (!digits) return "";
-    if (digits.startsWith("0")) return "+84" + digits.slice(1);
-    if (digits.startsWith("+")) return digits;
-    return "+84" + digits;
-  };
-
-  const mapPhoneAuthError = (error: unknown) => {
-    const message =
-      typeof error === "object" && error && "message" in error
-        ? String((error as any).message ?? "")
-        : "";
-
-    if (message.toLowerCase().includes("unsupported phone provider")) {
-      return new Error(
-        [
-          "Supabase project chưa cấu hình SMS provider nên không thể gửi OTP.",
-          // "Mở Supabase Dashboard → Authentication → Phone và làm theo docs/PHONE_AUTH_SETUP.md.",
-        ].join(" ")
-      );
-    }
-
-    if (error instanceof Error) return error;
-    return new Error("Không thể thực hiện xác thực bằng số điện thoại");
+  const validatePhone = (phone: string): boolean => {
+    // Validate Vietnam phone format: 0[35789]XXXXXXXX (10 digits)
+    const phoneRegex = /^0[35789]\d{8}$/;
+    return phoneRegex.test(phone);
   };
 
   const ensureProfile = async (u: User | null) => {
@@ -184,46 +166,97 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const sendOtpToPhone = async (phone: string) => {
-    const normalized = formatPhoneE164(phone);
-    if (!normalized) throw new Error("Invalid phone number");
-    
-    console.log("Sending OTP to phone:", normalized);
-    
-    const { data, error } = await supabase.auth.signInWithOtp({
-      phone: normalized,
-      options: { channel: "sms" },
-    });
-    
-    if (error) {
-      console.error("OTP send error:", error);
-      console.error("Error details:", JSON.stringify(error, null, 2));
-      throw mapPhoneAuthError(error);
+  // ============================================
+  // PHONE + PASSWORD AUTHENTICATION
+  // ============================================
+  
+  const signUpWithPhone = async (
+    phone: string,
+    password: string,
+    fullName?: string
+  ) => {
+    // Validate phone number (VN format)
+    if (!validatePhone(phone)) {
+      throw new Error(
+        "Số điện thoại không hợp lệ. Vui lòng nhập số VN (10 số, bắt đầu 0)"
+      );
     }
-    
-    console.log("OTP sent successfully. Response:", data);
-    return data;
-  };
 
-  const verifyOtp = async (phone: string, token: string) => {
-    const normalized = formatPhoneE164(phone);
-    const { data, error } = await supabase.auth.verifyOtp({
-      phone: normalized,
-      token,
-      type: "sms",
+    // Check if phone already exists
+    const { data: existingProfile } = await supabase
+      .from("profiles")
+      .select("phone")
+      .eq("phone", phone)
+      .single();
+
+    if (existingProfile) {
+      throw new Error("Số điện thoại đã được đăng ký");
+    }
+
+    // Create dummy email from phone
+    const email = `${phone}@fooddelivery.local`;
+
+    // Sign up with Supabase
+    const { data: authData, error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          phone,
+          full_name: fullName,
+        },
+      },
     });
-    if (error) throw mapPhoneAuthError(error);
-    await ensureProfile(data.session?.user ?? null);
+
+    if (signUpError) throw signUpError;
+
+    // Update profile with actual phone
+    if (authData.user) {
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({
+          phone,
+          name: fullName || "User",
+          email, // Keep dummy email for auth
+        })
+        .eq("id", authData.user.id);
+
+      if (profileError) {
+        console.error("Failed to update profile:", profileError);
+      }
+    }
   };
 
-  const signInWithPhonePassword = async (phone: string, password: string) => {
-    const normalized = formatPhoneE164(phone);
-    const { data, error } = await supabase.auth.signInWithPassword({
-      phone: normalized,
+  const signInWithPhone = async (phone: string, password: string) => {
+    // Validate phone number
+    if (!validatePhone(phone)) {
+      throw new Error("Số điện thoại không hợp lệ");
+    }
+
+    // Find user by phone
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("id, email")
+      .eq("phone", phone)
+      .single();
+
+    if (profileError || !profile) {
+      throw new Error("Số điện thoại chưa được đăng ký");
+    }
+
+    // Sign in with dummy email
+    const email = profile.email || `${phone}@fooddelivery.local`;
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
       password,
     });
-    if (error) throw error;
-    await ensureProfile(data.user ?? null);
+
+    if (error) {
+      if (error.message.toLowerCase().includes("invalid login credentials")) {
+        throw new Error("Số điện thoại hoặc mật khẩu không đúng");
+      }
+      throw error;
+    }
   };
 
   const updatePassword = async (newPassword: string) => {
@@ -242,9 +275,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signOut,
         signInWithGoogle,
         signInWithGithub,
-        sendOtpToPhone,
-        verifyOtp,
-        signInWithPhonePassword,
+        signUpWithPhone,
+        signInWithPhone,
         updatePassword,
       }}
     >

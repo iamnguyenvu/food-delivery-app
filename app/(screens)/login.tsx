@@ -23,51 +23,52 @@ import { SafeAreaView } from "react-native-safe-area-context";
 WebBrowser.maybeCompleteAuthSession();
 
 export default function LoginScreen() {
-  const { signInWithGoogle, signInWithGithub, sendOtpToPhone, signInWithPhonePassword } = useAuth();
+  const { signInWithGoogle, signInWithGithub, signUpWithPhone, signInWithPhone } = useAuth();
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
-  const [showPasswordInput, setShowPasswordInput] = useState(false);
+  const [fullName, setFullName] = useState("");
+  const [isSignUpMode, setIsSignUpMode] = useState(false); // Toggle between login/signup
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("");
+  
   const isValidVietnamPhone = (p: string) => {
     // 10 digits, starts with 0, and next digit in 3/5/7/8/9
     return /^0[35789]\d{8}$/.test(p);
   };
 
   const isPhoneValid = isValidVietnamPhone(phone);
-  const canContinue = showPasswordInput
-    ? isPhoneValid && password.length >= 6
-    : isPhoneValid;
+  const isPasswordValid = password.length >= 6;
+  const canContinue = isSignUpMode
+    ? isPhoneValid && isPasswordValid && fullName.trim().length > 0
+    : isPhoneValid && isPasswordValid;
 
-  const handleContinue = async () => {
+  const handlePhoneAuth = async () => {
     if (!canContinue) return;
 
-    if (showPasswordInput) {
-      // Login with password
-      await handleLoginWithPassword();
-    } else {
-      try {
-        setIsLoading(true);
-        await sendOtpToPhone(phone);
-        router.push({ pathname: "/verify-otp", params: { phone } } as any);
-      } catch (error: any) {
-        console.error("Send OTP error:", error);
-        Alert.alert("Lỗi", error.message || "Không thể gửi mã OTP");
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
-
-  const handleLoginWithPassword = async () => {
     try {
       setIsLoading(true);
-      await signInWithPhonePassword(phone, password);
-      router.replace("/(tabs)");
+      
+      if (isSignUpMode) {
+        // Sign up new user
+        setLoadingMessage("Đang tạo tài khoản...");
+        await signUpWithPhone(phone, password, fullName);
+        Alert.alert("Thành công", "Đăng ký thành công!");
+        router.replace("/(tabs)");
+      } else {
+        // Sign in existing user
+        setLoadingMessage("Đang đăng nhập...");
+        await signInWithPhone(phone, password);
+        router.replace("/(tabs)");
+      }
     } catch (error: any) {
-      console.error("Password login error:", error);
-      Alert.alert("Lỗi đăng nhập", error.message || "Sai số điện thoại hoặc mật khẩu") ;
+      console.error("Phone auth error:", error);
+      Alert.alert(
+        isSignUpMode ? "Lỗi đăng ký" : "Lỗi đăng nhập",
+        error.message || (isSignUpMode ? "Không thể tạo tài khoản" : "Sai số điện thoại hoặc mật khẩu")
+      );
     } finally {
       setIsLoading(false);
+      setLoadingMessage("");
     }
   };
 
@@ -421,20 +422,34 @@ export default function LoginScreen() {
 
           {/* Form */}
           <View className="px-6">
+            {/* Full Name Input (sign up only) */}
+            {isSignUpMode && (
+              <View className="mb-4">
+                <Text className="text-gray-700 mb-2 font-medium">
+                  Họ và tên
+                </Text>
+                <View className="flex-row items-center border border-gray-300 rounded-md px-4 py-1 bg-gray-50">
+                  <Ionicons name="person-outline" size={20} color="#6B7280" />
+                  <TextInput
+                    className="flex-1 ml-3 text-sm"
+                    placeholder="Nhập họ và tên"
+                    value={fullName}
+                    onChangeText={setFullName}
+                  />
+                </View>
+              </View>
+            )}
+            
             {/* Phone Input */}
             <View className="mb-4">
               <Text className="text-gray-700 mb-2 font-medium">
                 Số điện thoại
               </Text>
               <View className="flex-row items-center border border-gray-300 rounded-md px-4 py-1 bg-gray-50">
-                <Ionicons
-                  name={showPasswordInput ? "person-outline" : "call-outline"}
-                  size={20}
-                  color="#6B7280"
-                />
+                <Ionicons name="call-outline" size={20} color="#6B7280" />
                 <TextInput
                   className="flex-1 ml-3 text-sm"
-                  placeholder="Nhập số điện thoại"
+                  placeholder="Nhập số điện thoại (10 số)"
                   keyboardType="phone-pad"
                   maxLength={10}
                   value={phone}
@@ -448,30 +463,33 @@ export default function LoginScreen() {
               </View>
             </View>
 
-            {/* Password Input (conditional) */}
-            {showPasswordInput && (
-              <View className="mb-4">
-                <Text className="text-gray-700 mb-2 font-medium">Mật khẩu</Text>
-                <View className="flex-row items-center border border-gray-300 rounded-md px-4 py-1 bg-gray-50">
-                  <Ionicons
-                    name="lock-closed-outline"
-                    size={20}
-                    color="#6B7280"
-                  />
-                  <TextInput
-                    className="flex-1 ml-3 text-sm"
-                    placeholder="Nhập mật khẩu"
-                    secureTextEntry
-                    value={password}
-                    onChangeText={setPassword}
-                  />
-                </View>
+            {/* Password Input */}
+            <View className="mb-4">
+              <Text className="text-gray-700 mb-2 font-medium">Mật khẩu</Text>
+              <View className="flex-row items-center border border-gray-300 rounded-md px-4 py-1 bg-gray-50">
+                <Ionicons
+                  name="lock-closed-outline"
+                  size={20}
+                  color="#6B7280"
+                />
+                <TextInput
+                  className="flex-1 ml-3 text-sm"
+                  placeholder={isSignUpMode ? "Tạo mật khẩu (tối thiểu 6 ký tự)" : "Nhập mật khẩu"}
+                  secureTextEntry
+                  value={password}
+                  onChangeText={setPassword}
+                />
               </View>
-            )}
+              {isSignUpMode && password.length > 0 && password.length < 6 && (
+                <Text className="text-red-500 text-xs mt-1">
+                  Mật khẩu phải có ít nhất 6 ký tự
+                </Text>
+              )}
+            </View>
 
             {/* Continue Button */}
             <Pressable
-              onPress={handleContinue}
+              onPress={handlePhoneAuth}
               disabled={!canContinue || isLoading}
               className={`py-4 rounded-md items-center mb-3 ${
                 canContinue && !isLoading ? "bg-primary-400" : "bg-gray-300"
@@ -482,17 +500,27 @@ export default function LoginScreen() {
                   canContinue && !isLoading ? "text-white" : "text-gray-500"
                 }`}
               >
-                {isLoading ? "Đang xử lý..." : "Tiếp tục"}
+                {isLoading
+                  ? loadingMessage || "Đang xử lý..."
+                  : isSignUpMode
+                  ? "Đăng ký"
+                  : "Đăng nhập"}
               </Text>
             </Pressable>
 
-            {/* Toggle Password Login */}
+            {/* Toggle Sign Up/Login */}
             <Pressable
-              onPress={() => setShowPasswordInput(!showPasswordInput)}
+              onPress={() => {
+                setIsSignUpMode(!isSignUpMode);
+                setPassword("");
+                setFullName("");
+              }}
               className="items-center py-2"
             >
               <Text className="text-primary-400 font-medium">
-                {showPasswordInput ? "Dùng mã OTP" : "Dùng mật khẩu"}
+                {isSignUpMode
+                  ? "Đã có tài khoản? Đăng nhập"
+                  : "Chưa có tài khoản? Đăng ký"}
               </Text>
             </Pressable>
 
