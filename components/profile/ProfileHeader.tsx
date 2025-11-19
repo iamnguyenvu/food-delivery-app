@@ -49,7 +49,7 @@ export default function ProfileHeader({ onPressAvatar }: ProfileHeaderProps) {
     <View className="bg-primary-400 px-4 pt-12 pb-6">
       <Pressable
         onPress={onPressAvatar}
-        className="flex-row items-center gap-4"
+        className="flex-row items-center gap-4 mt-12"
         hitSlop={10}
       >
         {/* Avatar */}

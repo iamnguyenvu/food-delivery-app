@@ -143,7 +143,7 @@ function FlashSaleCard({
 }
 
 // Sample data for demonstration when no database data available (moved outside to avoid re-render)
-const SAMPLE_FLASH_SALES: FlashSale[] = [
+const SAMPLE_FLASH_SALES: FlashSaleItem[] = [
   {
     id: "sample-fs-1",
     dish_id: "dish-1",

@@ -7,6 +7,7 @@ export type MenuItemProps = {
   onPress: () => void;
   badge?: string | number;
   iconColor?: string;
+  textColor?: string;
 };
 
 export default function MenuItem({
@@ -15,6 +16,7 @@ export default function MenuItem({
   onPress,
   badge,
   iconColor = "#26C6DA",
+  textColor = "#1F2937",
 }: MenuItemProps) {
   return (
     <Pressable
@@ -27,7 +29,7 @@ export default function MenuItem({
       </View>
 
       {/* Label */}
-      <Text className="flex-1 text-gray-800 text-sm font-medium ml-3">
+      <Text className="flex-1 text-sm font-medium ml-3" style={{ color: textColor }}>
         {label}
       </Text>
 

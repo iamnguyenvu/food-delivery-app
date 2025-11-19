@@ -1,6 +1,7 @@
 import AddToCartAnimation from "@/components/common/AddToCartAnimation";
 import {
-  SAMPLE_DISHES
+  SAMPLE_DISHES,
+  useRestaurantDetail
 } from "@/src/hooks";
 import { useCartStore } from "@/src/store/cartStore";
 import type { Dish } from "@/src/types";
@@ -25,7 +26,7 @@ export default function RestaurantDetailScreen() {
   }>();
   
   const restaurantId = params.restaurantId;
-  const { data: restaurant, isLoading } = useRestaurant(restaurantId);
+  const { data: restaurant, isLoading } = useRestaurantDetail(restaurantId);
   
   const [activeSection, setActiveSection] = useState<RestaurantSection>('popular');
   const [isFavorite, setIsFavorite] = useState(false);

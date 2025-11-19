@@ -1,3 +1,4 @@
+import { useAuth } from "@/src/contexts/AuthContext";
 import { supabase } from "@/src/lib/supabase";
 import { useCartStore } from "@/src/store/cartStore";
 import { Ionicons } from "@expo/vector-icons";
@@ -8,6 +9,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import CartModal from "./CartModal";
 
 export default function FloatingCartBar() {
+  const { user } = useAuth();
   const { items, clearCart, getTotalPrice, getTotalDiscount, getRestaurantId } = useCartStore();
   const [showCartModal, setShowCartModal] = useState(false);
   const [restaurantName, setRestaurantName] = useState<string>("Nhà hàng");
@@ -66,6 +68,11 @@ export default function FloatingCartBar() {
 
   const handleCheckout = () => {
     setShowCartModal(false);
+    // Check authentication before navigating to checkout
+    if (!user) {
+      router.push("/(screens)/login" as any);
+      return;
+    }
     // Navigate to checkout
     router.push("/(screens)/checkout" as any);
   };
