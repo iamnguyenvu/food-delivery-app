@@ -39,13 +39,36 @@
 
 ##  Quick Start
 
-### Prerequisites
+### Option 1: Quick Start with Docker (Recommended)
 
-- Node.js 18+ & npm/yarn
-- Expo CLI: `npm install -g expo-cli`
-- [Supabase account](https://supabase.com) (free tier)
+**No manual database setup required!** Docker will automatically create and populate the database.
 
-### Installation
+```bash
+# Clone & install
+git clone https://github.com/iamnguyenvu/food-delivery-app.git
+cd food-delivery-app
+npm install
+
+# Start database with Docker
+docker-compose up postgres -d
+
+# Or use the quick start script
+./docker-start.bat    # Windows
+./docker-start.sh     # Mac/Linux
+
+# Setup environment
+cp .env.example .env
+# Add your connection (or use local Docker):
+# EXPO_PUBLIC_SUPABASE_URL=http://localhost:54321
+# EXPO_PUBLIC_SUPABASE_ANON_KEY=your_key
+
+# Start development
+npm start
+```
+
+>  **Docker Setup**: See [DOCKER.md](DOCKER.md) for detailed Docker instructions.
+
+### Option 2: Manual Setup (Supabase Cloud)
 
 ```bash
 # Clone & install
@@ -59,6 +82,9 @@ cp .env.example .env
 # EXPO_PUBLIC_SUPABASE_URL=your_url
 # EXPO_PUBLIC_SUPABASE_ANON_KEY=your_key
 
+# Setup database (run migrations manually)
+# See docs/SETUP_DATABASE_GUIDE.md
+
 # Start development
 npm start
 
@@ -68,7 +94,7 @@ npm run ios        # iOS (macOS only)
 npm run web        # Web browser
 ```
 
->  **Need help?** Check [Setup Guide](docs/SETUP.md) for detailed instructions.
+>  **Need help?** Check [Setup Guide](docs/SETUP.md) or [Docker Guide](DOCKER.md) for detailed instructions.
 
 ---
 
