@@ -1,3 +1,4 @@
+import AddToCartAnimation from "@/components/common/AddToCartAnimation";
 import DishOptionsModal from "@/components/common/DishOptionsModal";
 import { useDish } from "@/src/hooks";
 import { useCartStore } from "@/src/store/cartStore";
@@ -5,11 +6,11 @@ import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import {
-    Image,
-    Pressable,
-    ScrollView,
-    Text,
-    View,
+  Image,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -47,6 +48,7 @@ const MOCK_REVIEWS = [
 export default function DishDetailScreen() {
   const { dishId } = useLocalSearchParams<{ dishId: string }>();
   const [showOptionsModal, setShowOptionsModal] = useState(false);
+  const [showAddAnimation, setShowAddAnimation] = useState(false);
   const { addItem } = useCartStore();
 
   // Mock flash sale data
@@ -87,8 +89,9 @@ export default function DishDetailScreen() {
     selectedOptions: any,
     notes: string
   ) => {
-    addItem(dishData, quantity);
-    // In production, handle options and notes
+    addItem(dishData, quantity, notes);
+    setShowAddAnimation(true);
+    // In production, handle options (selectedOptions can be stored in metadata)
     console.log("Added with options:", selectedOptions, notes);
   };
 
@@ -100,6 +103,7 @@ export default function DishDetailScreen() {
       setShowOptionsModal(true);
     } else {
       addItem(dish, 1);
+      setShowAddAnimation(true);
     }
   };
 
@@ -329,6 +333,12 @@ export default function DishDetailScreen() {
         dish={dish}
         onClose={() => setShowOptionsModal(false)}
         onAddToCart={handleAddToCart}
+      />
+
+      {/* Add to Cart Animation */}
+      <AddToCartAnimation
+        visible={showAddAnimation}
+        onComplete={() => setShowAddAnimation(false)}
       />
     </View>
   );

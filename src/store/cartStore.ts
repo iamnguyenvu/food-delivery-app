@@ -1,79 +1,118 @@
-import type { CartItem, Dish } from '@/src/types';
-import { create } from 'zustand';
+import type { Dish } from "@/src/types";
+import { create } from "zustand";
+
+export interface CartItem {
+  id: string;
+  dish: Dish;
+  quantity: number;
+  notes: string;
+  options: {
+    size?: string;
+    toppings: string[];
+  };
+  price: number;
+}
 
 interface CartStore {
   items: CartItem[];
-  addItem: (dish: Dish, quantity?: number) => void;
-  removeItem: (dishId: string) => void;
-  updateQuantity: (dishId: string, quantity: number) => void;
+  addItem: (
+    dish: Dish,
+    quantity?: number,
+    notes?: string,
+    options?: { size?: string; toppings?: string[] },
+    price?: number
+  ) => void;
+  removeItem: (id: string) => void;
+  updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
   getTotalPrice: () => number;
   getTotalItems: () => number;
   getTotalDiscount: () => number;
+  getRestaurantId: () => string | null;
 }
 
 export const useCartStore = create<CartStore>((set, get) => ({
   items: [],
 
-  addItem: (dish, quantity = 1) => {
-    set((state) => {
-      const existingItem = state.items.find((item) => item.dish.id === dish.id);
+  addItem: (dish, quantity = 1, notes = "", options, price) => {
+    const normalizedOptions = {
+      size: options?.size,
+      toppings: options?.toppings ?? [],
+    };
 
-      if (existingItem) {
-        return {
-          items: state.items.map((item) =>
-            item.dish.id === dish.id
-              ? { ...item, quantity: item.quantity + quantity }
-              : item
-          ),
+    const key = `${dish.id}|${normalizedOptions.size ?? ""}|${normalizedOptions.toppings
+      .slice()
+      .sort()
+      .join(",")}|${notes}`;
+    const pricePerPortion = price ?? dish.price;
+
+    set((state) => {
+      const existingIndex = state.items.findIndex((item) => item.id === key);
+
+      if (existingIndex !== -1) {
+        const updatedItems = [...state.items];
+        const existing = updatedItems[existingIndex];
+
+        updatedItems[existingIndex] = {
+          ...existing,
+          quantity: existing.quantity + quantity,
+          notes,
         };
+
+        return { items: updatedItems };
       }
 
-      return {
-        items: [...state.items, { dish, quantity }],
+      const newItem: CartItem = {
+        id: key,
+        dish,
+        quantity,
+        notes,
+        options: normalizedOptions,
+        price: pricePerPortion,
       };
+
+      return { items: [...state.items, newItem] };
     });
   },
 
-  removeItem: (dishId) => {
+  removeItem: (id) => {
     set((state) => ({
-      items: state.items.filter((item) => item.dish.id !== dishId),
+      items: state.items.filter((item) => item.id !== id),
     }));
   },
 
-  updateQuantity: (dishId, quantity) => {
+  updateQuantity: (id, quantity) => {
     if (quantity <= 0) {
-      get().removeItem(dishId);
+      set((state) => ({
+        items: state.items.filter((item) => item.id !== id),
+      }));
       return;
     }
 
     set((state) => ({
       items: state.items.map((item) =>
-        item.dish.id === dishId ? { ...item, quantity } : item
+        item.id === id ? { ...item, quantity } : item
       ),
     }));
   },
 
-  clearCart: () => {
-    set({ items: [] });
-  },
+  clearCart: () => set({ items: [] }),
 
-  getTotalPrice: () => {
-    return get().items.reduce((total, item) => {
-      return total + item.dish.price * item.quantity;
-    }, 0);
-  },
+  getTotalPrice: () =>
+    get().items.reduce((sum, item) => sum + item.price * item.quantity, 0),
 
-  getTotalItems: () => {
-    return get().items.reduce((total, item) => total + item.quantity, 0);
-  },
+  getTotalItems: () =>
+    get().items.reduce((total, item) => total + item.quantity, 0),
 
-  getTotalDiscount: () => {
-    // Calculate total discount from originalPrice
-    return get().items.reduce((total, item) => {
-      const discount = item.dish.originalPrice ? 
-        (item.dish.originalPrice - item.dish.price) * item.quantity : 0;
-      return total + discount;
-    }, 0);
+  getTotalDiscount: () =>
+    get().items.reduce((total, item) => {
+      if (!item.dish.originalPrice) return total;
+      const discountPerUnit = item.dish.originalPrice - item.dish.price;
+      return total + Math.max(discountPerUnit, 0) * item.quantity;
+    }, 0),
+
+  getRestaurantId: () => {
+    const firstItem = get().items[0];
+    return firstItem ? firstItem.dish.restaurantId : null;
   },
 }));

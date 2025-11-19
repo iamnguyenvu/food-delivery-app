@@ -10,22 +10,22 @@ import { Dish, Order, ordersMockData } from "./OrderTypeAndMock";
 import SuggestionSection from "./SuggestionSection";
 
 // Custom Date Picker Component
-function CustomDatePicker({ 
-    visible, 
-    value, 
-    onClose, 
-    onConfirm 
-}: { 
-    visible: boolean; 
-    value: Date; 
-    onClose: () => void; 
+function CustomDatePicker({
+                              visible,
+                              value,
+                              onClose,
+                              onConfirm
+                          }: {
+    visible: boolean;
+    value: Date;
+    onClose: () => void;
     onConfirm: (date: Date) => void;
 }) {
     const [selectedDate, setSelectedDate] = useState(value);
     const dayScrollRef = useRef<ScrollView>(null);
     const monthScrollRef = useRef<ScrollView>(null);
     const yearScrollRef = useRef<ScrollView>(null);
-    
+
     const daysInMonth = (month: number, year: number) => {
         return new Date(year, month + 1, 0).getDate();
     };
@@ -37,7 +37,7 @@ function CustomDatePicker({
 
     const currentYear = new Date().getFullYear();
     const years = Array.from({ length: 50 }, (_, i) => currentYear - 10 + i);
-    
+
     useEffect(() => {
         if (visible) {
             setSelectedDate(value);
@@ -47,7 +47,7 @@ function CustomDatePicker({
                 const month = value.getMonth();
                 const year = value.getFullYear();
                 const yearIndex = years.findIndex(y => y === year);
-                
+
                 // Scroll to selected day (approximately 40px per item)
                 dayScrollRef.current?.scrollTo({ y: (day - 1) * 40, animated: true });
                 // Scroll to selected month (approximately 40px per item)
@@ -107,7 +107,7 @@ function CustomDatePicker({
                         {/* Day Picker */}
                         <View className="flex-1 mr-2">
                             <Text className="text-xs text-gray-600 mb-2 text-center font-medium">Ngày</Text>
-                            <ScrollView 
+                            <ScrollView
                                 ref={dayScrollRef}
                                 className="border border-[#D3F3F7] rounded-md bg-[#F8FDFE]"
                                 showsVerticalScrollIndicator={false}
@@ -134,7 +134,7 @@ function CustomDatePicker({
                         {/* Month Picker */}
                         <View className="flex-1 mr-2">
                             <Text className="text-xs text-gray-600 mb-2 text-center font-medium">Tháng</Text>
-                            <ScrollView 
+                            <ScrollView
                                 ref={monthScrollRef}
                                 className="border border-[#D3F3F7] rounded-md bg-[#F8FDFE]"
                                 showsVerticalScrollIndicator={false}
@@ -159,7 +159,7 @@ function CustomDatePicker({
                         {/* Year Picker */}
                         <View className="flex-1">
                             <Text className="text-xs text-gray-600 mb-2 text-center font-medium">Năm</Text>
-                            <ScrollView 
+                            <ScrollView
                                 ref={yearScrollRef}
                                 className="border border-[#D3F3F7] rounded-md bg-[#F8FDFE]"
                                 showsVerticalScrollIndicator={false}
@@ -270,7 +270,7 @@ export default function OrdersTabs({ activeTab }: { activeTab: string }) {
         );
         setLoading(false);
 
-           // get data for supabase
+        // get data for supabase
         /*
         const { data, error } = await supabase
             .from("orders")
@@ -572,21 +572,21 @@ export default function OrdersTabs({ activeTab }: { activeTab: string }) {
                 <View className="flex-1 bg-[#F8FDFE]">
                     <SafeAreaView className="flex-1" edges={['top']}>
                         {/* Header */}
-						<View className="bg-white px-4 pt-3 pb-3 border-b border-[#E0F7FA]">
-							<View className="flex-row items-center">
-								<Pressable onPress={() => setShowOrderDetail(false)} className="w-10 h-10 items-center justify-center -ml-1">
-									<Ionicons name="arrow-back" size={22} color="#0F172A" />
-								</Pressable>
-								<View className="flex-1 items-center">
-									<Text className="text-xl font-bold text-[#0F172A]">Chi tiết đơn hàng</Text>
-									{selectedOrder && (
-										<Text className="text-[11px] text-gray-500 mt-0.5">#{selectedOrder.order_number}</Text>
-									)}
-								</View>
-								{/* right spacer to balance layout */}
-								<View className="w-10" />
-							</View>
-						</View>
+                        <View className="bg-white px-4 pt-3 pb-3 border-b border-[#E0F7FA]">
+                            <View className="flex-row items-center">
+                                <Pressable onPress={() => setShowOrderDetail(false)} className="w-10 h-10 items-center justify-center -ml-1">
+                                    <Ionicons name="arrow-back" size={22} color="#0F172A" />
+                                </Pressable>
+                                <View className="flex-1 items-center">
+                                    <Text className="text-xl font-bold text-[#0F172A]">Chi tiết đơn hàng</Text>
+                                    {selectedOrder && (
+                                        <Text className="text-[11px] text-gray-500 mt-0.5">#{selectedOrder.order_number}</Text>
+                                    )}
+                                </View>
+                                {/* right spacer to balance layout */}
+                                <View className="w-10" />
+                            </View>
+                        </View>
 
                         {selectedOrder && <OrderDetail order={selectedOrder} />}
                     </SafeAreaView>
@@ -666,11 +666,11 @@ export default function OrdersTabs({ activeTab }: { activeTab: string }) {
                                         prev.map((o) =>
                                             o.id === reviewingOrder.id
                                                 ? {
-                                                      ...o,
-                                                      rating: reviewRating,
-                                                      review: reviewText.trim() || undefined,
-                                                      reviewed_at: new Date(),
-                                                  }
+                                                    ...o,
+                                                    rating: reviewRating,
+                                                    review: reviewText.trim() || undefined,
+                                                    reviewed_at: new Date(),
+                                                }
                                                 : o
                                         )
                                     );
@@ -702,12 +702,12 @@ export default function OrdersTabs({ activeTab }: { activeTab: string }) {
                                 style={
                                     reviewRating > 0
                                         ? {
-                                              shadowColor: "#26C6DA",
-                                              shadowOffset: { width: 0, height: 2 },
-                                              shadowOpacity: 0.2,
-                                              shadowRadius: 4,
-                                              elevation: 3,
-                                          }
+                                            shadowColor: "#26C6DA",
+                                            shadowOffset: { width: 0, height: 2 },
+                                            shadowOpacity: 0.2,
+                                            shadowRadius: 4,
+                                            elevation: 3,
+                                        }
                                         : {}
                                 }
                             >
