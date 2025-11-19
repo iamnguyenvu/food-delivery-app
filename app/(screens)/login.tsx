@@ -6,16 +6,16 @@ import { router } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useState } from "react";
 import {
-  Alert,
-  Image,
-  KeyboardAvoidingView,
-  Linking,
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
+    Alert,
+    Image,
+    KeyboardAvoidingView,
+    Linking,
+    Platform,
+    Pressable,
+    ScrollView,
+    Text,
+    TextInput,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -23,51 +23,53 @@ import { SafeAreaView } from "react-native-safe-area-context";
 WebBrowser.maybeCompleteAuthSession();
 
 export default function LoginScreen() {
-  const { signInWithGoogle, signInWithGithub, sendOtpToPhone, signInWithPhonePassword } = useAuth();
-  const [phone, setPhone] = useState("");
+  const { signInWithGoogle, signInWithGithub, signUp, signIn } = useAuth();
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPasswordInput, setShowPasswordInput] = useState(false);
+  const [fullName, setFullName] = useState("");
+  const [isSignUpMode, setIsSignUpMode] = useState(false); // Toggle between login/signup
   const [isLoading, setIsLoading] = useState(false);
-  const isValidVietnamPhone = (p: string) => {
-    // 10 digits, starts with 0, and next digit in 3/5/7/8/9
-    return /^0[35789]\d{8}$/.test(p);
+  const [loadingMessage, setLoadingMessage] = useState("");
+  
+  const isValidEmail = (e: string) => {
+    // Basic email validation
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
   };
 
-  const isPhoneValid = isValidVietnamPhone(phone);
-  const canContinue = showPasswordInput
-    ? isPhoneValid && password.length >= 6
-    : isPhoneValid;
+  const isEmailValid = isValidEmail(email);
+  const isPasswordValid = password.length >= 6;
+  const canContinue = isSignUpMode
+    ? isEmailValid && isPasswordValid && fullName.trim().length > 0
+    : isEmailValid && isPasswordValid;
 
-  const handleContinue = async () => {
+  const handleEmailAuth = async () => {
     if (!canContinue) return;
 
-    if (showPasswordInput) {
-      // Login with password
-      await handleLoginWithPassword();
-    } else {
-      try {
-        setIsLoading(true);
-        await sendOtpToPhone(phone);
-        router.push({ pathname: "/verify-otp", params: { phone } } as any);
-      } catch (error: any) {
-        console.error("Send OTP error:", error);
-        Alert.alert("Lỗi", error.message || "Không thể gửi mã OTP");
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
-
-  const handleLoginWithPassword = async () => {
     try {
       setIsLoading(true);
-      await signInWithPhonePassword(phone, password);
-      router.replace("/(tabs)");
+      
+      if (isSignUpMode) {
+        // Sign up new user
+        setLoadingMessage("Đang tạo tài khoản...");
+        await signUp(email, password, fullName);
+        // No alert - just redirect
+        router.replace("/(tabs)");
+      } else {
+        // Sign in existing user
+        setLoadingMessage("Đang đăng nhập...");
+        await signIn(email, password);
+        // No alert - just redirect
+        router.replace("/(tabs)");
+      }
     } catch (error: any) {
-      console.error("Password login error:", error);
-      Alert.alert("Lỗi đăng nhập", error.message || "Sai số điện thoại hoặc mật khẩu") ;
+      console.error("Email auth error:", error);
+      Alert.alert(
+        isSignUpMode ? "Lỗi đăng ký" : "Lỗi đăng nhập",
+        error.message || (isSignUpMode ? "Không thể tạo tài khoản" : "Sai email hoặc mật khẩu")
+      );
     } finally {
       setIsLoading(false);
+      setLoadingMessage("");
     }
   };
 
@@ -99,7 +101,7 @@ export default function LoginScreen() {
           
           try {
             await WebBrowser.dismissBrowser();
-          } catch (e) {
+          } catch {
             // Ignore if browser already closed
           }
           
@@ -290,7 +292,7 @@ export default function LoginScreen() {
           
           try {
             await WebBrowser.dismissBrowser();
-          } catch (e) {
+          } catch {
             // Ignore if browser already closed
           }
           
@@ -421,57 +423,74 @@ export default function LoginScreen() {
 
           {/* Form */}
           <View className="px-6">
-            {/* Phone Input */}
+            {/* Full Name Input (sign up only) */}
+            {isSignUpMode && (
+              <View className="mb-4">
+                <Text className="text-gray-700 mb-2 font-medium">
+                  Họ và tên
+                </Text>
+                <View className="flex-row items-center border border-gray-300 rounded-md px-4 py-1 bg-gray-50">
+                  <Ionicons name="person-outline" size={20} color="#6B7280" />
+                  <TextInput
+                    className="flex-1 ml-3 text-sm"
+                    placeholder="Nhập họ và tên"
+                    value={fullName}
+                    onChangeText={setFullName}
+                  />
+                </View>
+              </View>
+            )}
+            
+            {/* Email Input */}
             <View className="mb-4">
               <Text className="text-gray-700 mb-2 font-medium">
-                Số điện thoại
+                Email
               </Text>
               <View className="flex-row items-center border border-gray-300 rounded-md px-4 py-1 bg-gray-50">
-                <Ionicons
-                  name={showPasswordInput ? "person-outline" : "call-outline"}
-                  size={20}
-                  color="#6B7280"
-                />
+                <Ionicons name="mail-outline" size={20} color="#6B7280" />
                 <TextInput
                   className="flex-1 ml-3 text-sm"
-                  placeholder="Nhập số điện thoại"
-                  keyboardType="phone-pad"
-                  maxLength={10}
-                  value={phone}
-                  onChangeText={setPhone}
+                  placeholder="Nhập địa chỉ email"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  value={email}
+                  onChangeText={setEmail}
                 />
-                {phone.length > 0 && (
-                  <Pressable onPress={() => setPhone("")}>
+                {email.length > 0 && (
+                  <Pressable onPress={() => setEmail("")}>
                     <Ionicons name="close-circle" size={20} color="#9CA3AF" />
                   </Pressable>
                 )}
               </View>
             </View>
 
-            {/* Password Input (conditional) */}
-            {showPasswordInput && (
-              <View className="mb-4">
-                <Text className="text-gray-700 mb-2 font-medium">Mật khẩu</Text>
-                <View className="flex-row items-center border border-gray-300 rounded-md px-4 py-1 bg-gray-50">
-                  <Ionicons
-                    name="lock-closed-outline"
-                    size={20}
-                    color="#6B7280"
-                  />
-                  <TextInput
-                    className="flex-1 ml-3 text-sm"
-                    placeholder="Nhập mật khẩu"
-                    secureTextEntry
-                    value={password}
-                    onChangeText={setPassword}
-                  />
-                </View>
+            {/* Password Input */}
+            <View className="mb-4">
+              <Text className="text-gray-700 mb-2 font-medium">Mật khẩu</Text>
+              <View className="flex-row items-center border border-gray-300 rounded-md px-4 py-1 bg-gray-50">
+                <Ionicons
+                  name="lock-closed-outline"
+                  size={20}
+                  color="#6B7280"
+                />
+                <TextInput
+                  className="flex-1 ml-3 text-sm"
+                  placeholder={isSignUpMode ? "Tạo mật khẩu (tối thiểu 6 ký tự)" : "Nhập mật khẩu"}
+                  secureTextEntry
+                  value={password}
+                  onChangeText={setPassword}
+                />
               </View>
-            )}
+              {isSignUpMode && password.length > 0 && password.length < 6 && (
+                <Text className="text-red-500 text-xs mt-1">
+                  Mật khẩu phải có ít nhất 6 ký tự
+                </Text>
+              )}
+            </View>
 
             {/* Continue Button */}
             <Pressable
-              onPress={handleContinue}
+              onPress={handleEmailAuth}
               disabled={!canContinue || isLoading}
               className={`py-4 rounded-md items-center mb-3 ${
                 canContinue && !isLoading ? "bg-primary-400" : "bg-gray-300"
@@ -482,17 +501,27 @@ export default function LoginScreen() {
                   canContinue && !isLoading ? "text-white" : "text-gray-500"
                 }`}
               >
-                {isLoading ? "Đang xử lý..." : "Tiếp tục"}
+                {isLoading
+                  ? loadingMessage || "Đang xử lý..."
+                  : isSignUpMode
+                  ? "Đăng ký"
+                  : "Đăng nhập"}
               </Text>
             </Pressable>
 
-            {/* Toggle Password Login */}
+            {/* Toggle Sign Up/Login */}
             <Pressable
-              onPress={() => setShowPasswordInput(!showPasswordInput)}
+              onPress={() => {
+                setIsSignUpMode(!isSignUpMode);
+                setPassword("");
+                setFullName("");
+              }}
               className="items-center py-2"
             >
               <Text className="text-primary-400 font-medium">
-                {showPasswordInput ? "Dùng mã OTP" : "Dùng mật khẩu"}
+                {isSignUpMode
+                  ? "Đã có tài khoản? Đăng nhập"
+                  : "Chưa có tài khoản? Đăng ký"}
               </Text>
             </Pressable>
 

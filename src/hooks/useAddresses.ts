@@ -119,6 +119,7 @@ export function useAddresses(userId?: string) {
     if (userId) {
       loadAddresses();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
   return {

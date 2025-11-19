@@ -66,7 +66,8 @@ cp .env.example .env
 npm start
 ```
 
->  **Docker Setup**: See [DOCKER.md](DOCKER.md) for detailed Docker instructions.
+>  **Docker Setup**: See [docs/guides/DOCKER.md](docs/guides/DOCKER.md) for detailed Docker instructions.
+>  **Full Installation Guide**: See [docs/guides/INSTALLATION.md](docs/guides/INSTALLATION.md) for comprehensive setup.
 
 ### Option 2: Manual Setup (Supabase Cloud)
 
@@ -94,7 +95,11 @@ npm run ios        # iOS (macOS only)
 npm run web        # Web browser
 ```
 
->  **Need help?** Check [Setup Guide](docs/SETUP.md) or [Docker Guide](DOCKER.md) for detailed instructions.
+>  **Need help?** Check:
+>  - [Installation Guide](docs/guides/INSTALLATION.md) - Comprehensive setup guide
+>  - [Docker Guide](docs/guides/DOCKER.md) - Docker setup instructions
+>  - [Authentication Guide](docs/guides/AUTHENTICATION.md) - Auth setup and troubleshooting
+>  - [Setup Guide](docs/SETUP.md) - Legacy setup guide
 
 ---
 

@@ -1,5 +1,6 @@
 import Card from "@/components/common/Card";
-import { useFlashSales, type FlashSale } from "@/src/hooks";
+import type { FlashSale as FlashSaleItem } from "@/src/hooks";
+import { useFlashSales } from "@/src/hooks";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -66,11 +67,11 @@ function CountdownTimer({ endTime }: { endTime: string }) {
 }
 
 // Flash Sale Item Card
-function FlashSaleItem({
+function FlashSaleCard({
   item,
   onPress,
 }: {
-  item: FlashSale;
+  item: FlashSaleItem;
   onPress: () => void;
 }) {
   const total = item.total_quantity || 0;
@@ -142,7 +143,7 @@ function FlashSaleItem({
 }
 
 // Sample data for demonstration when no database data available (moved outside to avoid re-render)
-const SAMPLE_FLASH_SALES: FlashSale[] = [
+const SAMPLE_FLASH_SALES: FlashSaleItem[] = [
   {
     id: "sample-fs-1",
     dish_id: "dish-1",
@@ -227,7 +228,7 @@ const SAMPLE_FLASH_SALES: FlashSale[] = [
       name: "Cơm Tấm Sài Gòn",
     },
   },
-];
+] as FlashSaleItem[];
 
 export default function FlashSale({
   onViewMore,
@@ -293,8 +294,8 @@ export default function FlashSale({
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={scrollContentStyle}
         >
-          {displayFlashSales.map((item: FlashSale) => (
-            <FlashSaleItem
+          {displayFlashSales.map((item: FlashSaleItem) => (
+            <FlashSaleCard
               key={item.id}
               item={item}
               onPress={() => {

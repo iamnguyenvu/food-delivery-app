@@ -2,10 +2,13 @@ import MenuSection, {
     type MenuSectionProps,
 } from "@/components/profile/MenuSection";
 import ProfileHeader from "@/components/profile/ProfileHeader";
+import { useAuth } from "@/src/contexts/AuthContext";
 import { router } from "expo-router";
-import { ScrollView, View } from "react-native";
+import { Alert, ScrollView, View } from "react-native";
 
 export default function ProfileScreen() {
+  const { user, signOut } = useAuth();
+  
   // Financial section
   const financialItems: MenuSectionProps["items"] = [
     {
@@ -68,6 +71,41 @@ export default function ProfileScreen() {
     router.push("/edit-profile" as any);
   };
 
+  const handleLogout = async () => {
+    Alert.alert(
+      "Đăng xuất",
+      "Bạn có chắc chắn muốn đăng xuất?",
+      [
+        {
+          text: "Hủy",
+          style: "cancel",
+        },
+        {
+          text: "Đăng xuất",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await signOut();
+              router.replace("/(screens)/login" as any);
+            } catch (error) {
+              Alert.alert("Lỗi", "Không thể đăng xuất. Vui lòng thử lại.");
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  // Logout section (only show if user is logged in)
+  const logoutItems: MenuSectionProps["items"] = user ? [
+    {
+      icon: "log-out-outline",
+      label: "Đăng xuất",
+      onPress: handleLogout,
+      textColor: "#EF4444", // red color for logout
+    },
+  ] : [];
+
   return (
     <View className="flex-1 bg-gray-100">
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
@@ -80,6 +118,7 @@ export default function ProfileScreen() {
           <MenuSection items={paymentAddressItems} marginBottom={12} />
           {/* <MenuSection items={referralItems} marginBottom={12} /> */}
           <MenuSection items={helpSettingsItems} marginBottom={12} />
+          {user && <MenuSection items={logoutItems} marginBottom={12} />}
         </View>
       </ScrollView>
     </View>

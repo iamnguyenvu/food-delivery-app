@@ -94,6 +94,7 @@ export function useDeals(options?: { limit?: number; featured?: boolean }) {
 
   useEffect(() => {
     fetchDeals();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [limit, featured]);
 
   async function fetchDeals() {

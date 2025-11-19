@@ -41,15 +41,15 @@ export default function ProfileHeader({ onPressAvatar }: ProfileHeaderProps) {
 
   // Logged in user
   const email = user.email || "User";
-  const username = email.split("@")[0];
-  const fullName = user.user_metadata?.full_name || "";
-  const avatarUrl = user.user_metadata?.avatar_url;
+  const fullName = user.user_metadata?.full_name || user.user_metadata?.name || "";
+  const displayName = fullName || email.split("@")[0];
+  const avatarUrl = user.user_metadata?.avatar_url || user.user_metadata?.picture;
 
   return (
     <View className="bg-primary-400 px-4 pt-12 pb-6">
       <Pressable
         onPress={onPressAvatar}
-        className="flex-row items-center gap-4"
+        className="flex-row items-center gap-4 mt-12"
         hitSlop={10}
       >
         {/* Avatar */}
@@ -68,13 +68,13 @@ export default function ProfileHeader({ onPressAvatar }: ProfileHeaderProps) {
         {/* User Info */}
         <View className="flex-1">
           <Text className="text-white text-lg font-semibold" numberOfLines={1}>
-            {username}
+            {displayName}
           </Text>
-          {fullName ? (
+          {fullName && (
             <Text className="text-white/80 text-sm mt-0.5" numberOfLines={1}>
-              {fullName}
+              {email}
             </Text>
-          ) : null}
+          )}
         </View>
 
         {/* Chevron */}

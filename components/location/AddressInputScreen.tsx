@@ -49,7 +49,7 @@ export default function AddressInputScreen() {
   const userId = user?.id;
 
   // Always call hook, but it won't fetch if userId is undefined
-  const { addresses: dbAddresses = [], loading: dbLoading = false, saveAddress: saveToDatabase } =
+  const { addresses: dbAddresses = [], saveAddress: saveToDatabase } =
     useAddresses(userId);
 
   // Convert SavedAddress to SavedLocation format for compatibility
@@ -140,7 +140,7 @@ export default function AddressInputScreen() {
               streetAddress: streetAddr || "Địa chỉ không xác định",
               fullAddress: parts.join(", ") || "Chi tiết không có",
             };
-          } catch (e) {
+          } catch {
             return {
               id: `result-${index}`,
               location: { latitude, longitude },

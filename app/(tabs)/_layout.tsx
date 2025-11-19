@@ -6,7 +6,6 @@ import { Platform } from "react-native";
 import { useColorScheme } from "@/components/useColorScheme";
 import Colors from '@/constants/Colors';
 import { useLanguage } from '@/src/hooks/useLanguage';
-import { useTheme } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 
@@ -20,7 +19,6 @@ const ICONS: Record<string, { on: keyof typeof Ionicons.glyphMap; off: keyof typ
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
-  const theme = useTheme();
   const {lang} = useLanguage();
   const insets = useSafeAreaInsets();
 

@@ -58,7 +58,7 @@ function CustomDatePicker({
                 }
             }, 100);
         }
-    }, [visible, value]);
+    }, [visible, value, years]);
 
     const handleConfirm = () => {
         onConfirm(selectedDate);

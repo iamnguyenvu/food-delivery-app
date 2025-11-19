@@ -35,6 +35,12 @@ export default function CheckoutScreen() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showPaymentMethods, setShowPaymentMethods] = useState(false);
 
+    // Redirect to login if not authenticated
+    if (!user) {
+        router.replace("/(screens)/login" as any);
+        return null;
+    }
+
     // Calculate totals
     const subtotal = getTotalPrice();
     const itemDiscount = getTotalDiscount();

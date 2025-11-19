@@ -1,7 +1,7 @@
 import AddToCartAnimation from "@/components/common/AddToCartAnimation";
 import {
   SAMPLE_DISHES,
-  SAMPLE_RESTAURANT
+  useRestaurantDetail
 } from "@/src/hooks";
 import { useCartStore } from "@/src/store/cartStore";
 import type { Dish } from "@/src/types";
@@ -20,18 +20,38 @@ import { SafeAreaView } from "react-native-safe-area-context";
 type RestaurantSection = 'flash-sale' | 'discounted' | 'popular' | 'bestseller';
 
 export default function RestaurantDetailScreen() {
-  const { restaurantId, dishId } = useLocalSearchParams<{
+  const params = useLocalSearchParams<{
     restaurantId: string;
     dishId?: string;
   }>();
   
+  const restaurantId = params.restaurantId;
+  const { data: restaurant, isLoading } = useRestaurantDetail(restaurantId);
+  
   const [activeSection, setActiveSection] = useState<RestaurantSection>('popular');
   const [isFavorite, setIsFavorite] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
+  const { addItem } = useCartStore();
+  const [showAddAnimation, setShowAddAnimation] = useState(false);
 
   // Use sample data for now - in real app would fetch from API
-  const restaurant = SAMPLE_RESTAURANT;
   const dishes = SAMPLE_DISHES;
+  
+  if (isLoading) {
+    return (
+      <View className="flex-1 justify-center items-center">
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+  
+  if (!restaurant) {
+    return (
+      <View className="flex-1 justify-center items-center">
+        <Text>Restaurant not found</Text>
+      </View>
+    );
+  }
   
   const popularDishes = dishes.filter(d => d.isPopular);
   const bestsellerDishes = dishes.filter(d => d.isBestSeller);
@@ -40,9 +60,6 @@ export default function RestaurantDetailScreen() {
   const handleBack = () => {
     router.back();
   };
-
-  const { addItem } = useCartStore();
-  const [showAddAnimation, setShowAddAnimation] = useState(false);
 
   const handleToggleFavorite = () => {
     setIsFavorite(!isFavorite);

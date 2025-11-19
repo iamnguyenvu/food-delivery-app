@@ -7,7 +7,6 @@ import {
     Pressable,
     RefreshControl,
     ScrollView,
-    StatusBar,
     Text,
     View,
 } from "react-native";
