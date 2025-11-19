@@ -23,26 +23,26 @@ import { SafeAreaView } from "react-native-safe-area-context";
 WebBrowser.maybeCompleteAuthSession();
 
 export default function LoginScreen() {
-  const { signInWithGoogle, signInWithGithub, signUpWithPhone, signInWithPhone } = useAuth();
-  const [phone, setPhone] = useState("");
+  const { signInWithGoogle, signInWithGithub, signUp, signIn } = useAuth();
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [isSignUpMode, setIsSignUpMode] = useState(false); // Toggle between login/signup
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
   
-  const isValidVietnamPhone = (p: string) => {
-    // 10 digits, starts with 0, and next digit in 3/5/7/8/9
-    return /^0[35789]\d{8}$/.test(p);
+  const isValidEmail = (e: string) => {
+    // Basic email validation
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
   };
 
-  const isPhoneValid = isValidVietnamPhone(phone);
+  const isEmailValid = isValidEmail(email);
   const isPasswordValid = password.length >= 6;
   const canContinue = isSignUpMode
-    ? isPhoneValid && isPasswordValid && fullName.trim().length > 0
-    : isPhoneValid && isPasswordValid;
+    ? isEmailValid && isPasswordValid && fullName.trim().length > 0
+    : isEmailValid && isPasswordValid;
 
-  const handlePhoneAuth = async () => {
+  const handleEmailAuth = async () => {
     if (!canContinue) return;
 
     try {
@@ -51,20 +51,21 @@ export default function LoginScreen() {
       if (isSignUpMode) {
         // Sign up new user
         setLoadingMessage("Đang tạo tài khoản...");
-        await signUpWithPhone(phone, password, fullName);
-        Alert.alert("Thành công", "Đăng ký thành công!");
+        await signUp(email, password, fullName);
+        // No alert - just redirect
         router.replace("/(tabs)");
       } else {
         // Sign in existing user
         setLoadingMessage("Đang đăng nhập...");
-        await signInWithPhone(phone, password);
+        await signIn(email, password);
+        // No alert - just redirect
         router.replace("/(tabs)");
       }
     } catch (error: any) {
-      console.error("Phone auth error:", error);
+      console.error("Email auth error:", error);
       Alert.alert(
         isSignUpMode ? "Lỗi đăng ký" : "Lỗi đăng nhập",
-        error.message || (isSignUpMode ? "Không thể tạo tài khoản" : "Sai số điện thoại hoặc mật khẩu")
+        error.message || (isSignUpMode ? "Không thể tạo tài khoản" : "Sai email hoặc mật khẩu")
       );
     } finally {
       setIsLoading(false);
@@ -440,23 +441,23 @@ export default function LoginScreen() {
               </View>
             )}
             
-            {/* Phone Input */}
+            {/* Email Input */}
             <View className="mb-4">
               <Text className="text-gray-700 mb-2 font-medium">
-                Số điện thoại
+                Email
               </Text>
               <View className="flex-row items-center border border-gray-300 rounded-md px-4 py-1 bg-gray-50">
-                <Ionicons name="call-outline" size={20} color="#6B7280" />
+                <Ionicons name="mail-outline" size={20} color="#6B7280" />
                 <TextInput
                   className="flex-1 ml-3 text-sm"
-                  placeholder="Nhập số điện thoại (10 số)"
-                  keyboardType="phone-pad"
-                  maxLength={10}
-                  value={phone}
-                  onChangeText={setPhone}
+                  placeholder="Nhập địa chỉ email"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  value={email}
+                  onChangeText={setEmail}
                 />
-                {phone.length > 0 && (
-                  <Pressable onPress={() => setPhone("")}>
+                {email.length > 0 && (
+                  <Pressable onPress={() => setEmail("")}>
                     <Ionicons name="close-circle" size={20} color="#9CA3AF" />
                   </Pressable>
                 )}
@@ -489,7 +490,7 @@ export default function LoginScreen() {
 
             {/* Continue Button */}
             <Pressable
-              onPress={handlePhoneAuth}
+              onPress={handleEmailAuth}
               disabled={!canContinue || isLoading}
               className={`py-4 rounded-md items-center mb-3 ${
                 canContinue && !isLoading ? "bg-primary-400" : "bg-gray-300"

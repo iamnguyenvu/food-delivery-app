@@ -17,16 +17,10 @@ type AuthContextType = {
   session: Session | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, fullName?: string) => Promise<void>;
   signOut: () => Promise<void>;
   signInWithGoogle: () => Promise<OAuthData>;
   signInWithGithub: () => Promise<OAuthData>;
-  // Phone + Password authentication (recommended)
-  signUpWithPhone: (phone: string, password: string, fullName?: string) => Promise<void>;
-  signInWithPhone: (phone: string, password: string) => Promise<void>;
-  // Deprecated: Phone OTP removed (Twilio blocked VN numbers)
-  // sendOtpToPhone: (phone: string) => Promise<{ user: null; session: null; messageId?: string | null; }>;
-  // verifyOtp: (phone: string, token: string) => Promise<void>;
   updatePassword: (newPassword: string) => Promise<void>;
 };
 
@@ -72,10 +66,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) throw error;
   };
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (email: string, password: string, fullName?: string) => {
     const { error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: {
+          full_name: fullName,
+        },
+      },
     });
 
     if (error) throw error;
@@ -84,12 +83,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
-  };
-
-  const validatePhone = (phone: string): boolean => {
-    // Validate Vietnam phone format: 0[35789]XXXXXXXX (10 digits)
-    const phoneRegex = /^0[35789]\d{8}$/;
-    return phoneRegex.test(phone);
   };
 
   const ensureProfile = async (u: User | null) => {
@@ -108,7 +101,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           phone: (u as any).phone ?? null,
         });
       }
-    } catch (_e) {}
+    } catch {
+      // Ignore profile creation errors
+    }
   };
 
   const signInWithGoogle = async () => {
@@ -166,100 +161,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // ============================================
-  // PHONE + PASSWORD AUTHENTICATION
-  // ============================================
-  
-  const signUpWithPhone = async (
-    phone: string,
-    password: string,
-    fullName?: string
-  ) => {
-    // Validate phone number (VN format)
-    if (!validatePhone(phone)) {
-      throw new Error(
-        "Số điện thoại không hợp lệ. Vui lòng nhập số VN (10 số, bắt đầu 0)"
-      );
-    }
-
-    // Check if phone already exists
-    const { data: existingProfile } = await supabase
-      .from("profiles")
-      .select("phone")
-      .eq("phone", phone)
-      .single();
-
-    if (existingProfile) {
-      throw new Error("Số điện thoại đã được đăng ký");
-    }
-
-    // Create valid dummy email from phone
-    // Use phone.app.fooddelivery.vn format (Supabase requires valid email format)
-    const email = `phone.${phone}@gmail.com`;
-
-    // Sign up with Supabase
-    const { data: authData, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          phone,
-          full_name: fullName,
-        },
-      },
-    });
-
-    if (signUpError) throw signUpError;
-
-    // Update profile with actual phone
-    if (authData.user) {
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .update({
-          phone,
-          name: fullName || "User",
-          email, // Keep dummy email for auth
-        })
-        .eq("id", authData.user.id);
-
-      if (profileError) {
-        console.error("Failed to update profile:", profileError);
-      }
-    }
-  };
-
-  const signInWithPhone = async (phone: string, password: string) => {
-    // Validate phone number
-    if (!validatePhone(phone)) {
-      throw new Error("Số điện thoại không hợp lệ");
-    }
-
-    // Find user by phone
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("id, email")
-      .eq("phone", phone)
-      .single();
-
-    if (profileError || !profile) {
-      throw new Error("Số điện thoại chưa được đăng ký");
-    }
-
-    // Sign in with stored email (or construct from phone)
-    const email = profile.email || `phone.${phone}@app.fooddelivery.vn`;
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      if (error.message.toLowerCase().includes("invalid login credentials")) {
-        throw new Error("Số điện thoại hoặc mật khẩu không đúng");
-      }
-      throw error;
-    }
-  };
-
   const updatePassword = async (newPassword: string) => {
     const { error } = await supabase.auth.updateUser({ password: newPassword });
     if (error) throw error;
@@ -276,8 +177,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signOut,
         signInWithGoogle,
         signInWithGithub,
-        signUpWithPhone,
-        signInWithPhone,
         updatePassword,
       }}
     >
