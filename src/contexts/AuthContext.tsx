@@ -193,8 +193,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error("Số điện thoại đã được đăng ký");
     }
 
-    // Create dummy email from phone
-    const email = `${phone}@fooddelivery.local`;
+    // Create valid dummy email from phone
+    // Use phone.app.fooddelivery.vn format (Supabase requires valid email format)
+    const email = `phone.${phone}@gmail.com`;
 
     // Sign up with Supabase
     const { data: authData, error: signUpError } = await supabase.auth.signUp({
@@ -244,8 +245,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error("Số điện thoại chưa được đăng ký");
     }
 
-    // Sign in with dummy email
-    const email = profile.email || `${phone}@fooddelivery.local`;
+    // Sign in with stored email (or construct from phone)
+    const email = profile.email || `phone.${phone}@app.fooddelivery.vn`;
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
