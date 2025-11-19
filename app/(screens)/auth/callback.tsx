@@ -1,8 +1,7 @@
 import { supabase } from "@/src/lib/supabase";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Platform } from "react-native";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { ActivityIndicator, Platform, Text, View } from "react-native";
 
 // Helper to extract URL parameters from hash or query string
 const extractUrlParams = (): URLSearchParams => {
@@ -30,7 +29,7 @@ export default function AuthCallback() {
   useEffect(() => {
     let mounted = true;
     let subscription: any = null;
-    let timeoutId: NodeJS.Timeout | null = null;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
     const handleAuthCallback = async () => {
       try {
