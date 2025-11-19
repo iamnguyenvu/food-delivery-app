@@ -138,7 +138,6 @@ export default function CheckoutScreen() {
         }
 
         if (!user) {
-            Alert.alert("Lỗi", "Vui lòng đăng nhập để đặt hàng");
             router.push("/(screens)/login");
             return;
         }

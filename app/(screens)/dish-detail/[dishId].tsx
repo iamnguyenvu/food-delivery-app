@@ -340,7 +340,13 @@ export default function DishDetailScreen() {
         visible={showOptionsModal}
         dish={dish}
         onClose={() => setShowOptionsModal(false)}
-        onAddToCart={(dishData, quantity, selectedOptions, notes, unitPrice) => {
+        onAddToCart={(
+          dishData: Dish,
+          quantity: number,
+          selectedOptions: Record<string, string[]>,
+          notes: string,
+          unitPrice: number
+        ) => {
           handleAddToCart(dishData, quantity, selectedOptions, notes, unitPrice);
           setShowOptionsModal(false);
         }}

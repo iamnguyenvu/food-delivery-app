@@ -25,7 +25,7 @@ interface DishOption {
     multiSelect: boolean;
 }
 
-interface DishOptionsModalProps {
+export interface DishOptionsModalProps {
     visible: boolean;
     dish: Dish | null;
     onClose: () => void;
