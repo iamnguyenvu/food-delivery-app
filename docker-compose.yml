@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database with Supabase-like setup
+  postgres:
+    image: postgres:15-alpine
+    container_name: food-delivery-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: food_delivery
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init-db:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Supabase Studio (Optional - for database management UI)
+  supabase-studio:
+    image: supabase/studio:latest
+    container_name: food-delivery-studio
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      SUPABASE_URL: http://postgres:5432
+      SUPABASE_REST_URL: http://kong:8000/rest/v1/
+      POSTGRES_PASSWORD: postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Expo Development Server (Optional)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: food-delivery-app
+    restart: unless-stopped
+    ports:
+      - "19000:19000"
+      - "19001:19001"
+      - "19002:19002"
+      - "8081:8081"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - EXPO_DEVTOOLS_LISTEN_ADDRESS=0.0.0.0
+      - REACT_NATIVE_PACKAGER_HOSTNAME=192.168.1.100
+    command: npm start
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+    driver: local
