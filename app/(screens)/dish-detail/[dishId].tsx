@@ -2,6 +2,7 @@ import AddToCartAnimation from "@/components/common/AddToCartAnimation";
 import DishOptionsModal from "@/components/common/DishOptionsModal";
 import { useDish } from "@/src/hooks";
 import { useCartStore } from "@/src/store/cartStore";
+import type { Dish } from "@/src/types";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
@@ -84,15 +85,23 @@ export default function DishDetailScreen() {
   };
 
   const handleAddToCart = (
-    dishData: any,
+    dishData: Dish,
     quantity: number,
-    selectedOptions: any,
-    notes: string
+    selectedOptions: Record<string, string[]> = {},
+    notes = "",
+    pricePerUnit?: number
   ) => {
-    addItem(dishData, quantity, notes);
+    addItem(
+      dishData,
+      quantity,
+      notes,
+      {
+        size: selectedOptions.size?.[0],
+        toppings: selectedOptions.toppings || [],
+      },
+      pricePerUnit ?? dishData.price
+    );
     setShowAddAnimation(true);
-    // In production, handle options (selectedOptions can be stored in metadata)
-    console.log("Added with options:", selectedOptions, notes);
   };
 
   const handleQuickAdd = () => {
@@ -102,8 +111,7 @@ export default function DishDetailScreen() {
     if (hasOptions) {
       setShowOptionsModal(true);
     } else {
-      addItem(dish, 1);
-      setShowAddAnimation(true);
+      handleAddToCart(dish, 1);
     }
   };
 
@@ -332,7 +340,10 @@ export default function DishDetailScreen() {
         visible={showOptionsModal}
         dish={dish}
         onClose={() => setShowOptionsModal(false)}
-        onAddToCart={handleAddToCart}
+        onAddToCart={(dishData, quantity, selectedOptions, notes, unitPrice) => {
+          handleAddToCart(dishData, quantity, selectedOptions, notes, unitPrice);
+          setShowOptionsModal(false);
+        }}
       />
 
       {/* Add to Cart Animation */}

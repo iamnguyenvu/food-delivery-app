@@ -29,12 +29,20 @@ interface DishOptionsModalProps {
     visible: boolean;
     dish: Dish | null;
     onClose: () => void;
+    onAddToCart?: (
+        dish: Dish,
+        quantity: number,
+        selectedOptions: Record<string, string[]>,
+        notes: string,
+        pricePerUnit: number
+    ) => void;
 }
 
 export default function DishOptionsModal({
                                              visible,
                                              dish,
                                              onClose,
+                                             onAddToCart,
                                          }: DishOptionsModalProps) {
     const [quantity, setQuantity] = useState(1);
     const [selectedOptions, setSelectedOptions] = useState<
@@ -128,17 +136,21 @@ export default function DishOptionsModal({
         const totalPrice = calculateTotalPrice();
         const pricePerOne = totalPrice / quantity;
 
-        // Gọi addItem từ store
-        addItem(
-            dish,
-            quantity,
-            notes,
-            {
-                size: selectedOptions.size?.[0],
-                toppings: selectedOptions.toppings || [],
-            },
-            pricePerOne
-        );
+        if (onAddToCart) {
+            onAddToCart(dish, quantity, selectedOptions, notes, pricePerOne);
+        } else {
+            // Gọi addItem từ store nếu component cha không override
+            addItem(
+                dish,
+                quantity,
+                notes,
+                {
+                    size: selectedOptions.size?.[0],
+                    toppings: selectedOptions.toppings || [],
+                },
+                pricePerOne
+            );
+        }
 
         handleClose();
     };

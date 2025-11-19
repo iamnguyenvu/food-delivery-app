@@ -1,17 +1,19 @@
+import AddToCartAnimation from "@/components/common/AddToCartAnimation";
 import {
-    SAMPLE_DISHES,
-    SAMPLE_RESTAURANT
+  SAMPLE_DISHES,
+  SAMPLE_RESTAURANT
 } from "@/src/hooks";
+import { useCartStore } from "@/src/store/cartStore";
 import type { Dish } from "@/src/types";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useRef, useState } from "react";
 import {
-    Image,
-    Pressable,
-    ScrollView,
-    Text,
-    View
+  Image,
+  Pressable,
+  ScrollView,
+  Text,
+  View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -39,6 +41,9 @@ export default function RestaurantDetailScreen() {
     router.back();
   };
 
+  const { addItem } = useCartStore();
+  const [showAddAnimation, setShowAddAnimation] = useState(false);
+
   const handleToggleFavorite = () => {
     setIsFavorite(!isFavorite);
     // In real app, would update backend
@@ -51,8 +56,8 @@ export default function RestaurantDetailScreen() {
 
   const handleAddToCart = (dish: Dish, event: any) => {
     event.stopPropagation();
-    // In real app, would add to cart or show customization modal
-    console.log("Add to cart:", dish.name);
+    addItem(dish, 1);
+    setShowAddAnimation(true);
   };
 
   const handleSectionPress = (section: RestaurantSection) => {
@@ -210,6 +215,10 @@ export default function RestaurantDetailScreen() {
           />
         </View>
       </ScrollView>
+      <AddToCartAnimation
+        visible={showAddAnimation}
+        onComplete={() => setShowAddAnimation(false)}
+      />
     </SafeAreaView>
   );
 }

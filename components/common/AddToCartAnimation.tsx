@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useRef } from "react";
-import { Animated, StyleSheet, View } from "react-native";
+import { Animated, Easing, StyleSheet, View } from "react-native";
 
 interface AddToCartAnimationProps {
   visible: boolean;
@@ -8,55 +8,86 @@ interface AddToCartAnimationProps {
 }
 
 export default function AddToCartAnimation({ visible, onComplete }: AddToCartAnimationProps) {
-  const scaleAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.6)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
+  const translateAnim = useRef(new Animated.Value(30)).current;
+  const ringScaleAnim = useRef(new Animated.Value(0.8)).current;
+  const ringOpacityAnim = useRef(new Animated.Value(0.4)).current;
 
   useEffect(() => {
-    if (visible) {
-      // Reset values
-      scaleAnim.setValue(0);
-      opacityAnim.setValue(0);
+    if (!visible) return;
 
-      // Animate: scale up with bounce, then fade out
-      Animated.sequence([
-        Animated.parallel([
-          Animated.spring(scaleAnim, {
-            toValue: 1.2,
-            friction: 3,
-            tension: 40,
-            useNativeDriver: true,
-          }),
-          Animated.timing(opacityAnim, {
-            toValue: 1,
-            duration: 200,
-            useNativeDriver: true,
-          }),
-        ]),
-        Animated.parallel([
-          Animated.spring(scaleAnim, {
-            toValue: 1,
-            friction: 3,
-            tension: 40,
-            useNativeDriver: true,
-          }),
-        ]),
-        Animated.parallel([
-          Animated.timing(scaleAnim, {
-            toValue: 0.8,
-            duration: 200,
-            useNativeDriver: true,
-          }),
-          Animated.timing(opacityAnim, {
-            toValue: 0,
-            duration: 200,
-            useNativeDriver: true,
-          }),
-        ]),
-      ]).start(() => {
-        onComplete();
-      });
-    }
-  }, [visible, scaleAnim, opacityAnim, onComplete]);
+    // Reset values
+    scaleAnim.setValue(0.6);
+    opacityAnim.setValue(0);
+    translateAnim.setValue(30);
+    ringScaleAnim.setValue(0.8);
+    ringOpacityAnim.setValue(0.4);
+
+    Animated.sequence([
+      Animated.parallel([
+        Animated.timing(opacityAnim, {
+          toValue: 1,
+          duration: 140,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          stiffness: 280,
+          damping: 18,
+          mass: 0.6,
+          useNativeDriver: true,
+        }),
+        Animated.timing(translateAnim, {
+          toValue: 0,
+          duration: 220,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
+      ]),
+      Animated.parallel([
+        Animated.spring(scaleAnim, {
+          toValue: 1.15,
+          stiffness: 200,
+          damping: 12,
+          mass: 0.8,
+          useNativeDriver: true,
+        }),
+        Animated.timing(ringScaleAnim, {
+          toValue: 2.3,
+          duration: 320,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(ringOpacityAnim, {
+          toValue: 0,
+          duration: 320,
+          useNativeDriver: true,
+        }),
+      ]),
+      Animated.parallel([
+        Animated.timing(opacityAnim, {
+          toValue: 0,
+          duration: 180,
+          easing: Easing.in(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(scaleAnim, {
+          toValue: 0.8,
+          duration: 180,
+          useNativeDriver: true,
+        }),
+        Animated.timing(translateAnim, {
+          toValue: -20,
+          duration: 180,
+          useNativeDriver: true,
+        }),
+      ]),
+    ]).start(() => {
+      onComplete();
+    });
+  }, [visible, scaleAnim, opacityAnim, translateAnim, ringScaleAnim, ringOpacityAnim, onComplete]);
 
   if (!visible) return null;
 
@@ -64,9 +95,18 @@ export default function AddToCartAnimation({ visible, onComplete }: AddToCartAni
     <View style={styles.container} pointerEvents="none">
       <Animated.View
         style={[
+          styles.pulse,
+          {
+            transform: [{ scale: ringScaleAnim }],
+            opacity: ringOpacityAnim,
+          },
+        ]}
+      />
+      <Animated.View
+        style={[
           styles.iconContainer,
           {
-            transform: [{ scale: scaleAnim }],
+            transform: [{ scale: scaleAnim }, { translateY: translateAnim }],
             opacity: opacityAnim,
           },
         ]}
@@ -89,6 +129,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     zIndex: 9999,
+  },
+  pulse: {
+    position: "absolute",
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    borderWidth: 2,
+    borderColor: "#26C6DA",
+    opacity: 0.4,
   },
   iconContainer: {
     justifyContent: "center",
