@@ -24,6 +24,8 @@ export interface Restaurant {
   reviewCount?: number;
   commentCount?: number;
   coverImage?: string;
+  distance?: string; // e.g., "1.2 km"
+  isPartner?: boolean;
 }
 
 export interface Dish {

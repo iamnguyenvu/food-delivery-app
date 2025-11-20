@@ -86,8 +86,12 @@ export default function ProfileScreen() {
           onPress: async () => {
             try {
               await signOut();
-              router.replace("/(screens)/login" as any);
+              // Use push instead of replace to ensure navigation works
+              setTimeout(() => {
+                router.push("/(screens)/login" as any);
+              }, 100);
             } catch (error) {
+              console.error("Logout error:", error);
               Alert.alert("Lỗi", "Không thể đăng xuất. Vui lòng thử lại.");
             }
           },

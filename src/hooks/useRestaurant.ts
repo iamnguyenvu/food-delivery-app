@@ -380,6 +380,32 @@ export function getDishToRestaurantMapping(): Record<string, string> {
   };
 }
 
+// ==================== Top Restaurants Hook ====================
+
+export function useTopRestaurants(limit = 10) {
+  return useQuery({
+    queryKey: ['top-restaurants', limit],
+    queryFn: async (): Promise<Restaurant[]> => {
+      const { data, error } = await supabase
+        .from('restaurants')
+        .select('*')
+        .eq('is_active', true)
+        .order('rating', { ascending: false })
+        .order('review_count', { ascending: false })
+        .limit(limit);
+
+      if (error) {
+        console.error('Error fetching top restaurants:', error);
+        return [];
+      }
+
+      return data ? data.map(transformRestaurantFromDB) : [];
+    },
+  });
+}
+
+// ==================== Mapping Functions ====================
+
 export function getFlashSaleToDishMapping(): Record<string, string> {
   // Map flash sale IDs to dish IDs
   return {

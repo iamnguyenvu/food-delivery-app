@@ -1,7 +1,8 @@
 import Card from "@/components/common/Card";
+import { useTopRestaurants } from "@/src/hooks";
 import { Ionicons } from "@expo/vector-icons";
 import { useMemo } from "react";
-import { Image, Pressable, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Image, Pressable, ScrollView, Text, View } from "react-native";
 
 interface TopRatedRestaurant {
   id: string;
@@ -156,8 +157,30 @@ export default function TopRatedRestaurants({
 }: TopRatedRestaurantsProps) {
   const scrollContentStyle = useMemo(() => ({ paddingRight: 12, gap: 10 }), []);
   
-  // In a real app, this would fetch from API
-  const restaurants = SAMPLE_RESTAURANTS;
+  // Fetch top restaurants from database
+  const { data: dbRestaurants = [], isLoading } = useTopRestaurants(10);
+  
+  // Use database restaurants if available, fallback to sample data
+  const restaurants = dbRestaurants.length > 0 ? dbRestaurants.map(r => ({
+    id: r.id,
+    name: r.name,
+    image: r.image || "https://via.placeholder.com/400",
+    rating: r.rating || 0,
+    categories: r.categories || [],
+    deliveryTime: r.deliveryTime || "20-30 phút",
+    distance: r.distance,
+    isPartner: r.isPartner,
+  })) : SAMPLE_RESTAURANTS;
+
+  if (isLoading) {
+    return (
+      <Card className="mx-2 mb-3" header={{ title: "Top quán Rating 5⭐ Có gì Hot?", titleSize: "text-base" }}>
+        <View className="py-8 items-center">
+          <ActivityIndicator size="small" color="#26C6DA" />
+        </View>
+      </Card>
+    );
+  }
 
   if (restaurants.length === 0) {
     return null;

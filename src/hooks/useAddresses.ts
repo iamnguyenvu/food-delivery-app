@@ -71,12 +71,12 @@ export function useAddresses(userId?: string) {
           user_id: userId,
           label,
           full_address: address.formatted,
-          street: address.street,
-          ward: address.district, // Using district as ward for now
-          district: address.district,
-          city: address.city,
-          latitude: location.latitude,
-          longitude: location.longitude,
+          street: address.street || null,
+          ward: address.district || null,
+          district: address.district || null,
+          city: address.city || "Chưa xác định", // Required field, provide default
+          latitude: location.latitude.toString(),
+          longitude: location.longitude.toString(),
           is_default: isDefault,
         })
         .select()
