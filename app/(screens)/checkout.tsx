@@ -4,7 +4,7 @@ import { useCartStore } from "@/src/store/cartStore";
 import { useLocationStore } from "@/src/store/locationStore";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     ActivityIndicator,
     Alert,
@@ -35,10 +35,22 @@ export default function CheckoutScreen() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showPaymentMethods, setShowPaymentMethods] = useState(false);
 
-    // Redirect to login if not authenticated
+    // Redirect to login if not authenticated (use useEffect to avoid setState during render)
+    useEffect(() => {
+        if (!user) {
+            router.replace("/(screens)/login" as any);
+        }
+    }, [user]);
+
+    // Show loading while redirecting to login
     if (!user) {
-        router.replace("/(screens)/login" as any);
-        return null;
+        return (
+            <SafeAreaView className="flex-1 bg-white">
+                <View className="flex-1 items-center justify-center">
+                    <ActivityIndicator size="large" color="#26C6DA" />
+                </View>
+            </SafeAreaView>
+        );
     }
 
     // Calculate totals
