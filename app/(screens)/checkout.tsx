@@ -27,7 +27,7 @@ export default function CheckoutScreen() {
     const insets = useSafeAreaInsets();
     const { user } = useAuth();
     const { items, getTotalPrice, getTotalDiscount, getRestaurantId, clearCart } = useCartStore();
-    const { address } = useLocationStore();
+    const { location, address } = useLocationStore();
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod>("cash");
     const [deliveryNotes, setDeliveryNotes] = useState("");
     const [couponCode, setCouponCode] = useState("");
@@ -177,8 +177,8 @@ export default function CheckoutScreen() {
             const deliveryAddressData = {
                 formatted: address?.formatted || "",
                 street: address?.street || "",
-                latitude: address?.location?.latitude || null,
-                longitude: address?.location?.longitude || null,
+                latitude: location?.latitude || null,
+                longitude: location?.longitude || null,
             };
 
             // Create order (match database schema)
