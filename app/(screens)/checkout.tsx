@@ -161,7 +161,15 @@ export default function CheckoutScreen() {
             // Generate order number
             const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
 
-            // Create order
+            // Prepare delivery address as JSON object
+            const deliveryAddressData = {
+                formatted: address?.formatted || "",
+                street: address?.street || "",
+                latitude: address?.location?.latitude || null,
+                longitude: address?.location?.longitude || null,
+            };
+
+            // Create order (match database schema)
             const { data: orderData, error: orderError } = await supabase
                 .from("orders")
                 .insert({
@@ -171,18 +179,14 @@ export default function CheckoutScreen() {
                     status: "pending",
                     subtotal: subtotal,
                     delivery_fee: deliveryFee,
-                    service_fee: serviceFee,
-                    tax: tax,
-                    discount: itemDiscount + couponDiscount,
-                    total: total,
-                    coupon_code: appliedCoupon?.code || null,
-                    discount_percentage: appliedCoupon ? (couponDiscount / subtotal) * 100 : null,
-                    delivery_address: address,
-                    delivery_phone: user.phone || "",
-                    delivery_notes: deliveryNotes || null,
+                    tax_amount: tax,
+                    discount_amount: itemDiscount + couponDiscount,
+                    total_amount: total,
+                    delivery_address: deliveryAddressData,
+                    estimated_delivery_time: 30, // 30 minutes
                     payment_method: selectedPaymentMethod,
                     payment_status: selectedPaymentMethod === "cash" ? "pending" : "pending",
-                    estimated_delivery: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 minutes from now
+                    notes: deliveryNotes || null,
                 })
                 .select()
                 .single();
@@ -191,17 +195,16 @@ export default function CheckoutScreen() {
                 throw orderError;
             }
 
-            // Create order items
+            // Create order items (match database schema)
             const orderItems = items.map((item) => ({
                 order_id: orderData.id,
                 dish_id: item.dish.id,
                 dish_name: item.dish.name,
-                dish_image: item.dish.image,
+                dish_price: item.dish.price,
                 quantity: item.quantity,
-                unit_price: item.dish.price,
                 subtotal: item.dish.price * item.quantity,
                 notes: item.notes || null,
-                options: null, // Can be extended for dish customizations
+                options: item.options ? JSON.stringify(item.options) : null,
             }));
 
             const { error: itemsError } = await supabase.from("order_items").insert(orderItems);

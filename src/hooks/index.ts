@@ -13,7 +13,7 @@ export {
     SAMPLE_DISHES, SAMPLE_RESTAURANT, getDealToDishMapping, getDishToRestaurantMapping,
     getFlashSaleToDishMapping, useBestSellerDishes,
     useDiscountedDishes, useDish, usePopularDishes, useRestaurantCategories, useRestaurantDetail,
-    useRestaurantDishes, useRestaurantFromDish
+    useRestaurantDishes, useRestaurantFromDish, useTopRestaurants
 } from './useRestaurant';
 export {
     useAddSearchHistory,
