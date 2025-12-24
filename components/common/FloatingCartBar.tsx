@@ -21,14 +21,6 @@ export default function FloatingCartBar() {
   // Position cart bar above tab bar
   const bottomOffset = tabBarHeight;
 
-  // Check if we're on the homepage (index tab)
-  // Homepage is when we're in (tabs) and the last segment is "index" or we're at the root
-  const segmentsArray = segments as string[];
-  const isOnHomepage = 
-    segmentsArray.length === 0 || 
-    (segmentsArray.length === 1 && segmentsArray[0] === "(tabs)") ||
-    (segmentsArray.length === 2 && segmentsArray[0] === "(tabs)" && segmentsArray[1] === "index");
-  
   // Check if we're on the checkout screen
   const isOnCheckoutScreen = segments.some((segment) => segment === "checkout");
 
@@ -52,8 +44,9 @@ export default function FloatingCartBar() {
     }
   }, [items, getRestaurantId]);
 
-  // Only show if cart has items, on homepage, and not on checkout screen
-  if (items.length === 0 || !isOnHomepage || isOnCheckoutScreen) {
+  // Hide cart bar on checkout and when cart is empty
+  // Show on all other screens
+  if (items.length === 0 || isOnCheckoutScreen) {
     return null;
   }
 
