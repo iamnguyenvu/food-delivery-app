@@ -84,15 +84,27 @@ export default function ProfileScreen() {
           text: "Đăng xuất",
           style: "destructive",
           onPress: async () => {
+            console.log('👤 User confirmed logout');
             try {
+              // Clear cart before logout
+              console.log('🛒 Clearing cart...');
+              const { useCartStore } = await import("@/src/store/cartStore");
+              useCartStore.getState().clearCart();
+              console.log('✅ Cart cleared');
+              
+              // Sign out
+              console.log('🚪 Calling signOut...');
               await signOut();
-              // Use push instead of replace to ensure navigation works
-              setTimeout(() => {
-                router.push("/(screens)/login" as any);
-              }, 100);
+              console.log('✅ SignOut completed');
+              
+              // Navigate to login screen
+              console.log('🔄 Navigating to login screen...');
+              router.replace("/(screens)/login" as any);
+              console.log('✅ Navigation complete');
             } catch (error) {
-              console.error("Logout error:", error);
-              Alert.alert("Lỗi", "Không thể đăng xuất. Vui lòng thử lại.");
+              console.error("❌ Logout error:", error);
+              // Still try to navigate even if there's an error
+              router.replace("/(screens)/login" as any);
             }
           },
         },

@@ -44,8 +44,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state change:", event);
-      setSession(session);
-      setUser(session?.user ?? null);
+      
+      if (event === "SIGNED_OUT") {
+        // Explicitly clear state on sign out
+        console.log("SIGNED_OUT event - clearing state");
+        setSession(null);
+        setUser(null);
+      } else {
+        setSession(session);
+        setUser(session?.user ?? null);
+      }
+      
       setLoading(false);
       
       // Ensure profile exists when user signs in
@@ -81,8 +90,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    console.log('🚪 Starting signOut process...');
+    try {
+      // Clear Supabase session
+      console.log('🔐 Calling supabase.auth.signOut()...');
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('⚠️ Supabase signOut error:', error);
+        // Don't throw - continue with local cleanup
+      } else {
+        console.log('✅ Supabase signOut successful');
+      }
+      
+    } catch (error) {
+      console.error('❌ Exception during supabase.auth.signOut():', error);
+      // Continue with cleanup even if Supabase fails
+    } finally {
+      // ALWAYS reset local state, regardless of Supabase success/failure
+      console.log('🧹 Clearing local auth state...');
+      setSession(null);
+      setUser(null);
+      console.log('✅ Logout completed - state cleared');
+    }
   };
 
   const ensureProfile = async (u: User | null) => {

@@ -14,12 +14,13 @@ import {
     trackBannerClick,
     useBanners
 } from "@/src/hooks";
+import { useCartStore } from "@/src/store/cartStore";
 import { useLocationStore } from "@/src/store/locationStore";
 import { Banner } from "@/src/types";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Animated, ScrollView } from "react-native";
+import { Alert, Animated, Linking, ScrollView } from "react-native";
 
 export default function HomeScreen() {
   const { address, location, setAll } = useLocationStore();
@@ -62,22 +63,67 @@ export default function HomeScreen() {
 
     switch (banner.actionType) {
       case "restaurant":
-        console.log(
-          "Navigate to restaurant:",
-          banner.actionValue || banner.restaurantId
-        );
+        // Navigate to restaurant detail
+        const restaurantId = banner.actionValue || banner.restaurantId;
+        if (restaurantId) {
+          router.push(`/(screens)/restaurant-detail/${restaurantId}` as any);
+        } else {
+          console.warn("Banner missing restaurant ID");
+        }
         break;
+
       case "dish":
-        console.log("Navigate to dish:", banner.actionValue);
+        // Navigate to dish detail
+        if (banner.actionValue) {
+          router.push(`/(screens)/dish-detail/${banner.actionValue}` as any);
+        } else {
+          console.warn("Banner missing dish ID");
+        }
         break;
+
       case "coupon":
-        console.log("Apply coupon:", banner.actionValue);
+        // Apply coupon - navigate to checkout with coupon pre-filled
+        if (banner.actionValue) {
+          // If user has items in cart, go to checkout
+          const cartStore = useCartStore.getState();
+          if (cartStore.items.length > 0) {
+            router.push({
+              pathname: "/(screens)/checkout",
+              params: { couponCode: banner.actionValue },
+            } as any);
+          } else {
+            Alert.alert(
+              "Mã giảm giá",
+              `Mã: ${banner.actionValue}\n\nVui lòng thêm món vào giỏ hàng để sử dụng mã này.`,
+              [
+                { text: "OK" },
+                {
+                  text: "Xem vouchers",
+                  onPress: () => router.push("/(screens)/voucher/vouchers" as any),
+                },
+              ]
+            );
+          }
+        }
         break;
+
       case "url":
-        console.log("Open URL:", banner.actionValue);
+        // Open external URL
+        if (banner.actionValue) {
+          Linking.canOpenURL(banner.actionValue).then((supported) => {
+            if (supported) {
+              Linking.openURL(banner.actionValue!);
+            } else {
+              Alert.alert("Lỗi", "Không thể mở liên kết này");
+            }
+          });
+        }
         break;
+
       default:
+        // Default: just show banner info
         console.log("Banner clicked:", banner.title);
+        Alert.alert(banner.title, banner.subtitle || "");
     }
   };
 

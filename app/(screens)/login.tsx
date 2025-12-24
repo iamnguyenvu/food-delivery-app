@@ -2,7 +2,7 @@ import { useAuth } from "@/src/contexts/AuthContext";
 import { getAuthRedirectUrl } from "@/src/lib/authRedirect";
 import { supabase } from "@/src/lib/supabase";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useNavigation } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useState } from "react";
 import {
@@ -24,6 +24,7 @@ WebBrowser.maybeCompleteAuthSession();
 
 export default function LoginScreen() {
   const { signInWithGoogle, signInWithGithub, signUp, signIn } = useAuth();
+  const navigation = useNavigation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -388,7 +389,17 @@ export default function LoginScreen() {
       {/* Header */}
       <View className="flex-row items-center justify-between px-2 pt-3 pb-2 border-b border-gray-200">
         <View className="flex-row items-center">
-          <Pressable onPress={() => router.back()} className="p-2">
+          <Pressable 
+            onPress={() => {
+              // If can go back, go back. Otherwise go to home
+              if (navigation.canGoBack()) {
+                router.back();
+              } else {
+                router.replace("/(tabs)" as any);
+              }
+            }} 
+            className="p-2"
+          >
             <Ionicons name="arrow-back" size={24} color="#26C6DA" />
           </Pressable>
 

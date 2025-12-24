@@ -1,9 +1,11 @@
 import AddToCartAnimation from "@/components/common/AddToCartAnimation";
 import DishOptionsModal from "@/components/common/DishOptionsModal";
 import { useDish } from "@/src/hooks";
+import { supabase } from "@/src/lib/supabase";
 import { useCartStore } from "@/src/store/cartStore";
 import type { Dish } from "@/src/types";
 import { Ionicons } from "@expo/vector-icons";
+import { useQuery } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import {
@@ -64,6 +66,28 @@ export default function DishDetailScreen() {
   // Fetch dish data based on dishId
   const { data: dish, isLoading } = useDish(dishId || '');
 
+  // Fetch restaurant info
+  const { data: restaurant } = useQuery({
+    queryKey: ["restaurant", dish?.restaurantId],
+    queryFn: async () => {
+      if (!dish?.restaurantId) return null;
+
+      const { data, error } = await supabase
+        .from("restaurants")
+        .select("id, name, address, rating, image")
+        .eq("id", dish.restaurantId)
+        .single();
+
+      if (error) {
+        console.error("Error fetching restaurant:", error);
+        return null;
+      }
+
+      return data;
+    },
+    enabled: !!dish?.restaurantId,
+  });
+
   if (isLoading) {
     return (
       <SafeAreaView className="flex-1 bg-white justify-center items-center">
@@ -99,9 +123,12 @@ export default function DishDetailScreen() {
         size: selectedOptions.size?.[0],
         toppings: selectedOptions.toppings || [],
       },
-      pricePerUnit ?? dishData.price
+      pricePerUnit ?? dishData.price,
+      () => {
+        // Only show animation AFTER item is successfully added
+        setShowAddAnimation(true);
+      }
     );
-    setShowAddAnimation(true);
   };
 
   const handleQuickAdd = () => {
@@ -142,6 +169,34 @@ export default function DishDetailScreen() {
 
         {/* Content */}
         <View className="px-4 py-4">
+          {/* Restaurant Info Section */}
+          {restaurant && (
+            <Pressable
+              onPress={() => {
+                if (dish?.restaurantId) {
+                  router.push(`/(screens)/restaurant-detail/${dish.restaurantId}` as any);
+                }
+              }}
+              className="mb-4 bg-gray-50 rounded-xl p-3 flex-row items-center active:bg-gray-100"
+            >
+              <View className="w-12 h-12 bg-primary-100 rounded-lg items-center justify-center mr-3">
+                <Ionicons name="storefront" size={24} color="#26C6DA" />
+              </View>
+              <View className="flex-1">
+                <Text className="text-sm font-semibold text-gray-800" numberOfLines={1}>
+                  {restaurant.name}
+                </Text>
+                <View className="flex-row items-center mt-1">
+                  <Ionicons name="star" size={12} color="#F59E0B" />
+                  <Text className="text-xs text-gray-600 ml-1">
+                    {restaurant.rating} • {restaurant.address}
+                  </Text>
+                </View>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+            </Pressable>
+          )}
+
           {/* Flash Sale Info Row (if applicable) */}
           {isFlashSale && (
             <View className="bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 rounded-lg p-3 mb-4">
