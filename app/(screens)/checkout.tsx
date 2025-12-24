@@ -1,4 +1,4 @@
-import { useAuth } from "@/src/hooks/useAuth";
+import { useAuth } from "@/src/contexts/AuthContext";
 import { supabase } from "@/src/lib/supabase";
 import { useCartStore } from "@/src/store/cartStore";
 import { useLocationStore } from "@/src/store/locationStore";
