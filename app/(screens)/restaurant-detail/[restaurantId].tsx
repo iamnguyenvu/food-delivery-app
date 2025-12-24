@@ -73,8 +73,10 @@ export default function RestaurantDetailScreen() {
 
   const handleAddToCart = (dish: Dish, event: any) => {
     event.stopPropagation();
-    addItem(dish, 1);
-    setShowAddAnimation(true);
+    addItem(dish, 1, "", undefined, undefined, () => {
+      // Only show animation AFTER item is successfully added
+      setShowAddAnimation(true);
+    });
   };
 
   const handleSectionPress = (section: RestaurantSection) => {

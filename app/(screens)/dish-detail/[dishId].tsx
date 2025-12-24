@@ -123,9 +123,12 @@ export default function DishDetailScreen() {
         size: selectedOptions.size?.[0],
         toppings: selectedOptions.toppings || [],
       },
-      pricePerUnit ?? dishData.price
+      pricePerUnit ?? dishData.price,
+      () => {
+        // Only show animation AFTER item is successfully added
+        setShowAddAnimation(true);
+      }
     );
-    setShowAddAnimation(true);
   };
 
   const handleQuickAdd = () => {

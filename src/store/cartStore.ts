@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { Dish } from "@/src/types";
+import { Alert } from "react-native";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
@@ -22,7 +23,8 @@ interface CartStore {
     quantity?: number,
     notes?: string,
     options?: { size?: string; toppings?: string[] },
-    price?: number
+    price?: number,
+    onSuccess?: () => void
   ) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
@@ -38,14 +40,12 @@ export const useCartStore = create<CartStore>()(
     (set, get) => ({
       items: [],
 
-      addItem: (dish, quantity = 1, notes = "", options, price) => {
+      addItem: (dish, quantity = 1, notes = "", options, price, onSuccess) => {
     const state = get();
     const currentRestaurantId = state.getRestaurantId();
 
     // Check if adding from different restaurant
     if (currentRestaurantId && currentRestaurantId !== dish.restaurantId) {
-      const { Alert } = require("react-native");
-
       Alert.alert(
         "Thay đổi nhà hàng?",
         "Giỏ hàng đang có món từ nhà hàng khác. Bạn có muốn xóa giỏ hàng và thêm món mới?",
@@ -83,6 +83,11 @@ export const useCartStore = create<CartStore>()(
               };
 
               set({ items: [newItem] });
+              
+              // Call success callback after adding
+              if (onSuccess) {
+                setTimeout(onSuccess, 100); // Small delay to ensure state update
+              }
             },
           },
         ]
@@ -129,6 +134,11 @@ export const useCartStore = create<CartStore>()(
 
       return { items: [...state.items, newItem] };
     });
+    
+    // Call success callback after adding
+    if (onSuccess) {
+      setTimeout(onSuccess, 100); // Small delay to ensure state update
+    }
   },
 
   removeItem: (id) => {
